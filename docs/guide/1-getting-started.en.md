@@ -42,12 +42,12 @@ Make the message editable by the user.
 <na-blla>
   <section *let="name='World'">
     <h2>Hello, %name%!</h2>
-    <input *model="name" placeholder="Type your name..." />
+    <input *input="name" placeholder="Type your name..." />
   </section>
 </na-blla>
 ```
 
-Type in the input and watch the text update. `*model` keeps `name` in sync both ways.
+Type in the input and watch the text update. `*input` keeps `name` in sync both ways.
 
 ---
 
@@ -68,7 +68,7 @@ No virtual DOM. No custom runtime. HTML remains the source of truth.
 ---
 
 ## 6) Next Steps
-- Learn more directives: `*let`, `*text`, `*if`, `*model`, etc.
+- Learn more directives: `*let`, `*text`, `*if`, `*input`, etc.
 - Read the philosophy in `docs/0-intro.en.md`.
 - Contribute at: https://github.com/hitoshi-watase/nablla
 
