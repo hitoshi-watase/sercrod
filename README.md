@@ -1,4 +1,4 @@
-#Sercrod
+# Sercrod
 
 Sercrod is a lightweight UI runtime driven by HTML attributes (directives).  
 Official site: https://sercrod.com  
