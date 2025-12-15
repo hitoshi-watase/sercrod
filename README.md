@@ -1,7 +1,11 @@
-# Sercrod Project
+Sercrod
 
-Official source and documentation for the Sercrod framework.
+Sercrod is a lightweight UI runtime driven by HTML attributes (directives).
+Official site: https://sercrod.com
+Docs: https://sercrod.com/docs/
+Source: https://github.com/hitoshi-watase/sercrod
 
-Copyright 2025 Hitoshi Watase - Sercrod Project  
-License: GNU General Public License v3.0 or later (GPLv3+)  
-License docs: Apache License 2.0
+License
+- Code: GPL-3.0-or-later
+- Docs: Apache-2.0
+Copyright 2025 Hitoshi Watase - Sercrod Project
