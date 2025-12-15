@@ -60,9 +60,15 @@ Sercrod is a Web Components based library that treats HTML attributes as the sou
 - [Reserved and Transient](./reserved-and-transient.md)
 - [Grammar](./grammar.md)
 
+## Directive details
+
+For the per-directive reference (one page per directive, attribute binding, or event binding), see:
+
+- [Directive reference](./reference/directives/index.md)
+
 ## Target source
 
-This reference tracks the canonical code designated as [NABLLA_CANONICAL] in this repository as of 2025-10-31. When the canonical source changes, the reference will update with diffs aligned to that version.
+This reference tracks the canonical code designated as [SERCROD_CANONICAL] in this repository as of 2025-10-31. When the canonical source changes, the reference will update with diffs aligned to that version.
 
 ## Conventions
 

@@ -4,7 +4,7 @@ _What you will find:_ a high-level picture of Sercrod’s runtime model, its pub
 
 ## Canonical source and version
 
-This reference tracks the canonical source designated as [NABLLA_CANONICAL]. Current header indicates `Sercrod v1.0.0`. :contentReference[oaicite:0]{index=0}
+This reference tracks the canonical source designated as [SERCROD_CANONICAL]. Current header indicates `Sercrod v1.0.0`. :contentReference[oaicite:0]{index=0}
 
 ## What Sercrod is
 

@@ -198,7 +198,7 @@ Conceptually, when Nablla encounters `*global` on an element:
      - Otherwise, returns a special placeholder made by `_makehole_scoped()` that records the access path.
    - On `set`:
      - Converts the property key to a string.
-     - If NABLLA data already has that key, writes into data.
+     - If SERCROD data already has that key, writes into data.
      - Otherwise writes to `globalThis`.
 
 3. It executes:

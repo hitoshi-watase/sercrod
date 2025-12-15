@@ -4,13 +4,13 @@ _What you will find:_ all configuration surfaces recognized by this implementati
 
 ## 1) Global switches
 
-### `window.NABLLA_NO_AUTO_DEFINE: boolean`
+### `window.SERCROD_NO_AUTO_DEFINE: boolean`
 - **Effect**: when truthy, the runtime does not auto-register the default tag. Users must call `customElements.define("serc-rod", Sercrod)` themselves.
 - **Default**: `false` (auto-definition enabled).
 
 ### Default custom element tag
 - **Value**: `"serc-rod"`
-- **Registration**: auto-defined unless `NABLLA_NO_AUTO_DEFINE` is truthy.
+- **Registration**: auto-defined unless `SERCROD_NO_AUTO_DEFINE` is truthy.
 
 ## 2) Ambient preload points
 
