@@ -2,7 +2,7 @@
 
 #### Summary
 
-This page describes the general behavior of Nablla’s attribute bindings that **do not** have their own dedicated manual.
+This page describes the general behavior of Sercrod’s attribute bindings that **do not** have their own dedicated manual.
 
 Any attribute whose name starts with `:` (for example `:title`, `:aria-label`, `:data-id`) participates in this mechanism.
 The expression to the right of `=` is evaluated, and the result is mapped to a plain HTML attribute on the rendered element.
@@ -44,7 +44,7 @@ Reserved keys:
 A typical use of fallback attribute bindings:
 
 ```html
-<na-blla id="user-card" data='{
+<serc-rod id="user-card" data='{
   "user": {
     "id": "u-123",
     "name": "Alice",
@@ -60,7 +60,7 @@ A typical use of fallback attribute bindings:
   >
     <span *print="user.name"></span>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
@@ -73,11 +73,11 @@ Behavior:
 
 #### Behavior
 
-At render time, Nablla scans each element for attributes that start with `:`:
+At render time, Sercrod scans each element for attributes that start with `:`:
 
 - For each `:name="expr"`:
 
-  - Nablla evaluates `expr` in the current scope.
+  - Sercrod evaluates `expr` in the current scope.
   - The result is mapped to the underlying attribute name `name` (for example `title`, `aria-label`, `data-id`).
   - The scope is never modified by attribute bindings; they are pure read operations.
 
@@ -149,15 +149,15 @@ For `:value` on form controls:
 
 #### Filters and customization
 
-Attribute bindings use the following hooks on the `Nablla` class:
+Attribute bindings use the following hooks on the `Sercrod` class:
 
-- `Nablla._filters.url(raw, attrName, ctx)`:
+- `Sercrod._filters.url(raw, attrName, ctx)`:
 
   - Used for URL-like attributes (`href`, `src`, `action`, `formaction`, `xlink:href`).
   - By default, it just returns the raw string.
   - Projects can override it to sanitize or rewrite URLs.
 
-- `Nablla._filters.attr(name, value, ctx)`:
+- `Sercrod._filters.attr(name, value, ctx)`:
 
   - Used for all other attributes that go through the generic path.
   - By default, it returns `{ name, value }`.
@@ -205,7 +205,7 @@ In broad order:
    - How many copies (if any) are created.
    - Which children will be present.
 
-2. For each concrete element being rendered, Nablla evaluates attribute bindings:
+2. For each concrete element being rendered, Sercrod evaluates attribute bindings:
 
    - `:class`, `:style`, `:value`, and all other `:name` attributes (except `:text` / `:html`) are processed.
    - Each attribute is evaluated once for the current scope.
@@ -238,13 +238,13 @@ For the fallback path, you can think of `:name="expr"` as:
    - If `name === "class"`:
      - Use the class-specific rules (string, array, object).
    - Else if `name === "style"`:
-     - Use the style-specific rule and `Nablla._filters.style`.
+     - Use the style-specific rule and `Sercrod._filters.style`.
    - Else if `name === "value"` and the element is a form control:
      - Assign to both `el.value` and the `value` attribute.
    - Else if `name` is URL-like:
-     - Pass through `Nablla._filters.url`.
+     - Pass through `Sercrod._filters.url`.
    - Otherwise:
-     - Pass through `Nablla._filters.attr` and set or remove the attribute accordingly.
+     - Pass through `Sercrod._filters.attr` and set or remove the attribute accordingly.
 
 4. **Cleanup (optional)**:
 
@@ -255,13 +255,13 @@ For the fallback path, you can think of `:name="expr"` as:
 
 Attribute bindings **do not** create any new variables.
 
-- The expression on a `:name` attribute sees the same scope as any other Nablla expression on that element.
+- The expression on a `:name` attribute sees the same scope as any other Sercrod expression on that element.
 - No new loop variables, aliases, or helpers are introduced.
 - The scope is never mutated by attribute bindings; they always read from data, never write back to it.
 
 Available inside the expression:
 
-- The data bound to the surrounding Nablla host (`data` or any other root object).
+- The data bound to the surrounding Sercrod host (`data` or any other root object).
 - Special helpers:
 
   - `$data` - the current host’s data.
@@ -360,7 +360,7 @@ As a rule of thumb:
 Using `:aria-*` and `:data-*` for accessibility and diagnostics:
 
 ```html
-<na-blla id="menu" data='{
+<serc-rod id="menu" data='{
   "items": [
     { "id": "home", "label": "Home", "active": true },
     { "id": "settings", "label": "Settings", "active": false }
@@ -383,7 +383,7 @@ Using `:aria-*` and `:data-*` for accessibility and diagnostics:
       </li>
     </ul>
   </nav>
-</na-blla>
+</serc-rod>
 ```
 
 Using `:role` and `:data-*` together:

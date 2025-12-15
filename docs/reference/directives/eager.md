@@ -2,13 +2,13 @@
 
 #### Summary
 
-`*eager` is an optional modifier for `*input` / `n-input` that makes Nablla re-render the host “eagerly” on every input-like event for text fields and textareas.
+`*eager` is an optional modifier for `*input` / `n-input` that makes Sercrod re-render the host “eagerly” on every input-like event for text fields and textareas.
 
-- Without `*eager`, data is still written on every event, but the host only performs a narrower update (typically propagating changes to child Nablla components).
+- Without `*eager`, data is still written on every event, but the host only performs a narrower update (typically propagating changes to child Sercrod components).
 - With `*eager`, the host calls `update()` after each input event on the control (subject to `*stage` and host-level `*lazy`).
 - `*eager` has an alias `n-eager`.
 
-`*eager` only has effect on elements that also carry `*input` or `n-input` and are treated as text-like controls by Nablla.
+`*eager` only has effect on elements that also carry `*input` or `n-input` and are treated as text-like controls by Sercrod.
 
 
 #### Basic example
@@ -16,7 +16,7 @@
 Enable eager updates on a text input:
 
 ```html
-<na-blla id="profile" data='{"user":{"name":""}}'>
+<serc-rod id="profile" data='{"user":{"name":""}}'>
   <form>
     <label>
       Name:
@@ -25,13 +25,13 @@ Enable eager updates on a text input:
 
     <p>Preview: <span *print="user.name"></span></p>
   </form>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
 - Every keystroke in the input writes to `user.name`.
-- Because of `*eager`, Nablla calls `update()` for the host after each input event.
+- Because of `*eager`, Sercrod calls `update()` for the host after each input event.
 - The `<span *print="user.name">` is kept in sync keystroke-by-keystroke, without waiting for a change or submit event.
 
 
@@ -106,11 +106,11 @@ Recognized forms:
   <input *input="form.email" n-eager="user.prefersEagerInputs">
   ```
 
-  - Nablla evaluates the attribute value as a normal expression in the current scope.
+  - Sercrod evaluates the attribute value as a normal expression in the current scope.
   - If evaluation succeeds:
     - `isEager` is `Boolean(result)`.
   - If evaluation throws (for example, due to a `ReferenceError`):
-    - Nablla falls back to a string-based rule:
+    - Sercrod falls back to a string-based rule:
       - If the raw attribute value is `"false"` (any case), `isEager` is `false`.
       - Any other non-empty literal string makes `isEager` `true`.
 
@@ -128,18 +128,18 @@ Practical interpretation:
 - Without `*input` / `n-input`:
 
   - `*eager` is effectively ignored.
-  - Nablla does not attach eager behavior to arbitrary elements.
+  - Sercrod does not attach eager behavior to arbitrary elements.
 
 - With `*input` / `n-input`:
 
-  - Nablla reads `*eager` / `n-eager` during binding setup for that control.
+  - Sercrod reads `*eager` / `n-eager` during binding setup for that control.
   - `*eager` influences how often the host re-renders in response to that control’s user events.
 
 Data writes:
 
 - Regardless of `*eager`, when the control’s event handler fires:
 
-  - Nablla always writes the new value to the bound path via `assign_expr`.
+  - Sercrod always writes the new value to the bound path via `assign_expr`.
   - `*eager` does not delay or batch the write; it only changes the re-render strategy.
 
 Summary:
@@ -150,9 +150,9 @@ Summary:
 
 #### Interaction with *lazy
 
-There are two separate uses of `*lazy` in Nablla:
+There are two separate uses of `*lazy` in Sercrod:
 
-1. Host-level `*lazy` on `<na-blla>`:
+1. Host-level `*lazy` on `<serc-rod>`:
    - Affects how often the host re-renders in response to generic updates and events.
 
 2. Input-level `*lazy` on controls that also have `*input` / `n-input`:
@@ -201,10 +201,10 @@ This allows you to combine:
 
 #### Evaluation timing
 
-The value of `*eager` is determined when Nablla binds the element:
+The value of `*eager` is determined when Sercrod binds the element:
 
 - During `_renderElement`, when a node with `*input` / `n-input` is processed:
-  - Nablla parses and evaluates the `*eager` / `n-eager` attribute.
+  - Sercrod parses and evaluates the `*eager` / `n-eager` attribute.
   - The resulting boolean `isEager` is captured in the event handlers.
 
 Consequences:
@@ -225,24 +225,24 @@ For a text-like input with `*input` and optional `*eager`, the flow is:
 
 1. Binding setup (render time):
 
-   - Nablla reads the `*input` / `n-input` expression and figures out a target data object.
+   - Sercrod reads the `*input` / `n-input` expression and figures out a target data object.
    - It evaluates `*eager` / `n-eager` once to compute `isEager`.
    - It sets the initial control value based on the current data.
    - It attaches event listeners (`input` and/or `change`) that capture `isEager`.
 
 2. On each `input` event (text inputs and textareas):
 
-   - Nablla transforms the raw value using any installed input filters.
+   - Sercrod transforms the raw value using any installed input filters.
    - It writes the value to the bound data path with `assign_expr`.
    - If the host is not staged:
      - If `isEager` is `true`:
        - It calls `update()` on the host.
      - Otherwise:
-       - It only propagates updates to child Nablla instances (`_updateChildren(...)`).
+       - It only propagates updates to child Sercrod instances (`_updateChildren(...)`).
 
 3. On `change` events (checkbox/radio/select/others):
 
-   - Nablla computes and writes the new value, similar to text inputs.
+   - Sercrod computes and writes the new value, similar to text inputs.
    - `isEager` is ignored; the actual update policy is controlled by `*lazy`.
 
 In all cases, `*eager` does not change what is written, only when and how broadly the host re-renders.
@@ -284,7 +284,7 @@ In all cases, `*eager` does not change what is written, only when and how broadl
 Live search box:
 
 ```html
-<na-blla id="search" data='{"query":"","results":[]}'>
+<serc-rod id="search" data='{"query":"","results":[]}'>
   <div>
     <input
       type="search"
@@ -296,7 +296,7 @@ Live search box:
   <ul *each="item of results">
     <li *print="item.label"></li>
   </ul>
-</na-blla>
+</serc-rod>
 ```
 
 - Each keystroke updates `query` and triggers `update()` because of `*eager`.
@@ -305,7 +305,7 @@ Live search box:
 Conditional eager mode:
 
 ```html
-<na-blla id="settings" data='{
+<serc-rod id="settings" data='{
   "user": { "name": "" },
   "ui":   { "eagerPreview": true }
 }'>
@@ -323,7 +323,7 @@ Conditional eager mode:
   </label>
 
   <p>Preview: <span *print="user.name"></span></p>
-</na-blla>
+</serc-rod>
 ```
 
 - When `ui.eagerPreview` is `true`, name changes re-render the host on each keystroke.

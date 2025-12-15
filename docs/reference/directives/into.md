@@ -2,7 +2,7 @@
 
 #### Summary
 
-`*into` selects a data slot that receives the result of certain Nablla directives that talk to the outside world.
+`*into` selects a data slot that receives the result of certain Sercrod directives that talk to the outside world.
 It is most often used together with `*api`, `*upload`, or `*websocket` to capture responses in a named field on the root data object.
 
 `*into` has an alias `n-into`. Both forms behave the same.
@@ -19,7 +19,7 @@ Key points:
 Capture an API response into `user`:
 
 ```html
-<na-blla id="app" data='{"user": null}'>
+<serc-rod id="app" data='{"user": null}'>
   <button
     *api="'/api/user.json'"
     method="GET"
@@ -29,7 +29,7 @@ Capture an API response into `user`:
   </button>
 
   <pre *if="user" *print="JSON.stringify(user, null, 2)"></pre>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
@@ -43,7 +43,7 @@ Behavior:
 
 #### Behavior
 
-`*into` is a routing hint for Nablla’s I/O helpers. It tells those helpers which top-level key on the root data object should receive their latest result.
+`*into` is a routing hint for Sercrod’s I/O helpers. It tells those helpers which top-level key on the root data object should receive their latest result.
 
 Implemented behavior in this version:
 
@@ -71,20 +71,20 @@ Putting `*into` on an element that does not participate in these features has no
 - For `*api`:
 
   - During rendering, `*api` reads `*into` or `n-into` from the same element.
-  - The network request is run when Nablla decides to activate that `*api` (for example on click or on initial render, depending on how `*api` is used).
+  - The network request is run when Sercrod decides to activate that `*api` (for example on click or on initial render, depending on how `*api` is used).
   - When the request resolves, the response body is passed to a small helper `place(value)` which:
     - Updates `$download` or `$upload`.
     - Writes to the `*into` target if one was provided.
 
 - For `*upload`:
 
-  - When an upload button is bound, Nablla reads `*into` from the original element that defines the upload behavior.
+  - When an upload button is bound, Sercrod reads `*into` from the original element that defines the upload behavior.
   - The value is stored on an internal helper and reused when the upload completes.
   - The upload completion handler then writes the response body to the chosen key.
 
 - For `*websocket`:
 
-  - When a WebSocket connection is initialized, Nablla reads `*into` from the element that has `*websocket` / `n-websocket`.
+  - When a WebSocket connection is initialized, Sercrod reads `*into` from the element that has `*websocket` / `n-websocket`.
   - The destination is stored together with the WebSocket instance and reused whenever messages arrive.
   - Each incoming message is run through a lightweight parser and then written to the `*into` target, if present.
 
@@ -95,7 +95,7 @@ At a high level, the execution model for `*into` looks like this for each suppor
 
 - With `*api`:
 
-  1. Nablla finds an element with `*api` or `n-api`.
+  1. Sercrod finds an element with `*api` or `n-api`.
   2. It clones the element as a real DOM node and reads:
      - `*api` / `n-api` for the URL expression.
      - `method` for the HTTP method (default `"GET"`).
@@ -107,11 +107,11 @@ At a high level, the execution model for `*into` looks like this for each suppor
      - For non-GET requests or file uploads, it stores the body into `$upload`.
      - If `*into` is present, it stores the same value into `data[into]` and remembers that key for later clearing.
   6. It dispatches custom events to signal start, success, or error.
-  7. Nablla continues its normal update cycle. At the finalize step, `$download`, `$upload`, and any remembered `*into` keys are reset to `null`.
+  7. Sercrod continues its normal update cycle. At the finalize step, `$download`, `$upload`, and any remembered `*into` keys are reset to `null`.
 
 - With `*upload`:
 
-  1. Nablla normalizes upload options from an expression and element attributes.
+  1. Sercrod normalizes upload options from an expression and element attributes.
   2. It creates or reuses a hidden `<input type="file">` for the clickable element.
   3. It reads `*into` / `n-into` from the upload context element and stores this value on the hidden input.
   4. When the user selects files and the upload completes, the server response body is stored into:
@@ -121,13 +121,13 @@ At a high level, the execution model for `*into` looks like this for each suppor
 
 - With `*websocket`:
 
-  1. Nablla resolves the WebSocket specification from:
+  1. Sercrod resolves the WebSocket specification from:
      - The `*websocket` / `n-websocket` attribute.
      - The current data scope.
   2. It reads `*into` / `n-into` and constructs a holder `{ ws, into, el }`.
   3. When messages arrive:
      - The last payload is stored into `$ws_last`.
-     - Nablla tries to push it into `$ws_messages` if that array exists.
+     - Sercrod tries to push it into `$ws_messages` if that array exists.
      - If `into` is non-empty, the value is also written to `data[into]` and the key is added to the list for later clearing.
 
 
@@ -137,7 +137,7 @@ At a high level, the execution model for `*into` looks like this for each suppor
 Instead, it targets the root data object:
 
 - The value of `*into` is taken as a key on the root data object (`this._data`).
-- Nablla writes directly to `this._data[into]`.
+- Sercrod writes directly to `this._data[into]`.
 - Nested path semantics (for example `"user.profile"`) are not interpreted.
   Such a string is treated literally as a property name.
 - The stored values can later be read by any directive that uses the normal scope, for example:
@@ -154,7 +154,7 @@ There is no special `$into` variable or local binding created by `*into` itself.
 Because `*into` writes to the root data object, scope behaves as follows:
 
 - The new key is visible as a normal data field.
-- Inside the same `na-blla` host, it is available through:
+- Inside the same `serc-rod` host, it is available through:
   - The implicit root scope.
   - `$data`, if you refer to the unwrapped data.
   - `$root`, if you are inside nested hosts.
@@ -220,7 +220,7 @@ Behavior:
 Example pattern:
 
 ```html
-<na-blla
+<serc-rod
   data='{
     "uploadResult": null
   }'
@@ -235,7 +235,7 @@ Example pattern:
   <p *if="uploadResult">
     Uploaded: <span *print="uploadResult.fileName"></span>
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 In this pattern:
@@ -252,7 +252,7 @@ In this pattern:
 
 Behavior:
 
-- On an element with `*websocket` or `n-websocket`, Nablla:
+- On an element with `*websocket` or `n-websocket`, Sercrod:
 
   - Resolves a WebSocket specification that includes a URL and optional extra options.
   - Reads `*into` / `n-into` from the same element.
@@ -264,12 +264,12 @@ Behavior:
   - `$ws_messages` (if present and array-like) collects all payloads.
   - If an `into` key is present, `data[into]` is updated with the latest payload and added to the list of keys cleared at finalize.
 
-If the `*websocket` expression resolves to an object with an `into` property, Nablla also respects that, but a markup `*into` on the same element takes priority.
+If the `*websocket` expression resolves to an object with an `into` property, Sercrod also respects that, but a markup `*into` on the same element takes priority.
 
 Example:
 
 ```html
-<na-blla id="ws-app" data='{"lastMessage": null}'>
+<serc-rod id="ws-app" data='{"lastMessage": null}'>
   <section
     *websocket="'wss://example.com/live'"
     *into="lastMessage"
@@ -277,7 +277,7 @@ Example:
     <p>Connection status: <span *print="$ws_ready ? 'ready' : 'connecting'"></span></p>
     <p *if="lastMessage">Last message: <span *print="JSON.stringify(lastMessage)"></span></p>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 
@@ -309,7 +309,7 @@ Example:
 Capture download status separately for GET and POST:
 
 ```html
-<na-blla
+<serc-rod
   data='{
     "user": null,
     "saveResult": null
@@ -337,13 +337,13 @@ Capture download status separately for GET and POST:
     <h2>Last save result</h2>
     <pre *print="JSON.stringify(saveResult, null, 2)"></pre>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 Use `*into` with WebSocket messages:
 
 ```html
-<na-blla data='{"ticker": null}'>
+<serc-rod data='{"ticker": null}'>
   <div
     *websocket="{ url: 'wss://example.com/ticker', into: 'ticker' }"
   >
@@ -351,7 +351,7 @@ Use `*into` with WebSocket messages:
       Price: <span *print="ticker.price"></span>
     </p>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 

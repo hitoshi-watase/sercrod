@@ -11,7 +11,7 @@ Typical uses include:
 - triggering search or filtering when the user releases Enter,
 - updating live previews based on current input.
 
-`@keyup` is part of the event handler family (such as `@click`, `@input`, `@keydown`) and follows the same generic event rules in Nablla.
+`@keyup` is part of the event handler family (such as `@click`, `@input`, `@keydown`) and follows the same generic event rules in Sercrod.
 
 
 #### Basic example
@@ -19,7 +19,7 @@ Typical uses include:
 Triggering search when the user presses Enter:
 
 ```html
-<na-blla id="search-app" data='{
+<serc-rod id="search-app" data='{
   "query": "",
   "results": [],
   "last_key": ""
@@ -40,7 +40,7 @@ Triggering search when the user presses Enter:
   <ul>
     <li *for="item of results">{{%item%}}</li>
   </ul>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
@@ -48,7 +48,7 @@ Behavior:
 - The input is bound to `query`.
 - On every `keyup`, the handler records the last key to `last_key`.
 - When the key is `"Enter"`, the expression calls `search(query)` in the current scope.
-- Nablla runs a light child update so that `last_key` and `results` are reflected in the DOM.
+- Sercrod runs a light child update so that `last_key` and `results` are reflected in the DOM.
 
 
 #### Behavior
@@ -60,8 +60,8 @@ Core rules:
   The element must be focusable for the handler to fire (for example, form controls or elements made focusable via `tabindex`).
 
 - Expression evaluation  
-  Nablla parses the attribute value as an expression (for example `search(query)` or `if($event.key === 'Enter') submit()`).
-  When the event fires, Nablla evaluates this expression using its event evaluator, with access to data and the event object.
+  Sercrod parses the attribute value as an expression (for example `search(query)` or `if($event.key === 'Enter') submit()`).
+  When the event fires, Sercrod evaluates this expression using its event evaluator, with access to data and the event object.
 
 - Side effects only  
   The return value of the expression is ignored.
@@ -82,26 +82,26 @@ Core rules:
 
 #### Evaluation timing
 
-`@keyup` participates in Nablla’s normal rendering and event lifecycle:
+`@keyup` participates in Sercrod’s normal rendering and event lifecycle:
 
 - Structural phase  
   Structural directives such as `*if`, `*for`, `*each`, `*switch`, and `*include` are applied first.
   If these directives remove or replace the element, `@keyup` is attached only to the final rendered element.
 
 - Attribute phase  
-  Once the element is kept, Nablla processes its attributes.
+  Once the element is kept, Sercrod processes its attributes.
   Event attributes whose names start with the configured event prefix (by default `"@"`) are detected, and `_renderEvent` is called for each of them, including `@keyup`.
 
 - Listener attachment  
-  In this phase, Nablla creates a handler function and attaches it with `addEventListener("keyup", handler, options)`, where `options` reflects event modifiers such as `.capture`, `.passive`, and `.once`.
+  In this phase, Sercrod creates a handler function and attaches it with `addEventListener("keyup", handler, options)`, where `options` reflects event modifiers such as `.capture`, `.passive`, and `.once`.
 
 - Event firing  
   When the browser fires `keyup` on that element:
 
-  - Nablla prepares an evaluation scope for this host and element.
+  - Sercrod prepares an evaluation scope for this host and element.
   - It injects the `KeyboardEvent` into `$event` and `$e`, and the element into `el` and `$el`.
   - It evaluates the `@keyup` expression in that scope.
-  - After evaluation, Nablla triggers an update pass (described below) so that data changes are reflected in the DOM.
+  - After evaluation, Sercrod triggers an update pass (described below) so that data changes are reflected in the DOM.
 
 There is no special debounce or delay attached to `@keyup` itself; it executes in the same turn as the native event.
 
@@ -110,7 +110,7 @@ There is no special debounce or delay attached to `@keyup` itself; it executes i
 
 At a high level, the runtime behaves as follows for `@keyup`:
 
-1. During rendering, Nablla finds an attribute whose name starts with the event prefix (by default `"@"`) and whose event name portion is `"keyup"`.
+1. During rendering, Sercrod finds an attribute whose name starts with the event prefix (by default `"@"`) and whose event name portion is `"keyup"`.
 2. It extracts:
 
    - the event name `ev = "keyup"`,
@@ -131,15 +131,15 @@ At a high level, the runtime behaves as follows for `@keyup`:
 
      - `$event` and `$e` refer to `e`,
      - `el` and `$el` refer to the element,
-     - other names are resolved first against Nablla data, then against the provided scope, and finally against `window`.
+     - other names are resolved first against Sercrod data, then against the provided scope, and finally against `window`.
 
    - Calls `this.eval_event(expr, scope, { el, $event: e })` to execute the expression.
    - Decides the update strategy and runs a suitable update method (see below).
    - If the `"once"` modifier was present, removes the handler from the element after the first call.
 
-5. Before attaching the handler, Nablla ensures that there is at most one handler per event name on the element:
+5. Before attaching the handler, Sercrod ensures that there is at most one handler per event name on the element:
 
-   - It keeps a private `el._nablla_handlers[ev]`.
+   - It keeps a private `el._sercrod_handlers[ev]`.
    - If a previous handler exists for `"keyup"`, it is removed before the new handler is attached.
 
 6. It attaches the handler using `el.addEventListener("keyup", handler, options)`.
@@ -162,16 +162,16 @@ Inside a `@keyup` handler expression:
 - `el` and `$el` point to the element where `@keyup` is declared.
 - Reads of other identifiers consult:
 
-  1. Nablla’s data object for the host,
+  1. Sercrod’s data object for the host,
   2. The provided scope for directives around this element (such as loop variables),
   3. `window` as a final fallback.
 
-- Writes to properties in the data object propagate back into Nablla data and mark them as dirty so that the subsequent update pass can reflect changes in the DOM.
+- Writes to properties in the data object propagate back into Sercrod data and mark them as dirty so that the subsequent update pass can reflect changes in the DOM.
 
 
 #### Update behavior for @keyup
 
-`@keyup` is treated as an input-like event in Nablla’s update strategy.
+`@keyup` is treated as an input-like event in Sercrod’s update strategy.
 
 After the handler runs, the runtime computes:
 
@@ -181,7 +181,7 @@ After the handler runs, the runtime computes:
 For `ev === "keyup"`:
 
 - `keyup` is explicitly listed as input-like.
-- As a result, after running the handler, Nablla calls a lightweight child update on the host:
+- As a result, after running the handler, Sercrod calls a lightweight child update on the host:
 
   - `this._updateChildren(false, this)`.
 
@@ -238,7 +238,7 @@ Structural directives do not change the semantics of `@keyup`; they only decide 
          @keyup="filters.query = $event.target.value">
   ```
 
-  The data is kept in sync with the DOM on each key release, and Nablla performs a child update for efficient re rendering.
+  The data is kept in sync with the DOM on each key release, and Sercrod performs a child update for efficient re rendering.
 
 - Combining with `*stage` for drafts:
 
@@ -258,12 +258,12 @@ Structural directives do not change the semantics of `@keyup`; they only decide 
   The user can type freely, and only when they press “Save” does `*apply` commit the staged data back into the main data object.
 
 
-#### Nablla-specific restrictions
+#### Sercrod-specific restrictions
 
-For `@keyup`, the main Nablla-specific points are:
+For `@keyup`, the main Sercrod-specific points are:
 
 - Single handler per event name per element  
-  Nablla maintains at most one handler per event name on each element.
+  Sercrod maintains at most one handler per event name on each element.
 
   - This is a runtime detail: when the host re renders and encounters `@keyup` again, it removes the previous handler for `"keyup"` before attaching a new one.
   - From a template perspective, you normally declare `@keyup` once per element.
@@ -320,7 +320,7 @@ Simple shortcut: submit on Enter, ignore other keys:
 Toggle a help overlay with a keyboard shortcut:
 
 ```html
-<na-blla id="help-app" data='{
+<serc-rod id="help-app" data='{
   "show_help": false
 }'>
   <input type="text"
@@ -334,13 +334,13 @@ Toggle a help overlay with a keyboard shortcut:
   <aside *if="show_help">
     Press F1 again to hide this help.
   </aside>
-</na-blla>
+</serc-rod>
 ```
 
 Implement a simple key logger for debugging:
 
 ```html
-<na-blla id="logger" data='{
+<serc-rod id="logger" data='{
   "keys": []
 }'>
   <input type="text"
@@ -350,7 +350,7 @@ Implement a simple key logger for debugging:
          ">
 
   <p>Recent keys: {{%keys.join(' ')%}}</p>
-</na-blla>
+</serc-rod>
 ```
 
 
@@ -358,6 +358,6 @@ Implement a simple key logger for debugging:
 
 - `@keyup` is a generic event handler for the native `keyup` event.
 - The event object is available as `$event` and `$e`, while the element is available as `el` and `$el`.
-- After each `@keyup` handler call, Nablla performs a lightweight child update on the host, treating keyup as an input-like event so that focus and caret remain stable.
+- After each `@keyup` handler call, Sercrod performs a lightweight child update on the host, treating keyup as an input-like event so that focus and caret remain stable.
 - Event modifiers such as `.prevent`, `.stop`, `.once`, `.capture`, and `.passive` are supported and handled before the expression is evaluated.
 - The event prefix is configurable, but the event name `keyup` is not; when the prefix changes, you must update the markup accordingly.

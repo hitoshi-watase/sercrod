@@ -9,7 +9,7 @@ It attaches low-level listeners that call `event.preventDefault()` for specific 
 - Form `submit` events (when the host is a `<form>`).
 - Or both, depending on the mode.
 
-Unlike many other directives, the attribute value is not a Nablla expression.
+Unlike many other directives, the attribute value is not a Sercrod expression.
 It is a simple mode string such as `enter`, `submit`, or `all`.
 
 
@@ -18,27 +18,27 @@ It is a simple mode string such as `enter`, `submit`, or `all`.
 Prevent the browser’s default form submission, but still run your handler:
 
 ```html
-<na-blla id="form-app" data='{"status": null}'>
+<serc-rod id="form-app" data='{"status": null}'>
   <form *prevent="submit" @submit="status = 'saved'">
     <input type="text" name="title">
     <button type="submit">Save</button>
     <p *if="status" *print="status"></p>
   </form>
-</na-blla>
+</serc-rod>
 ```
 
 In this example:
 
 - The browser’s built-in form submission is blocked.
 - The `@submit="status = 'saved'"` handler still runs.
-- The page does not navigate away; you stay in the current Nablla host.
+- The page does not navigate away; you stay in the current Sercrod host.
 
 
 #### Behavior
 
 `*prevent` and `*prevent-default` are handled by the same runtime branch:
 
-- If the element has either `*prevent-default` or `*prevent`, Nablla:
+- If the element has either `*prevent-default` or `*prevent`, Sercrod:
 
   - Reads the raw attribute value.
   - Interprets it as a mode string.
@@ -116,7 +116,7 @@ Typical usage patterns:
 In both cases:
 
 - The browser’s default form submission is blocked.
-- Nablla event handlers attached via `@submit` still run.
+- Sercrod event handlers attached via `@submit` still run.
 
 
 #### Modes in detail
@@ -166,10 +166,10 @@ Supported modes:
 
 #### Evaluation timing
 
-`*prevent` and `*prevent-default` are processed when Nablla renders each element:
+`*prevent` and `*prevent-default` are processed when Sercrod renders each element:
 
 - After attribute-based handlers (`@click`, `@submit`, and so on) are attached.
-- Before Nablla moves on to other non-structural directives on the same element.
+- Before Sercrod moves on to other non-structural directives on the same element.
 
 Important points:
 
@@ -206,33 +206,33 @@ Conceptually, the runtime flow for `*prevent` looks like:
 
 4. Continue:
 
-   - Nablla continues processing other directives and attributes as usual.
+   - Sercrod continues processing other directives and attributes as usual.
    - Event handlers registered via `@...` attributes are not replaced; they remain intact.
 
 
-#### Interaction with Nablla event handlers
+#### Interaction with Sercrod event handlers
 
 `*prevent` is complementary to the `@` event system:
 
 - `*prevent` controls whether the browser’s default action runs.
-- `@event="handler(...)"` controls which Nablla expression is executed.
+- `@event="handler(...)"` controls which Sercrod expression is executed.
 
 Example: manual form handling
 
 ```html
-<na-blla id="login-app" data='{"error": null}'>
+<serc-rod id="login-app" data='{"error": null}'>
   <form *prevent="submit" @submit="login()">
     <input type="text" name="user">
     <input type="password" name="pass">
     <button type="submit">Log in</button>
     <p *if="error" *print="error"></p>
   </form>
-</na-blla>
+</serc-rod>
 ```
 
 In this setup:
 
-- The `submit` event is delivered to the Nablla handler `login()`.
+- The `submit` event is delivered to the Sercrod handler `login()`.
 - The browser does not perform a real HTTP form submission.
 - You are free to implement `login()` with `fetch`, show errors in the page, etc.
 
@@ -257,7 +257,7 @@ Typical scenarios where `*prevent` is useful:
 
 - Controlled forms:
 
-  - When you have a Nablla-based validation or saving flow and do not want an actual page reload.
+  - When you have a Sercrod-based validation or saving flow and do not want an actual page reload.
 
 
 #### Best practices
@@ -314,13 +314,13 @@ Block both Enter and submit on a form:
 #### Notes
 
 - `*prevent` and `*prevent-default` share a single implementation branch and support the same modes.
-- The attribute value is a plain mode string, not a Nablla expression; unsupported mode strings result in no special behavior.
+- The attribute value is a plain mode string, not a Sercrod expression; unsupported mode strings result in no special behavior.
 - `*prevent` only covers Enter keydown and form submit:
 
   - It does not automatically block other keys or mouse events.
   - For more complex behaviors, combine `*prevent` with explicit `@event` handlers and custom logic.
 
-- There are no Nablla-level restrictions on combining `*prevent` with other directives on the same element, but:
+- There are no Sercrod-level restrictions on combining `*prevent` with other directives on the same element, but:
 
   - It only affects Enter and `submit`.
   - It does not alter the semantics of other structural or data-binding directives.

@@ -2,7 +2,7 @@
 
 #### Summary
 
-This reference explains in detail how `*let` interacts with Nablla’s data:
+This reference explains in detail how `*let` interacts with Sercrod’s data:
 
 - How `*let` creates new variables.
 - When existing data is left unchanged.
@@ -10,7 +10,7 @@ This reference explains in detail how `*let` interacts with Nablla’s data:
 - What happens inside loops.
 - How `*let` differs from `*global` in terms of side effects.
 
-It focuses on the actual behavior of the runtime, pattern by pattern, so that you can predict when Nablla’s host data (`data` on `<na-blla>`) is modified and when it is not.
+It focuses on the actual behavior of the runtime, pattern by pattern, so that you can predict when Sercrod’s host data (`data` on `<serc-rod>`) is modified and when it is not.
 
 
 ### 1. Data model recap
@@ -19,7 +19,7 @@ Before looking at patterns, it helps to separate three layers:
 
 1. **Host data (`_data`)**
 
-   - Each `<na-blla>` keeps a data object (from its `data="..."` or `data='{...}'` attribute).
+   - Each `<serc-rod>` keeps a data object (from its `data="..."` or `data='{...}'` attribute).
    - This is the base object used to build scopes.
    - When we say “host data changes”, we mean this object is mutated or receives new properties.
 
@@ -27,12 +27,12 @@ Before looking at patterns, it helps to separate three layers:
 
    - A plain object that represents “what expressions see” at a given element.
    - It starts from the host data.
-   - Nablla adds extra entries (loop variables like `item`, `index` and so on).
+   - Sercrod adds extra entries (loop variables like `item`, `index` and so on).
    - For each element, `effScope` may be replaced or extended (for example by `*let`).
 
 3. **Local *let scope (`letScope`)**
 
-   - When an element has `*let`, Nablla builds
+   - When an element has `*let`, Sercrod builds
 
      - `letScope = Object.assign(Object.create(effScope), effScope)`
 
@@ -44,7 +44,7 @@ Before looking at patterns, it helps to separate three layers:
 
 Promotion rule (current implementation):
 
-- After `*let` finishes, Nablla checks each property name in `letScope`.
+- After `*let` finishes, Sercrod checks each property name in `letScope`.
 - For every key `k`:
 
   - If `k` is already in the host data, it is not overwritten.
@@ -63,11 +63,11 @@ This section lists concrete patterns: initial data, `*let` code, and what happen
 Case A1: Create a new helper from existing data.
 
 ```html
-<na-blla id="invoice" data='{"price": 1200, "qty": 3}'>
+<serc-rod id="invoice" data='{"price": 1200, "qty": 3}'>
   <p *let="total = price * qty">
     <span *print="total"></span>
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 - Initial host data:
@@ -99,7 +99,7 @@ Case A1: Create a new helper from existing data.
 Case A2: Create multiple new names at once.
 
 ```html
-<na-blla data='{"a": 2, "b": 3}'>
+<serc-rod data='{"a": 2, "b": 3}'>
   <p *let="
     sum = a + b;
     diff = a - b;
@@ -107,7 +107,7 @@ Case A2: Create multiple new names at once.
     <span *print="sum"></span>
     <span *print="diff"></span>
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 - New names: `sum`, `diff`.
@@ -125,14 +125,14 @@ Case A2: Create multiple new names at once.
 Case B1: Reassign a field that already exists in data.
 
 ```html
-<na-blla id="priceBox" data='{"price": 100}'>
+<serc-rod id="priceBox" data='{"price": 100}'>
   <p *let="price = price * 1.1">
     <span *print="price"></span>
   </p>
   <p>
     Original price: <span *print="$data.price"></span>
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 - Initial host data:
@@ -165,11 +165,11 @@ Case B1: Reassign a field that already exists in data.
 Case B2: Incrementing an existing field with `+=`
 
 ```html
-<na-blla id="counter" data='{"count": 0}'>
+<serc-rod id="counter" data='{"count": 0}'>
   <p *let="count += 1">
     <span *print="count"></span>
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 - First render:
@@ -198,11 +198,11 @@ Consequence:
 Case C1: Creating a nested object from scratch.
 
 ```html
-<na-blla id="userBox" data='{}'>
+<serc-rod id="userBox" data='{}'>
   <p *let="user.name = 'Ann'">
     <span *print="user.name"></span>
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 - Initial host data:
@@ -218,7 +218,7 @@ Case C1: Creating a nested object from scratch.
   - When `user.name = 'Ann'` is executed:
 
     - The “hole” captures the intended path `["user","name"]`.
-    - Nablla calls an internal helper that ensures `letScope.user` is an object, then sets `user.name` to `"Ann"`.
+    - Sercrod calls an internal helper that ensures `letScope.user` is an object, then sets `user.name` to `"Ann"`.
 
 - Promotion:
 
@@ -239,14 +239,14 @@ This is the standard way `*let` creates nested objects for you when you assign t
 Case D1: Updating a nested field on an existing object.
 
 ```html
-<na-blla id="profile" data='{"user": { "name": "Ann", "age": 30 }}'>
+<serc-rod id="profile" data='{"user": { "name": "Ann", "age": 30 }}'>
   <p *let="user.name = 'Bob'">
     <span *print="user.name"></span>
   </p>
   <p>
     Outside: <span *print="$data.user.name"></span>
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 - Initial host data:
@@ -282,11 +282,11 @@ Key point:
 Case E1: Incrementing a variable that does not exist yet.
 
 ```html
-<na-blla id="box" data='{}'>
+<serc-rod id="box" data='{}'>
   <p *let="count += 1">
     <span *print="count"></span>
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 - First render:
@@ -334,13 +334,13 @@ Consequences:
 Example: `*let` inside `*each`.
 
 ```html
-<na-blla id="list" data='{"items":[{"name":"A"},{"name":"B"}]}'>
+<serc-rod id="list" data='{"items":[{"name":"A"},{"name":"B"}]}'>
   <ul *each="item of items">
     <li *let="label = item.name + '!'">
       <span *print="label"></span>
     </li>
   </ul>
-</na-blla>
+</serc-rod>
 ```
 
 Per iteration:
@@ -365,23 +365,23 @@ Practical guidance:
 
 #### 2.7 Pattern G: Using $parent inside *let
 
-Inside `*let`, Nablla injects `$parent` as a non-enumerable property:
+Inside `*let`, Sercrod injects `$parent` as a non-enumerable property:
 
-- `$parent` refers to the data of the nearest ancestor `<na-blla>`.
+- `$parent` refers to the data of the nearest ancestor `<serc-rod>`.
 - Because it is non-enumerable, it is not copied into host data during promotion.
 - However, the object behind `$parent` is shared and can be mutated.
 
 Example:
 
 ```html
-<na-blla id="root" data='{"currency":"JPY"}'>
-  <na-blla id="child" data='{"price": 500}'>
+<serc-rod id="root" data='{"currency":"JPY"}'>
+  <serc-rod id="child" data='{"price": 500}'>
     <button *let="$parent.total = ($parent.total || 0) + price">
       Add to total
     </button>
     <p>Total: <span *print="$parent.total"></span> {{currency}}</p>
-  </na-blla>
-</na-blla>
+  </serc-rod>
+</serc-rod>
 ```
 
 - `*let` runs in the child, but `"$parent"` points to the root host’s data.

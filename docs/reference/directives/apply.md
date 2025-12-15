@@ -7,9 +7,9 @@
 
 #### Description
 
-When a Nablla host uses *stage, the runtime keeps a separate buffer object called the stage for rendering and user edits, while the original data object remains the committed source of truth. During update, the visible scope for the host is taken from the stage buffer when it exists, and falls back to the data object when it does not. 
+When a Sercrod host uses *stage, the runtime keeps a separate buffer object called the stage for rendering and user edits, while the original data object remains the committed source of truth. During update, the visible scope for the host is taken from the stage buffer when it exists, and falls back to the data object when it does not. 
 
-*apply is a simple event-style directive that finalises a staged edit session. When the element is clicked, the contents of the stage buffer are merged into the host data and the host is updated. Immediately after applying, Nablla takes a deep snapshot of the committed data so that *restore can later rebuild the stage from that snapshot. :contentReference[oaicite:2]{index=2}
+*apply is a simple event-style directive that finalises a staged edit session. When the element is clicked, the contents of the stage buffer are merged into the host data and the host is updated. Immediately after applying, Sercrod takes a deep snapshot of the committed data so that *restore can later rebuild the stage from that snapshot. :contentReference[oaicite:2]{index=2}
 
 The attribute value of *apply or n-apply is not used. Presence of the attribute is all that matters; any value is ignored.
 
@@ -19,7 +19,7 @@ The attribute value of *apply or n-apply is not used. Presence of the attribute 
 A minimal save or cancel form with staging:
 
 ```html
-<na-blla data="{ profile: { name: 'Alice' } }" *stage>
+<serc-rod data="{ profile: { name: 'Alice' } }" *stage>
   <label>
     Name:
     <input type="text" *input="profile.name">
@@ -29,7 +29,7 @@ A minimal save or cancel form with staging:
 
   <button type="button" *apply>Save</button>
   <button type="button" *restore>Cancel</button>
-</na-blla>
+</serc-rod>
 ```
 
 In this pattern:
@@ -45,7 +45,7 @@ In this pattern:
   - *apply and n-apply are presence based. The attribute value, if any, is ignored by the runtime.
 
 - Host selection  
-  - The directive always talks to the nearest Nablla host that owns the template being rendered. The click handler is bound with that host as the internal target, and it uses that host data and stage.
+  - The directive always talks to the nearest Sercrod host that owns the template being rendered. The click handler is bound with that host as the internal target, and it uses that host data and stage.
 
 - Click handling  
   - On click, if the host has a non null stage buffer, the runtime performs a shallow merge from the stage to the host data at the top level using an assignment equivalent to Object.assign(data, stage). :contentReference[oaicite:4]{index=4}  
@@ -60,10 +60,10 @@ In this pattern:
 
 - Children and other directives inside the element  
   - The renderer handles *apply as a control directive: it clones the original element, wires the click handler on the clone, appends that clone to the output, and returns without sending the element through the normal attribute and text processing pipeline. :contentReference[oaicite:6]{index=6}  
-  - As a consequence, Nablla specific features inside the same element are not processed:
+  - As a consequence, Sercrod specific features inside the same element are not processed:
     - No text expansion of percent expressions inside the button label.
     - No *print, *textContent, *compose, or other directives on the same element.
-    - No @event attributes handled by Nablla on that element; only the internal click handler is attached.
+    - No @event attributes handled by Sercrod on that element; only the internal click handler is attached.
   - Plain HTML attributes, tag name, and static text in the element are preserved as in the template but stay static.
 
 - Aliases  
@@ -73,7 +73,7 @@ In this pattern:
 #### Evaluation timing
 
 - Template render  
-  - During rendering, Nablla scans each node for control directives after structural directives such as *if, *switch, and *each have been processed. *apply is one of these control directives.   
+  - During rendering, Sercrod scans each node for control directives after structural directives such as *if, *switch, and *each have been processed. *apply is one of these control directives.   
   - If *apply or n-apply is found on the working node, the engine:
     - Clones the node.
     - Attaches the click listener to the clone.
@@ -128,7 +128,7 @@ In this pattern:
 #### Parent access
 
 - Because *apply has no expression, it does not directly read or write parent or root variables.
-- The only data it modifies is the host data object associated with the Nablla element that owns the template.
+- The only data it modifies is the host data object associated with the Sercrod element that owns the template.
 - If the host data was constructed to inherit from a parent object through the prototype chain, parent level reads may see committed values after apply, but this is determined by how the data structure itself is set up rather than by the directive.
 
 
@@ -146,8 +146,8 @@ In this pattern:
   - In practice, you should treat these as mutually exclusive on a single element and place them on separate elements instead.
 
 - Children with directives  
-  - Child elements inside a *apply element are not processed as Nablla templates for this element, because the renderer returns after wiring the apply handler and does not recurse into children for this particular path.
-  - If you need dynamic labels or additional Nablla logic near a commit button, use separate sibling elements rather than nesting those features inside the same *apply button.
+  - Child elements inside a *apply element are not processed as Sercrod templates for this element, because the renderer returns after wiring the apply handler and does not recurse into children for this particular path.
+  - If you need dynamic labels or additional Sercrod logic near a commit button, use separate sibling elements rather than nesting those features inside the same *apply button.
 
 
 #### Best practices
@@ -159,7 +159,7 @@ In this pattern:
   - Place *apply or n-apply on a dedicated element, typically a button with type set to button to avoid unintended form submission when used inside forms.
 
 - Keep labels static inside the apply element  
-  - Because Nablla does not process directives or text expansions inside a *apply element, keep its contents static and move any dynamic information to nearby elements.
+  - Because Sercrod does not process directives or text expansions inside a *apply element, keep its contents static and move any dynamic information to nearby elements.
 
 - Coordinate with *restore  
   - For a smooth editing experience:
@@ -178,7 +178,7 @@ In this pattern:
 ##### Dialog style form with staged editing and commit
 
 ```html
-<na-blla
+<serc-rod
   data="{
     profile: { name: 'Alice', email: 'alice@example.com' },
     editing: false
@@ -205,7 +205,7 @@ In this pattern:
   <h2>Current profile</h2>
   <p>Name: %profile.name%</p>
   <p>Email: %profile.email%</p>
-</na-blla>
+</serc-rod>
 ```
 
 Key points:
@@ -220,7 +220,7 @@ Key points:
 You can place several apply buttons in the same staged host to offer alternative commit affordances:
 
 ```html
-<na-blla data="{ title: 'Draft', body: '' }" *stage>
+<serc-rod data="{ title: 'Draft', body: '' }" *stage>
   <header>
     <input type="text" *input="title">
     <button type="button" *apply>Save</button>
@@ -234,7 +234,7 @@ You can place several apply buttons in the same staged host to offer alternative
     <button type="button" *restore>Discard changes</button>
     <button type="button" *apply>Save and stay</button>
   </footer>
-</na-blla>
+</serc-rod>
 ```
 
 All apply buttons commit the same staged buffer into the host data when clicked. Users can choose whichever button is more convenient in the layout, but the semantics are identical.
@@ -244,5 +244,5 @@ All apply buttons commit the same staged buffer into the host data when clicked.
 
 - *apply and n-apply are purely host level commit controls; they do not evaluate expressions or accept configuration.
 - The directive relies on the staging mechanism; without *stage or n-stage on the host, it has no effect.
-- Because the contents of a *apply element are not processed by Nablla, you must not rely on nested directives or percent expressions inside the same element. Use separate elements for dynamic information or attach additional behavior via standard DOM event listeners from user code.
+- Because the contents of a *apply element are not processed by Sercrod, you must not rely on nested directives or percent expressions inside the same element. Use separate elements for dynamic information or attach additional behavior via standard DOM event listeners from user code.
 - On a single element, only one of the action oriented control directives such as *apply, *restore, *save, *load, *post, *api, *upload, or *download will be honored; additional directives of this kind on the same element are ignored by design.

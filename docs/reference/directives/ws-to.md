@@ -6,7 +6,7 @@
 It selects which WebSocket connection a `*ws-send` action will use by specifying a WebSocket URL.
 The directive has an alias `n-ws-to`; in this document, “*ws-to” refers to both `*ws-to` and `n-ws-to`.
 
-If a Nablla host only ever opens one WebSocket connection, `*ws-to` is not required and can be omitted.
+If a Sercrod host only ever opens one WebSocket connection, `*ws-to` is not required and can be omitted.
 When a host has multiple WebSocket connections open (for example primary, notifications, or other channels), `*ws-to` lets you explicitly choose which URL to send to from markup.
 
 
@@ -33,7 +33,7 @@ Instead:
 The following example shows a host that connects to two different WebSocket URLs and uses `*ws-to` to direct messages to each one.
 
 ```html
-<na-blla id="multi"
+<serc-rod id="multi"
          data='{
            "apiUrl":   "wss://example.com/api",
            "notifyUrl":"wss://example.com/notify"
@@ -53,7 +53,7 @@ The following example shows a host that connects to two different WebSocket URLs
           *ws-to="%notifyUrl%">
     Ping notify
   </button>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
@@ -79,9 +79,9 @@ On each click, when the handler runs, `*ws-send` resolves the target URL like th
 
   - `resolveTo()` returns:
     - An empty string if `toRaw` is empty.
-    - Otherwise, the text produced by passing `toRaw` through Nablla’s text expansion helper.
+    - Otherwise, the text produced by passing `toRaw` through Sercrod’s text expansion helper.
 
-- Nablla uses its central text expansion function (the same one used for other attribute expansions) to interpret constructs such as `%notifyUrl%` according to the current scope.
+- Sercrod uses its central text expansion function (the same one used for other attribute expansions) to interpret constructs such as `%notifyUrl%` according to the current scope.
 
 Once the target URL string has been calculated, the runtime calls the internal send helper:
 
@@ -125,7 +125,7 @@ This design lets `*ws-to` depend on dynamic state (such as a URL stored in data)
 
 #### Interaction with text expansion
 
-The value of `*ws-to` or `n-ws-to` is processed with Nablla’s generic text expansion helper, so it follows the same rules as other text templates in the system.
+The value of `*ws-to` or `n-ws-to` is processed with Sercrod’s generic text expansion helper, so it follows the same rules as other text templates in the system.
 
 Typical patterns:
 
@@ -137,13 +137,13 @@ Typical patterns:
 
   - `*ws-to="%config.websocket.notifyUrl%"`
 
-The exact placeholder syntax and expansion rules are defined by Nablla’s global configuration and text expansion logic.
+The exact placeholder syntax and expansion rules are defined by Sercrod’s global configuration and text expansion logic.
 The important point is that `*ws-to` is not a full expression binding; it is a text template that is expanded into a plain string URL for `_ws_send`.
 
 
 #### Multiple connections per host
 
-A Nablla host can maintain multiple WebSocket connections, one per URL, as long as the browser and server allow it.
+A Sercrod host can maintain multiple WebSocket connections, one per URL, as long as the browser and server allow it.
 
 Internally, each host keeps a map from URL to a holder object that contains:
 
@@ -191,7 +191,7 @@ In other words:
 
 #### Use with the websocket helper API
 
-Nablla’s host exposes a `websocket` helper object that includes a `send` method.
+Sercrod’s host exposes a `websocket` helper object that includes a `send` method.
 Internally:
 
 - Both the `websocket.send(payload, toUrl)` helper and `*ws-send` with `*ws-to` call the same low-level function for selecting connections and sending payloads.
@@ -248,7 +248,7 @@ This symmetry ensures that template-driven and script-driven code share the same
 Dynamic target based on environment:
 
 ```html
-<na-blla id="env-ws"
+<serc-rod id="env-ws"
          data='{
            "env": "prod",
            "wsUrls": {
@@ -261,7 +261,7 @@ Dynamic target based on environment:
   <button *ws-send="{ type: 'ping', env }">
     Ping current env
   </button>
-</na-blla>
+</serc-rod>
 ```
 
 In this scenario:
@@ -273,7 +273,7 @@ In this scenario:
 Explicit URL selection for three channels:
 
 ```html
-<na-blla id="multi3"
+<serc-rod id="multi3"
          data='{
            "chatUrl":   "wss://example.com/chat",
            "notifyUrl": "wss://example.com/notify",
@@ -297,7 +297,7 @@ Explicit URL selection for three channels:
           *ws-to="%metricsUrl%">
     Ping metrics
   </button>
-</na-blla>
+</serc-rod>
 ```
 
 Here, `*ws-to` and `n-ws-to` both associate buttons with specific connections, and the behavior is independent of the internal ordering of WebSocket connections on the host.

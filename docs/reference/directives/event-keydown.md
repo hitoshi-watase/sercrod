@@ -11,7 +11,7 @@ Typical uses:
 - Reacting to Enter, Escape, or arrow keys.
 - Implementing keyboard driven navigation or editing commands.
 
-`@keydown` is part of Nablla’s event handler family (such as `@click`, `@input`, `@change`, `@focus`, `@blur`) and uses the same evaluation and modifier rules as other `@event` directives.
+`@keydown` is part of Sercrod’s event handler family (such as `@click`, `@input`, `@change`, `@focus`, `@blur`) and uses the same evaluation and modifier rules as other `@event` directives.
 
 
 #### Basic example
@@ -19,7 +19,7 @@ Typical uses:
 A simple handler that reacts to Enter and Escape:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "log": [],
   "value": ""
 }'>
@@ -37,13 +37,13 @@ A simple handler that reacts to Enter and Escape:
   <ul>
     <li *for="msg of log" *textContent="msg"></li>
   </ul>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
 - While the input has focus, every physical key press triggers a `keydown` event.
-- Nablla evaluates the `@keydown` expression in the current scope, with `$event` bound to the native `KeyboardEvent`.
+- Sercrod evaluates the `@keydown` expression in the current scope, with `$event` bound to the native `KeyboardEvent`.
 - Pressing Enter logs a submit entry.
 - Pressing Escape clears the value and logs a clear entry.
 
@@ -57,7 +57,7 @@ Core rules:
   The element must be focusable (for example inputs, textareas, buttons, links, or elements with `tabindex`) for the event to fire.
 
 - Expression evaluation  
-  The attribute value (for example `onKey($event)` or the inline logic above) is parsed and stored as a Nablla expression.
+  The attribute value (for example `onKey($event)` or the inline logic above) is parsed and stored as a Sercrod expression.
   When the event fires, the expression is evaluated in the context of the current host and element.
 
 - Event object and element access  
@@ -72,7 +72,7 @@ Core rules:
   - `$event.ctrlKey`, `$event.shiftKey`, `$event.altKey`, `$event.metaKey` expose modifier keys.
 
 - One way effect  
-  Nablla ignores the return value of the expression.
+  Sercrod ignores the return value of the expression.
   Only side effects such as updating data, calling methods, or triggering other APIs matter.
 
 - Repeated firing  
@@ -101,10 +101,10 @@ Modifiers are appended to the attribute name, separated by dots:
   Registers the listener as passive, signaling that the handler will not call `preventDefault()`.
 
 - `update`  
-  Forces a Nablla update after the handler runs, even for events that would normally be treated as non mutating.
+  Forces a Sercrod update after the handler runs, even for events that would normally be treated as non mutating.
 
 - `noupdate`  
-  Suppresses Nablla’s automatic update after the handler runs.
+  Suppresses Sercrod’s automatic update after the handler runs.
 
 Examples:
 
@@ -117,40 +117,40 @@ Examples:
 
 Rules specific to `@keydown`:
 
-- `keydown` is not in Nablla’s default `non_mutating` event list.
-  By default, Nablla treats `@keydown` as a mutating event, so it will re render after the handler unless you use `.noupdate` or change configuration.
+- `keydown` is not in Sercrod’s default `non_mutating` event list.
+  By default, Sercrod treats `@keydown` as a mutating event, so it will re render after the handler unless you use `.noupdate` or change configuration.
 - Using `.noupdate` is often appropriate for pure keyboard navigation where you manually apply visual changes or where a full re render would be too heavy.
 
 
 #### Evaluation timing
 
-`@keydown` fits into Nablla’s event and render pipeline as follows:
+`@keydown` fits into Sercrod’s event and render pipeline as follows:
 
 1. Structural directives (`*if`, `*for`, `*each`, `*switch`, `*include`, etc.) first decide whether the element exists and in what form.
-2. Nablla processes attributes on the kept element:
+2. Sercrod processes attributes on the kept element:
 
    - Colon bindings like `:value`, `:class`, `:style`, etc.
    - Event bindings such as `@keydown`, `@input`, `@click`.
 
-3. For `@keydown`, Nablla extracts:
+3. For `@keydown`, Sercrod extracts:
 
    - The event name `"keydown"` from the attribute name (after removing the configured prefix).
    - Any modifiers from the rest of the attribute name.
    - The expression string from the attribute value.
 
-4. Nablla registers a real DOM event listener `keydown` on the element, using `capture`, `passive`, and `once` as requested.
+4. Sercrod registers a real DOM event listener `keydown` on the element, using `capture`, `passive`, and `once` as requested.
 5. When the browser fires `keydown`:
 
-   - Nablla builds an evaluation scope that proxies the current data scope and injects `$event` / `$e` and `el` / `$el`.
-   - Nablla runs the expression through its event evaluator.
-   - Nablla then decides whether and how to re render based on the event name, modifiers, and configuration.
+   - Sercrod builds an evaluation scope that proxies the current data scope and injects `$event` / `$e` and `el` / `$el`.
+   - Sercrod runs the expression through its event evaluator.
+   - Sercrod then decides whether and how to re render based on the event name, modifiers, and configuration.
 
 `@keydown` executes synchronously as part of the native event dispatch, so any side effects (such as updating data) happen immediately before any subsequent re renders.
 
 
 #### Execution model and updates
 
-Internally, after evaluating the handler expression, Nablla chooses the update strategy:
+Internally, after evaluating the handler expression, Sercrod chooses the update strategy:
 
 - It reads the configured set of non mutating event names: `this.constructor._config.events.non_mutating`.
 - It decides whether this event wants an update by default:
@@ -166,14 +166,14 @@ Internally, after evaluating the handler expression, Nablla chooses the update s
 
 - It detects input like interactions:
 
-  - Nablla distinguishes between input like events (such as `input`, `change`, composition events, and form control clicks) and other events.
-  - For input like events, Nablla prefers a lightweight child update rather than a full re render to preserve focus.
+  - Sercrod distinguishes between input like events (such as `input`, `change`, composition events, and form control clicks) and other events.
+  - For input like events, Sercrod prefers a lightweight child update rather than a full re render to preserve focus.
 
 - For `@keydown`:
 
   - `keydown` is not treated as a special input like event by default.
-  - If `wantsUpdate` is `true` and no modifiers override it, Nablla updates the entire host via `update()` after the handler.
-  - If you combine `@keydown` with `.noupdate`, Nablla will skip that update entirely.
+  - If `wantsUpdate` is `true` and no modifiers override it, Sercrod updates the entire host via `update()` after the handler.
+  - If you combine `@keydown` with `.noupdate`, Sercrod will skip that update entirely.
 
 This means `@keydown` is powerful but potentially expensive if many key events fire in quick succession and each triggers a full update.
 Use `.noupdate` or `events.non_mutating` if you need tight keyboard handling without frequent re renders.
@@ -264,15 +264,15 @@ If you want to globally prevent Enter from submitting a form, consider using `*p
 Each iteration gets its own `@keydown` handler, bound to that iteration’s `item` in scope.
 
 
-#### Nablla-specific restrictions
+#### Sercrod-specific restrictions
 
-For `@keydown` itself, Nablla does not impose special structural restrictions beyond the general event rules:
+For `@keydown` itself, Sercrod does not impose special structural restrictions beyond the general event rules:
 
 - You may put `@keydown` on any element that can receive focus.
 - You may combine `@keydown` with other event directives on the same element (such as `@keyup`, `@input`, `@blur`) as long as each uses a different event name.
 - You may combine `@keydown` with colon bindings like `:value`, `:class`, or `:style`, and with structural directives like `*if`, `*for`, and `*each` that target the same element.
 
-The main Nablla specific consideration is update behavior:
+The main Sercrod specific consideration is update behavior:
 
 - `keydown` is treated as a mutating event by default.
 - If you do not want re renders on every key, attach `.noupdate` or add `"keydown"` to `config.events.non_mutating` for your application.
@@ -288,7 +288,7 @@ The main Nablla specific consideration is update behavior:
   Delegate to lightweight helpers or throttle logic on the data side if needed.
 
 - Control updates explicitly  
-  For navigation or text editing shortcuts where you manage DOM directly (for example scrolling, `focus()` calls), use `.noupdate` so that Nablla does not re render on every key.
+  For navigation or text editing shortcuts where you manage DOM directly (for example scrolling, `focus()` calls), use `.noupdate` so that Sercrod does not re render on every key.
 
 - Use `.once` for setup shortcuts  
   If a certain keyboard shortcut needs to be wired only once per element, and the handler does not mutate data in a way that requires re render, use `.once` and possibly `.noupdate`.
@@ -303,7 +303,7 @@ The main Nablla specific consideration is update behavior:
 Arrow key navigation in a list:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "items": ["Alpha", "Beta", "Gamma"],
   "index": 0
 }'>
@@ -320,13 +320,13 @@ Arrow key navigation in a list:
       {{%item%}}
     </li>
   </ul>
-</na-blla>
+</serc-rod>
 ```
 
 Closing a dialog with Escape:
 
 ```html
-<na-blla id="dialogHost" data='{
+<serc-rod id="dialogHost" data='{
   "open": true
 }'>
   <div *if="open"
@@ -339,14 +339,14 @@ Closing a dialog with Escape:
        ">
     <p>Press Escape to close.</p>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 
 #### Notes
 
-- `@keydown` wires the native `keydown` event to a Nablla expression.
+- `@keydown` wires the native `keydown` event to a Sercrod expression.
 - Inside the handler, `$event` / `$e` and `el` / `$el` are always available.
 - Modifiers such as `.prevent`, `.stop`, `.once`, `.capture`, `.passive`, `.update`, and `.noupdate` are supported and follow the same semantics as for other `@event` directives.
-- By default, `keydown` is not in the built in `non_mutating` list, so Nablla will re render after the handler unless you suppress updates with `.noupdate` or change `config.events.non_mutating`.
-- If `cleanup.handlers` is enabled in the Nablla configuration, the original `@keydown` attribute is removed from the output DOM after the handler is wired, keeping the rendered HTML clean.
+- By default, `keydown` is not in the built in `non_mutating` list, so Sercrod will re render after the handler unless you suppress updates with `.noupdate` or change `config.events.non_mutating`.
+- If `cleanup.handlers` is enabled in the Sercrod configuration, the original `@keydown` attribute is removed from the output DOM after the handler is wired, keeping the rendered HTML clean.

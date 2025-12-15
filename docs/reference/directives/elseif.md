@@ -47,15 +47,15 @@ Semantically it works like a classic `if / else if / else` chain in JavaScript.:
 
 `*elseif` never works alone. It must be part of a chain headed by a `*if` (or `n-if`) on a preceding sibling:
 
-- For every element, Nablla checks whether it has any of `*if`, `*elseif`, or `*else` (or their `n-` forms).:contentReference[oaicite:6]{index=6}
+- For every element, Sercrod checks whether it has any of `*if`, `*elseif`, or `*else` (or their `n-` forms).:contentReference[oaicite:6]{index=6}
 - If the current element has `*if` / `n-if`, it is considered the head of a chain.
-- If the current element has `*elseif` or `*else` (no `*if`), Nablla searches to the left among previous siblings for the nearest element that has `*if` or `n-if`.:contentReference[oaicite:7]{index=7}
+- If the current element has `*elseif` or `*else` (no `*if`), Sercrod searches to the left among previous siblings for the nearest element that has `*if` or `n-if`.:contentReference[oaicite:7]{index=7}
   - The search stops early if it encounters a sibling that has none of `*if`, `*elseif`, or `*else`. In that case, the `*elseif` cannot join a chain through that sibling.
   - If a suitable `*if` is found, that `*if` becomes the head of the chain for this `*elseif`.
 
-If Nablla cannot find a preceding `*if` for a `*elseif` (or `*else`), that element is treated as an invalid chain and is completely ignored during rendering.:contentReference[oaicite:8]{index=8}
+If Sercrod cannot find a preceding `*if` for a `*elseif` (or `*else`), that element is treated as an invalid chain and is completely ignored during rendering.:contentReference[oaicite:8]{index=8}
 
-**Important Nablla-specific constraint**
+**Important Sercrod-specific constraint**
 
 Because chain membership is determined only through adjacent conditional siblings:
 
@@ -74,7 +74,7 @@ Here the second `div` is **not** part of the first `*if` chain because the `<p>`
 
 ##### Head-only evaluation
 
-Once the head `*if` is known, Nablla enforces the following rule:
+Once the head `*if` is known, Sercrod enforces the following rule:
 
 - Only the head `*if` node actually evaluates and resolves the whole chain.
 - When `renderNode` is called on a `*elseif` or `*else` node that belongs to a chain, it immediately returns without rendering, because the head has already handled the chain.:contentReference[oaicite:10]{index=10}
@@ -83,7 +83,7 @@ This guarantees that the chain is evaluated exactly once, from its head.
 
 ##### Collecting the chain
 
-Starting from the head `*if`, Nablla walks to the right through sibling elements and collects all consecutive conditional siblings belonging to the same chain:
+Starting from the head `*if`, Sercrod walks to the right through sibling elements and collects all consecutive conditional siblings belonging to the same chain:
 
 - Each element that has `*if` / `*elseif` / `*else` (or `n-` forms) is added as a branch:
   - `type: "if"` for `*if` / `n-if`
@@ -97,16 +97,16 @@ If the collected list is empty (which should not normally happen once a head is 
 
 ##### Branch selection and *elseif conditions
 
-Once Nablla has the ordered list of branches, it selects exactly one branch:
+Once Sercrod has the ordered list of branches, it selects exactly one branch:
 
 1. For each branch in order (`if`, then zero or more `elseif`s, then optional `else`):
-   - Nablla starts from the current effective scope (`effScope`).
-   - If the branch element has `*let` / `n-let`, Nablla creates a new branch-local scope that inherits from `effScope`, evaluates the `*let` code into this new scope, and uses it as `branchScope` for this branch only.
+   - Sercrod starts from the current effective scope (`effScope`).
+   - If the branch element has `*let` / `n-let`, Sercrod creates a new branch-local scope that inherits from `effScope`, evaluates the `*let` code into this new scope, and uses it as `branchScope` for this branch only.
 2. If the branch type is `"else"`:
    - It is selected only if no previous `if` / `elseif` was selected.
-   - After selecting `else`, Nablla stops looking at later branches.:contentReference[oaicite:15]{index=15}
+   - After selecting `else`, Sercrod stops looking at later branches.:contentReference[oaicite:15]{index=15}
 3. If the branch type is `"if"` or `"elif"`:
-   - Nablla chooses the correct attribute name:
+   - Sercrod chooses the correct attribute name:
      - For `"if"`: `*if` or `n-if`.
      - For `"elif"`: `*elseif` or `n-elseif`.
    - It reads the expression string from that attribute. Empty strings are treated as “no condition” and will not match.
@@ -119,7 +119,7 @@ If no branch is selected (all conditions are falsy and there is no `*else`), not
 
 When a branch (which may be `*elseif`) has been chosen:
 
-- Nablla clones the corresponding element node (deep clone, including its children).
+- Sercrod clones the corresponding element node (deep clone, including its children).
 - On the clone, it removes the structural control attributes:
   - `*if` / `n-if`
   - `*elseif` / `n-elseif`
@@ -144,11 +144,11 @@ The `n-elseif` attribute is a direct alias of `*elseif`:
 
 Condition evaluation uses `_eval_cond`, which wraps the general `eval_expr` helper:
 
-- First, the expression is evaluated as a Nablla expression with `eval_expr`, using a scope that includes:
+- First, the expression is evaluated as a Sercrod expression with `eval_expr`, using a scope that includes:
   - The current branch scope (including local `*let` variables).
   - `$data` for the host data.
   - `$root` for root data.
-  - `$parent` injected from the nearest ancestor Nablla host.
+  - `$parent` injected from the nearest ancestor Sercrod host.
   - Any methods configured via `*methods` and built-in internal methods.
 - Then `_eval_cond` normalizes the value into a boolean:
   - `false`, `null`, and `undefined` are false.
@@ -164,7 +164,7 @@ This means `*elseif="flag"` and `*elseif="'false'"` behave differently: `flag` d
 
 #### Execution model
 
-Nablla’s overall update flow re-renders the host’s children from the stored template on each update call.:contentReference[oaicite:26]{index=26} Within that flow, a `*if / *elseif / *else` chain is a structural (“returning”) directive group:
+Sercrod’s overall update flow re-renders the host’s children from the stored template on each update call.:contentReference[oaicite:26]{index=26} Within that flow, a `*if / *elseif / *else` chain is a structural (“returning”) directive group:
 
 - The chain decides which branch (if any) to render.
 - Exactly one branch is cloned and rendered; the others are ignored.
@@ -178,7 +178,7 @@ The clone of the chosen branch then runs all non-structural directives (such as 
 `*elseif` itself does not create variables, but it interacts closely with `*let` on the same element:
 
 - When a branch (including `*elseif`) has a `*let` or `n-let` attribute:
-  - Nablla creates a new local scope whose prototype is the current effective scope (`effScope`).
+  - Sercrod creates a new local scope whose prototype is the current effective scope (`effScope`).
   - It runs `eval_let` in this new scope, allowing the branch to define local variables.
   - This branch-local scope is then used to evaluate the `*if` / `*elseif` condition and to render the chosen branch if it is selected.
 - Branch-local variables do **not** leak into the outer host or into other branches.
@@ -221,7 +221,7 @@ If a `*if / *elseif / *else` group is nested inside loops (`*for`, `*each`) or i
 
 #### Parent access
 
-Because `eval_expr` injects `$parent` into the evaluation scope when it is not already defined, `*elseif` conditions can safely refer to properties of the parent Nablla host’s data.
+Because `eval_expr` injects `$parent` into the evaluation scope when it is not already defined, `*elseif` conditions can safely refer to properties of the parent Sercrod host’s data.
 
 Typical patterns:
 
@@ -288,7 +288,7 @@ In these patterns, the outer constructs (`*for`, `*switch`) decide which subtree
   When a branch needs derived values, define them with `*let` on the branch itself so the scope is clearly limited to that branch.
 
 - **Prefer nesting over mixing structural directives on one element.**  
-  While Nablla defines an order for processing structural directives, it is clearer and less error-prone to keep one structural directive per element and nest structures in the DOM tree instead of stacking them on the same tag.
+  While Sercrod defines an order for processing structural directives, it is clearer and less error-prone to keep one structural directive per element and nest structures in the DOM tree instead of stacking them on the same tag.
 
 
 #### Examples

@@ -3,7 +3,7 @@
 #### Summary
 
 `*import` loads HTML from an external URL and injects it into the current element’s `innerHTML`.
-The imported HTML is then processed by Nablla in the same render pass, so any directives inside the imported content (`*if`, `*for`, `*each`, `*include`, `*template`, and so on) are evaluated as usual.
+The imported HTML is then processed by Sercrod in the same render pass, so any directives inside the imported content (`*if`, `*for`, `*each`, `*include`, `*template`, and so on) are evaluated as usual.
 
 Key points:
 
@@ -18,17 +18,17 @@ Key points:
 Load a simple partial file:
 
 ```html
-<na-blla id="app" data='{"user":{"name":"Alice"}}'>
+<serc-rod id="app" data='{"user":{"name":"Alice"}}'>
   <section *import="'/partials/user-card.html'"></section>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
-- Nablla evaluates the expression `'/partials/user-card.html'` and resolves it to a URL string.
+- Sercrod evaluates the expression `'/partials/user-card.html'` and resolves it to a URL string.
 - It performs a synchronous HTTP request to that URL (with optional configuration).
-- If the request succeeds and returns non-empty HTML, Nablla assigns that HTML to `section.innerHTML`.
-- Nablla then continues rendering the `<section>` subtree, so any directives inside `user-card.html` are processed in the same pass.
+- If the request succeeds and returns non-empty HTML, Sercrod assigns that HTML to `section.innerHTML`.
+- Sercrod then continues rendering the `<section>` subtree, so any directives inside `user-card.html` are processed in the same pass.
 
 
 #### Behavior
@@ -54,23 +54,23 @@ The value of `*import` is interpreted as a URL in two steps:
 
 1. **Expression evaluation**
 
-   Nablla first tries to evaluate the raw attribute value as an expression:
+   Sercrod first tries to evaluate the raw attribute value as an expression:
 
    - It calls `eval_expr(raw_text, scope, { el: node, mode: "import", quiet: true })`.
-   - If the evaluation result is not `null` or `undefined`, Nablla converts it to a string and trims it.
+   - If the evaluation result is not `null` or `undefined`, Sercrod converts it to a string and trims it.
    - If the trimmed string is non-empty, that string becomes the URL.
 
    This allows patterns such as:
 
    ```html
-   <na-blla id="app" data='{"base":"/partials","name":"user-card.html"}'>
+   <serc-rod id="app" data='{"base":"/partials","name":"user-card.html"}'>
      <section *import="base + '/' + name"></section>
-   </na-blla>
+   </serc-rod>
    ```
 
 2. **Fallback to raw text**
 
-   If expression evaluation does not yield a usable string, Nablla falls back to the raw attribute text and checks whether it “looks like a URL”:
+   If expression evaluation does not yield a usable string, Sercrod falls back to the raw attribute text and checks whether it “looks like a URL”:
 
    - The raw text must not contain whitespace.
    - If it starts with `http://` or `https://`, or
@@ -82,7 +82,7 @@ The value of `*import` is interpreted as a URL in two steps:
 If neither step produces a non-empty URL string, or the URL becomes the literal `"false"`, the import is treated as invalid:
 
 - The element’s `*import` / `n-import` attributes are removed.
-- Depending on configuration, Nablla may mark the element with `nablla-import-invalid`.
+- Depending on configuration, Sercrod may mark the element with `sercrod-import-invalid`.
 - The element may or may not be kept in the DOM, depending on `remove_element_if_empty` (see configuration below).
 
 
@@ -98,13 +98,13 @@ Once a URL is resolved, `*import` uses a synchronous XMLHttpRequest to fetch HTM
 
 - Responses are cached per URL in a class-level map:
 
-  - If a cached entry exists and is non-empty, Nablla skips the network request and uses the cached HTML.
-  - If the cache is empty for that URL, Nablla performs a network request and, on success, stores the response text.
+  - If a cached entry exists and is non-empty, Sercrod skips the network request and uses the cached HTML.
+  - If the cache is empty for that URL, Sercrod performs a network request and, on success, stores the response text.
 
 Error handling:
 
-- If the HTTP status code is not in the `2xx` range, Nablla does not cache the response and may mark the element with `nablla-import-error="<status>"`, depending on `warn_on_element`.
-- If an exception occurs during the request, Nablla may mark the element with `nablla-import-error="exception"`, again depending on configuration.
+- If the HTTP status code is not in the `2xx` range, Sercrod does not cache the response and may mark the element with `sercrod-import-error="<status>"`, depending on `warn_on_element`.
+- If an exception occurs during the request, Sercrod may mark the element with `sercrod-import-error="exception"`, again depending on configuration.
 - If no HTML is obtained (empty string), the import is considered failed:
   - `*import` / `n-import` are removed.
   - The element may be kept or dropped based on `remove_element_if_empty` (see below).
@@ -119,7 +119,7 @@ Note:
 
 `*import` shares its depth tracking with `*include`:
 
-- Nablla maintains a numeric “include/import depth” in an internal WeakMap.
+- Sercrod maintains a numeric “include/import depth” in an internal WeakMap.
 - Each `*include` or `*import` increments the depth relative to the nearest ancestor `*include`/`*import`.
 
 Configuration:
@@ -127,7 +127,7 @@ Configuration:
 - `this.constructor._config.include.max_depth` (or an internal `_include_max_depth`) limits the allowed depth.
 - If a `*import` would exceed this `max_depth`:
 
-  - When `warn_on_element` is true, the element is marked with `nablla-import-depth-overflow="<max_depth>"`.
+  - When `warn_on_element` is true, the element is marked with `sercrod-import-depth-overflow="<max_depth>"`.
   - The `*import` / `n-import` attributes are removed.
   - Depending on configuration, the element may be appended in its current (unfilled) state, or import is simply skipped.
 
@@ -145,14 +145,14 @@ Within the host rendering pipeline, `*import` runs after template registration a
   - If an element has `*template`, it is treated as a template declaration and is not rendered; `*import` on the same element will effectively never run.
 - `*include` is handled before `*import`.
 - `*import` then resolves and injects HTML into the element’s `innerHTML`.
-- After that, Nablla continues normal child rendering, which means:
+- After that, Sercrod continues normal child rendering, which means:
   - Directives inside the imported HTML are evaluated in the same pass.
   - Binding directives, event handlers, and nested loops inside the imported content work as expected.
 
 The `*import` directive itself is one-time per render pass:
 
 - Once processed, `*import` / `n-import` are removed, so the same element will not re-import content during the same render cycle.
-- Re-imports only occur if the surrounding Nablla host re-renders from scratch or if the element is re-created.
+- Re-imports only occur if the surrounding Sercrod host re-renders from scratch or if the element is re-created.
 
 
 #### Execution model
@@ -206,7 +206,7 @@ The internal steps for `*import` are roughly:
 If you want imported content to have a specific scope:
 
 - Place `*import` on an element that already has the right data and context.
-- Or combine import with `*let` or `*stage` on the same Nablla host (but not on the same element if the directives would conflict structurally).
+- Or combine import with `*let` or `*stage` on the same Sercrod host (but not on the same element if the directives would conflict structurally).
 
 `*import` itself does not inject any new names into the scope.
 
@@ -275,12 +275,12 @@ Supported pattern examples:
 
 #### Configuration
 
-`*import` reads settings from the Nablla constructor’s config object:
+`*import` reads settings from the Sercrod constructor’s config object:
 
 - `this.constructor._config.include`:
 
   - `max_depth`: maximum allowed depth for nested `*include` / `*import` (default is 16 if not overridden).
-  - `warn_on_element`: if true, errors related to include/import depth or URL resolution are recorded as attributes on the element (for example `nablla-import-depth-overflow`, `nablla-import-invalid`, `nablla-import-error`).
+  - `warn_on_element`: if true, errors related to include/import depth or URL resolution are recorded as attributes on the element (for example `sercrod-import-depth-overflow`, `sercrod-import-invalid`, `sercrod-import-error`).
   - `remove_element_if_empty`: if true, elements whose include/import fails may be omitted entirely instead of being kept as empty placeholders.
 
 - `this.constructor._config.import`:
@@ -289,7 +289,7 @@ Supported pattern examples:
   - `credentials`: boolean, mapped to `xhr.withCredentials`.
   - `headers`: object with additional headers, applied via `xhr.setRequestHeader`.
 
-These configuration values are optional; if you do not set them, Nablla uses sensible defaults.
+These configuration values are optional; if you do not set them, Sercrod uses sensible defaults.
 
 
 #### Best practices
@@ -306,7 +306,7 @@ These configuration values are optional; if you do not set them, Nablla uses sen
 - Keep URLs simple and explicit:
 
   - Use quoted string literals or short expressions.
-  - If you need to encode multiple pieces of information (for example file and section name), do it in the URL and let the server interpret it; Nablla does not parse `":name"` postfixes in any special way.
+  - If you need to encode multiple pieces of information (for example file and section name), do it in the URL and let the server interpret it; Sercrod does not parse `":name"` postfixes in any special way.
 
 - Avoid heavy or large imports during interaction:
 
@@ -324,16 +324,16 @@ These configuration values are optional; if you do not set them, Nablla uses sen
 Dynamic URL based on data:
 
 ```html
-<na-blla id="app" data='{"lang":"en","page":"about"}'>
+<serc-rod id="app" data='{"lang":"en","page":"about"}'>
   <main *import="`/pages/${lang}/${page}.html`"></main>
-</na-blla>
+</serc-rod>
 ```
 
 Using headers and credentials via config (conceptual sketch):
 
 ```js
-Nablla._config = Nablla._config || {};
-Nablla._config.import = {
+Sercrod._config = Sercrod._config || {};
+Sercrod._config.import = {
   method: "GET",
   credentials: true,
   headers: {
@@ -352,7 +352,7 @@ Then:
 #### Notes
 
 - `*import` and `n-import` are aliases.
-- The directive uses Nablla’s expression sandbox for URL resolution but ultimately treats the resolved value as a plain string.
-- Nablla does not implement any special parsing for suffixes like `:card` in URLs. Such patterns are treated as part of the URL string and must be interpreted by your server if you use them.
+- The directive uses Sercrod’s expression sandbox for URL resolution but ultimately treats the resolved value as a plain string.
+- Sercrod does not implement any special parsing for suffixes like `:card` in URLs. Such patterns are treated as part of the URL string and must be interpreted by your server if you use them.
 - Infinite include/import recursion is prevented by a configurable depth limit that applies to both `*include` and `*import`.
 - Structural combinations where multiple directives try to control the same host’s children (such as `*import` plus `*each`, or `*import` plus `*include`) are not supported and should be considered invalid usage.

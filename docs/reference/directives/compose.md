@@ -7,8 +7,8 @@ It is the structural counterpart of `*innerHTML` and has an alias `n-compose`.
 
 Key ideas:
 
-- The expression is evaluated once per render in the normal Nablla expression sandbox.
-- The result is passed through `Nablla._filters.html(raw, ctx)` and then assigned to `innerHTML` of the rendered element.
+- The expression is evaluated once per render in the normal Sercrod expression sandbox.
+- The result is passed through `Sercrod._filters.html(raw, ctx)` and then assigned to `innerHTML` of the rendered element.
 - `*compose` does not create new local variables; it only consumes the current scope.
 - At runtime it shares the same pipeline as `*innerHTML`, but projects are expected to give `*compose` a higher-level meaning (for example, composing from templates, partials, or hosts) by customizing the `html` filter.
 
@@ -22,19 +22,19 @@ Alias:
 A basic composition from a precomputed HTML string:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "cardHtml": "<div class=&quot;card&quot><h2>Title</h2><p>Body</p></div>"
 }'>
   <section class="wrapper">
     <div class="slot" *compose="cardHtml"></div>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
-- Nablla evaluates `cardHtml` in the current scope.
-- The result is passed through `Nablla._filters.html` and becomes the `innerHTML` of the `<div class="slot">`.
+- Sercrod evaluates `cardHtml` in the current scope.
+- The result is passed through `Sercrod._filters.html` and becomes the `innerHTML` of the `<div class="slot">`.
 - The `<section>` and `<div>` themselves are created as normal elements; only the `<div>`’s content is supplied by `*compose`.
 
 
@@ -64,17 +64,17 @@ Details:
 
   - The final `innerHTML` of the rendered element is:
 
-    - `el.innerHTML = Nablla._filters.html(raw, { el, expr, scope })`.
+    - `el.innerHTML = Sercrod._filters.html(raw, { el, expr, scope })`.
 
 - Default filter:
 
-  - By default, `Nablla._filters.html` returns `raw` as-is.
+  - By default, `Sercrod._filters.html` returns `raw` as-is.
   - That means, without customization, `*compose` behaves like “evaluate an expression and insert the result as raw HTML”.
 
 - Interaction with children:
 
-  - `*compose` runs **before** Nablla recursively renders the template’s child nodes.
-  - After `innerHTML` is set, Nablla still walks `node.childNodes` (the template children) and renders them into the same element.
+  - `*compose` runs **before** Sercrod recursively renders the template’s child nodes.
+  - After `innerHTML` is set, Sercrod still walks `node.childNodes` (the template children) and renders them into the same element.
   - In common usage, you normally give the host no children when using `*compose`, or treat those children as optional “extra” content.
 
 
@@ -94,13 +94,13 @@ Within `_renderElement`, `*compose` takes part in the following order:
 
 - Static text with `%...%` expansion also runs before `*compose`:
 
-  - If there is exactly one text child and it contains `%` markers, Nablla uses `_expand_text`, appends the result, and returns.
+  - If there is exactly one text child and it contains `%` markers, Sercrod uses `_expand_text`, appends the result, and returns.
 
-- Only when the element has not been handled by the above cases does Nablla check for `*compose` / `n-compose` or `*innerHTML` / `n-innerHTML`.
+- Only when the element has not been handled by the above cases does Sercrod check for `*compose` / `n-compose` or `*innerHTML` / `n-innerHTML`.
 
 After `*compose`:
 
-- Nablla continues with:
+- Sercrod continues with:
 
   - `*class` / `n-class`, `*style` / `n-style`.
   - Other attribute bindings.
@@ -139,7 +139,7 @@ Conceptually, the engine behaves as follows when it hits `*compose`:
 5. Call the `html` filter:
 
    - `ctx = { el, expr, scope }`.
-   - `htmlString = Nablla._filters.html(raw, ctx)`.
+   - `htmlString = Sercrod._filters.html(raw, ctx)`.
 
 6. Write into `innerHTML`:
 
@@ -147,7 +147,7 @@ Conceptually, the engine behaves as follows when it hits `*compose`:
 
 7. On error:
 
-   - If evaluation or filtering throws, Nablla logs a `[Nablla warn] html filter:` message (when `error.warn` is enabled).
+   - If evaluation or filtering throws, Sercrod logs a `[Sercrod warn] html filter:` message (when `error.warn` is enabled).
    - `el.innerHTML` is set to an empty string.
 
 After that, the standard rendering pipeline continues, including child rendering and post-apply actions.
@@ -169,9 +169,9 @@ After that, the standard rendering pipeline continues, including child rendering
 
 - Custom behavior:
 
-  - Before Nablla starts, you can define `window.__Nablla_filter.html` to override the `html` filter:
+  - Before Sercrod starts, you can define `window.__Sercrod_filter.html` to override the `html` filter:
 
-    - `Nablla._filters` is initialized by merging the built-in filters with `window.__Nablla_filter` once at startup.
+    - `Sercrod._filters` is initialized by merging the built-in filters with `window.__Sercrod_filter` once at startup.
     - This is the intended hook for project-specific HTML composition.
 
   - The `ctx` object gives the filter access to:
@@ -183,7 +183,7 @@ After that, the standard rendering pipeline continues, including child rendering
   - A project can:
 
     - Treat specific values as template or partial names.
-    - Resolve host references and build HTML from other Nablla hosts.
+    - Resolve host references and build HTML from other Sercrod hosts.
     - Apply sanitization or escaping before insertion.
 
 
@@ -196,7 +196,7 @@ This manual’s role is to clearly document that behavior, not to claim that a p
 Even when you apply sanitization in the `html` filter, no single step can guarantee that all XSS vectors are eliminated.
 In practice, XSS protection is a multi-layer task that includes server-side validation, output encoding, and careful template design.
 
-Within that broader context, Nablla expects at least the following minimum precautions when using `*compose`:
+Within that broader context, Sercrod expects at least the following minimum precautions when using `*compose`:
 
 - Do not pass raw user input directly into `*compose`.
 - Prefer to keep `*compose` values under your control (for example, prebuilt fragments, trusted templates, or server-side generated HTML that has already been validated).
@@ -213,9 +213,9 @@ They do not replace application-level security measures, especially on the serve
 
 Scope behavior:
 
-- The expression is evaluated in the standard Nablla expression scope:
+- The expression is evaluated in the standard Sercrod expression scope:
 
-  - All data from the current `<na-blla>` host (`this._data`) are visible.
+  - All data from the current `<serc-rod>` host (`this._data`) are visible.
   - The merged scope includes:
 
     - The local scope for the current element.
@@ -225,7 +225,7 @@ Scope behavior:
     - Internal methods and any methods registered via `*methods`.
 
 - The directive does not inject extra names or loop variables.
-- Any variable names used in the expression follow the normal shadowing rules of Nablla expressions.
+- Any variable names used in the expression follow the normal shadowing rules of Sercrod expressions.
 
 
 #### Parent access
@@ -292,7 +292,7 @@ Because `*compose` is purely expression-driven and does not alter scope:
 - `*compose`:
 
   - Runs later, on the rendered element.
-  - Evaluates an expression, passes it through `Nablla._filters.html`, and sets `el.innerHTML`.
+  - Evaluates an expression, passes it through `Sercrod._filters.html`, and sets `el.innerHTML`.
 
 As a result:
 
@@ -300,7 +300,7 @@ As a result:
 
   - `*include` / `*import` change the template’s innerHTML.
   - `*compose` then sets the rendered element’s `innerHTML` from the expression result.
-  - After that, Nablla still walks the (possibly replaced) `node.childNodes` and appends their rendered versions under the same element.
+  - After that, Sercrod still walks the (possibly replaced) `node.childNodes` and appends their rendered versions under the same element.
 
 - This effectively means:
 
@@ -336,7 +336,7 @@ Guidance:
 - Prefer `*compose` over `*innerHTML` for higher-level composition:
 
   - Keep `*innerHTML` as a low-level escape hatch for raw HTML strings.
-  - Give `*compose` a meaningful semantic in your project by customizing `Nablla._filters.html`.
+  - Give `*compose` a meaningful semantic in your project by customizing `Sercrod._filters.html`.
 
 - Keep expressions simple:
 
@@ -360,19 +360,19 @@ Guidance:
 Composition from a pre-rendered fragment:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "fragments": {
-    "hero": "<h1>Welcome</h1><p>This is Nablla.</p>"
+    "hero": "<h1>Welcome</h1><p>This is Sercrod.</p>"
   }
 }'>
   <header *compose="fragments.hero"></header>
-</na-blla>
+</serc-rod>
 ```
 
 Using a method to produce HTML:
 
 ```html
-<na-blla id="app" data='{"items":[{"name":"Alpha"},{"name":"Beta"}]}'>
+<serc-rod id="app" data='{"items":[{"name":"Alpha"},{"name":"Beta"}]}'>
   <script type="application/json" *methods='{
     "renderList": function(items){
       return "<ul>" + items.map(function(it){
@@ -382,15 +382,15 @@ Using a method to produce HTML:
   }'></script>
 
   <section *compose="renderList(items)"></section>
-</na-blla>
+</serc-rod>
 ```
 
 Custom `html` filter for template names (conceptual pattern):
 
 ```html
 <script>
-  // Before Nablla loads
-  window.__Nablla_filter = {
+  // Before Sercrod loads
+  window.__Sercrod_filter = {
     html: function(raw, ctx){
       // Example: treat values starting with "tpl:" as template names
       if(typeof raw === "string" && raw.startsWith("tpl:")){
@@ -404,14 +404,14 @@ Custom `html` filter for template names (conceptual pattern):
   };
 </script>
 
-<na-blla id="app" data='{"currentTpl":"tpl:card"}'>
+<serc-rod id="app" data='{"currentTpl":"tpl:card"}'>
   <div class="card-container" *compose="currentTpl"></div>
-</na-blla>
+</serc-rod>
 ```
 
 In this pattern:
 
-- The Nablla core still only knows that `*compose` calls `html(raw, ctx)` and writes to `innerHTML`.
+- The Sercrod core still only knows that `*compose` calls `html(raw, ctx)` and writes to `innerHTML`.
 - All higher-level composition logic lives in the `html` filter.
 
 
@@ -419,7 +419,7 @@ In this pattern:
 
 - `*compose` / `n-compose` share their implementation with `*innerHTML` / `n-innerHTML`, differing only in which attribute name is used.
 - Null and `false` results are treated as empty strings; other values are forwarded to the `html` filter.
-- The default `html` filter returns the raw value; projects are expected to override it (via `window.__Nablla_filter.html`) if they need richer composition.
+- The default `html` filter returns the raw value; projects are expected to override it (via `window.__Sercrod_filter.html`) if they need richer composition.
 - Combining structural directives (`*for`, `*each`) with `*compose` on the same element causes the structural directive to win and `*compose` to be ignored; keep them on separate elements.
 - Combining `*compose` with `*include` / `*import` is technically possible but advanced; prefer to pick a single directive as the content owner for predictable behavior.
 - When in doubt, treat `*compose` as “evaluate once, pass through `html` filter, assign to `innerHTML`” and keep the rest of the element’s logic straightforward.

@@ -2,9 +2,9 @@
 
 #### Summary
 
-`*ws-send` sends a message through the active WebSocket connection managed by the same Nablla host.
+`*ws-send` sends a message through the active WebSocket connection managed by the same Sercrod host.
 It is an action directive for regular elements (for example `<button>`, `<a>`, or `<input>`).
-The directive has an alias `n-ws-send` and supports an optional `*ws-to` attribute that selects a specific WebSocket URL using Nablla’s text expansion.
+The directive has an alias `n-ws-send` and supports an optional `*ws-to` attribute that selects a specific WebSocket URL using Sercrod’s text expansion.
 
 Use `*ws-send` when you already have one or more WebSocket connections open (via `*websocket` or the `websocket` helper) and want a declarative way to send messages in response to clicks.
 
@@ -14,19 +14,19 @@ Use `*ws-send` when you already have one or more WebSocket connections open (via
 A basic setup with a host-level WebSocket and a button that sends a simple message:
 
 ```html
-<na-blla id="app"
+<serc-rod id="app"
          data='{"wsUrl":"wss://example.com/ws","message":"hello"}'
          *websocket="wsUrl">
   <button *ws-send="message">
     Send
   </button>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
-- `<na-blla>` connects to `wss://example.com/ws` because of `*websocket="wsUrl"`.
-- When the button is clicked, Nablla evaluates `message` in the current scope.
+- `<serc-rod>` connects to `wss://example.com/ws` because of `*websocket="wsUrl"`.
+- When the button is clicked, Sercrod evaluates `message` in the current scope.
 - The resulting value `"hello"` is sent through the active WebSocket connection.
 - The button’s content ("Send") is rendered as usual; `*ws-send` only adds behavior.
 
@@ -43,7 +43,7 @@ Behavior:
 - The directive does not create or manage WebSocket connections by itself.
   It reuses connections opened by:
 
-  - The host-level `*websocket` on `<na-blla>` or another Nablla host.
+  - The host-level `*websocket` on `<serc-rod>` or another Sercrod host.
   - The element-level `*websocket` on specific elements.
   - The imperative `this.websocket.connect(...)` helper from scripts.
 
@@ -64,7 +64,7 @@ For those clickable elements:
 
 - `*ws-send` adds its own click handler that sends the message.
 - Event attributes using the configured prefix (by default `@`) such as `@click`, `@mousedown`, and so on are still respected.
-  Nablla scans all attributes, and for each one whose name starts with the event prefix, it calls the internal event binder.
+  Sercrod scans all attributes, and for each one whose name starts with the event prefix, it calls the internal event binder.
 
 This means:
 
@@ -76,7 +76,7 @@ This means:
 
 The attribute value of `*ws-send` is an expression that is evaluated at click time, not at render time:
 
-- On each click, Nablla calls:
+- On each click, Sercrod calls:
 
   - `this.eval_expr(expr, scope, { el: work, mode: "ws-send", $event: e })`
 
@@ -85,7 +85,7 @@ The attribute value of `*ws-send` is an expression that is evaluated at click ti
   - All data in the current scope (for example properties from `data`, `stage`, or `*methods`).
   - `$data` (this host’s data object).
   - `$root` (root host’s data, if any).
-  - `$parent` (nearest ancestor Nablla host’s data).
+  - `$parent` (nearest ancestor Sercrod host’s data).
   - `el` (the original template element that declared `*ws-send`).
   - `$event` (the click event object).
 
@@ -112,12 +112,12 @@ Payload conversion:
 
 - Optional `*ws-to` attribute:
 
-  - If present, its value is treated as a text template and resolved via Nablla’s text expansion logic.
+  - If present, its value is treated as a text template and resolved via Sercrod’s text expansion logic.
   - Internally, the directive uses:
 
     - `this._expand_text(toRaw, scope, work)`
 
-  - This supports the standard placeholder mechanisms (such as `%path.to.url%` or other configured `%...%` forms), as defined by Nablla’s `_expand_text`.
+  - This supports the standard placeholder mechanisms (such as `%path.to.url%` or other configured `%...%` forms), as defined by Sercrod’s `_expand_text`.
 
 - Target resolution logic:
 
@@ -147,7 +147,7 @@ Important notes:
 
 - During rendering:
 
-  - Nablla sees the `*ws-send` or `n-ws-send` attribute.
+  - Sercrod sees the `*ws-send` or `n-ws-send` attribute.
   - It clones the element, appends the clone to the parent, and attaches the click handler if the element is clickable.
   - It also processes event attributes (such as `@click`) on the original element and binds them to the clone.
 
@@ -158,7 +158,7 @@ Important notes:
 
 - Updates:
 
-  - Re-renders of the Nablla host recreate the element and its event handlers.
+  - Re-renders of the Sercrod host recreate the element and its event handlers.
   - The send behavior is always driven by clicks, not by data changes alone.
 
 
@@ -204,7 +204,7 @@ The return value from `_ws_send` is not used by the directive itself but is expo
 
 #### Scope layering and variables
 
-`*ws-send` does not create new scope variables of its own, but its expression runs inside the normal Nablla scope:
+`*ws-send` does not create new scope variables of its own, but its expression runs inside the normal Sercrod scope:
 
 - Available in the expression:
 
@@ -224,13 +224,13 @@ The return value from `_ws_send` is not used by the directive itself but is expo
 
 - WebSocket connections:
 
-  - Host-level `*websocket` on `<na-blla>` can automatically connect once at initialization or when you call `update(true)`.
+  - Host-level `*websocket` on `<serc-rod>` can automatically connect once at initialization or when you call `update(true)`.
   - Element-level `*websocket` on, for example, a button, can connect when that element is clicked or immediately if it is not clickable.
   - Both forms ultimately use `_ws_connect` and share a common map of live connections on the host.
 
 - Status fields:
 
-  - When you use `*websocket`, Nablla keeps several fields on the data object:
+  - When you use `*websocket`, Sercrod keeps several fields on the data object:
 
     - `$ws_ready`: `true` when at least the last connection is open and ready, `false` otherwise.
     - `$ws_error`: last error message, or `null`.
@@ -248,14 +248,14 @@ Practical pattern:
 - Disable send buttons when no connection is ready:
 
   ```html
-  <na-blla id="app"
+  <serc-rod id="app"
            data='{"wsUrl":"wss://example.com/ws","message":"ping"}'
            *websocket="wsUrl">
     <button *ws-send="message"
             :disabled="!$ws_ready">
       Send ping
     </button>
-  </na-blla>
+  </serc-rod>
   ```
 
 
@@ -298,7 +298,7 @@ Practical pattern:
 Sending a structured JSON payload:
 
 ```html
-<na-blla id="chat"
+<serc-rod id="chat"
          data='{
            "wsUrl": "wss://example.com/chat",
            "draft": ""
@@ -311,13 +311,13 @@ Sending a structured JSON payload:
           :disabled="!$ws_ready || !draft">
     Send message
   </button>
-</na-blla>
+</serc-rod>
 ```
 
 Selecting a specific connection with `*ws-to`:
 
 ```html
-<na-blla id="multi"
+<serc-rod id="multi"
          data='{
            "primaryUrl": "wss://example.com/primary",
            "secondaryUrl": "wss://example.com/secondary"
@@ -331,7 +331,7 @@ Selecting a specific connection with `*ws-to`:
           *ws-to="%secondaryUrl%">
     Ping secondary
   </button>
-</na-blla>
+</serc-rod>
 ```
 
 In this pattern, you would typically have an element-level `*websocket` somewhere that connects to `secondaryUrl`.

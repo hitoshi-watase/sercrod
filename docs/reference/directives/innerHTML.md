@@ -2,7 +2,7 @@
 
 #### Summary
 
-`*innerHTML` sets the DOM `innerHTML` property of an element from a Nablla expression.
+`*innerHTML` sets the DOM `innerHTML` property of an element from a Sercrod expression.
 It is the low-level directive for inserting HTML markup as a string.
 The alias `n-innerHTML` behaves identically.
 
@@ -15,17 +15,17 @@ Unlike `*print` or `*textContent`, `*innerHTML` does not escape the value; it pa
 A simple example that renders an HTML fragment stored in data:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "contentHtml": "<strong>Hello</strong> <em>world</em>!"
 }'>
   <p *innerHTML="contentHtml"></p>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
 - The `contentHtml` string is evaluated from the current scope.
-- Nablla calls the global `html` filter with that value.
+- Sercrod calls the global `html` filter with that value.
 - The result is assigned to the `<p>` element’s `innerHTML`.
 - The `<p>` ends up containing `<strong>Hello</strong> <em>world</em>!` as real HTML, not as text.
 
@@ -36,7 +36,7 @@ Core behavior:
 
 - `*innerHTML` is a structural output directive that controls the inner markup of the host element.
 - For each render of the host:
-  - Nablla evaluates the expression on `*innerHTML` in the current scope.
+  - Sercrod evaluates the expression on `*innerHTML` in the current scope.
   - If the result is `null` or `false`, it is treated as an empty string.
   - Otherwise the raw value is passed to the global `html` filter:
     - `html(raw, { el, expr, scope })`.
@@ -67,13 +67,13 @@ Within the rendering pipeline of a single element:
 - `*print` and `*textContent` run before `*innerHTML`.
   - If they match, they set `textContent`, append the element to the parent, and return; no later output directive runs.
 - If none of the earlier output directives return, `*innerHTML` is evaluated.
-- After `*innerHTML`, Nablla continues with attribute bindings, style bindings, and finally recursive child rendering from the original template node.
+- After `*innerHTML`, Sercrod continues with attribute bindings, style bindings, and finally recursive child rendering from the original template node.
 
 Important consequence:
 
-- The HTML string inserted by `*innerHTML` is not traversed by Nablla’s renderer.
-  - Nablla still walks `node.childNodes` from the template, not the newly inserted HTML string.
-  - Any Nablla directives that appear inside the inserted HTML string are not compiled or bound by Nablla.
+- The HTML string inserted by `*innerHTML` is not traversed by Sercrod’s renderer.
+  - Sercrod still walks `node.childNodes` from the template, not the newly inserted HTML string.
+  - Any Sercrod directives that appear inside the inserted HTML string are not compiled or bound by Sercrod.
 
 
 #### Execution model
@@ -87,30 +87,30 @@ Conceptually, for an element `<div *innerHTML="expr">` the runtime behaves like 
    - Evaluate it with `eval_expr(expr, scope, { el: node, mode: "innerHTML" })`.
    - Map `null` or `false` to an empty string, otherwise use the returned value as `raw`.
    - Build a context object `{ el, expr, scope }`.
-   - Call `Nablla._filters.html(raw, ctx)` and assign the result to `el.innerHTML`.
+   - Call `Sercrod._filters.html(raw, ctx)` and assign the result to `el.innerHTML`.
 4. Recursively render the original template children:
    - For each `child` in `node.childNodes`, call `renderNode(child, scope, el)`.
-   - This may append Nablla-generated child content after the HTML inserted by `*innerHTML`.
+   - This may append Sercrod-generated child content after the HTML inserted by `*innerHTML`.
 5. At the end of `_renderElement`, if `cleanup.directives` is enabled in the global config:
-   - All attributes that are known Nablla directives (including `*innerHTML` and `n-innerHTML`) are removed from `el`.
+   - All attributes that are known Sercrod directives (including `*innerHTML` and `n-innerHTML`) are removed from `el`.
 6. Append `el` to the parent and run any log hooks.
 
-The inserted HTML string is therefore a one-shot, low-level injection step; Nablla does not automatically apply its own directives inside that string.
+The inserted HTML string is therefore a one-shot, low-level injection step; Sercrod does not automatically apply its own directives inside that string.
 
 
 #### Variable creation and scope layering
 
 `*innerHTML` does not create new variables.
 
-Its expression is evaluated in the normal Nablla scope:
+Its expression is evaluated in the normal Sercrod scope:
 
-- The current data bound to the host (for example from `data` on `<na-blla>`).
+- The current data bound to the host (for example from `data` on `<serc-rod>`).
 - Special injected variables:
   - `$data` for the current host’s data object.
-  - `$root` for the root Nablla host data.
-  - `$parent` for the nearest ancestor Nablla host data.
+  - `$root` for the root Sercrod host data.
+  - `$parent` for the nearest ancestor Sercrod host data.
 - Methods exposed via `*methods` or the global method injection mechanism.
-- Internal helper methods registered in `Nablla._internal_methods`.
+- Internal helper methods registered in `Sercrod._internal_methods`.
 
 There is no per-directive scope layering; `*innerHTML` simply looks at whatever is currently visible in the merged scope.
 
@@ -120,12 +120,12 @@ There is no per-directive scope layering; `*innerHTML` simply looks at whatever 
 `*innerHTML` does not alter parent relationships:
 
 - You can read values from the root or parent using `$root` and `$parent` in the expression.
-- The inserted HTML string does not introduce a new Nablla scope; it is just markup.
+- The inserted HTML string does not introduce a new Sercrod scope; it is just markup.
 
 Example:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "post": { "id": 1, "summaryHtml": "<p>Summary</p>" }
 }'>
   <article>
@@ -134,7 +134,7 @@ Example:
     </header>
     <section *innerHTML="post.summaryHtml"></section>
   </article>
-</na-blla>
+</serc-rod>
 ```
 
 Here, `*innerHTML` sees `post.summaryHtml` from the current scope.
@@ -161,12 +161,12 @@ The `<h1>` can still use `$parent` or `$root` as usual.
 
   ```html
   <div *innerHTML="introHtml">
-    <p *if="showNote" class="note">This note is rendered by Nablla.</p>
+    <p *if="showNote" class="note">This note is rendered by Sercrod.</p>
   </div>
   ```
 
   - The `introHtml` string is injected as markup.
-  - The `<p>` is still rendered or skipped by Nablla based on `showNote`.
+  - The `<p>` is still rendered or skipped by Sercrod based on `showNote`.
 
 - Loops:
 
@@ -194,7 +194,7 @@ The `<h1>` can still use `$parent` or `$root` as usual.
   - Resolves a named `*template`.
   - Copies the template’s `innerHTML` into `node.innerHTML` (the template node), not directly into `el`.
   - Leaves element tags and attributes in place.
-  - Does not return; it allows Nablla to walk the inserted template children and process their directives.
+  - Does not return; it allows Sercrod to walk the inserted template children and process their directives.
 
 - `*import`:
   - Fetches HTML from a URL (using a synchronous XHR, with optional caching).
@@ -206,7 +206,7 @@ The `<h1>` can still use `$parent` or `$root` as usual.
   - Evaluates an expression to get an HTML string.
   - Passes it through the `html` filter.
   - Writes the result directly into `el.innerHTML`.
-  - Does not touch `node.innerHTML`; Nablla still walks the original template children.
+  - Does not touch `node.innerHTML`; Sercrod still walks the original template children.
 
 Combined effect when used together:
 
@@ -214,7 +214,7 @@ Combined effect when used together:
 
   - `*include` / `*import` runs first and rewrites `node.innerHTML` for the template.
   - Later, `*innerHTML` sets `el.innerHTML` from the expression value.
-  - Finally, Nablla recursively renders `node.childNodes` (now coming from the include/import) into `el`.
+  - Finally, Sercrod recursively renders `node.childNodes` (now coming from the include/import) into `el`.
 
   This means the final element can contain:
 
@@ -229,7 +229,7 @@ Combined effect when used together:
 Recommendation:
 
 - Treat `*innerHTML` as a low-level primitive for HTML injection.
-- Use `*include` and `*import` for Nablla-managed templates and remote HTML.
+- Use `*include` and `*import` for Sercrod-managed templates and remote HTML.
 - Avoid designing APIs that rely on mixing them on the same element unless you have a very specific reason and fully understand the combined behavior.
 
 
@@ -249,7 +249,7 @@ The `html` filter is the main hook for controlling how HTML strings are inserted
 
 - When `html` throws:
 
-  - If `error.warn` is enabled on the Nablla instance, the runtime logs a warning:
+  - If `error.warn` is enabled on the Sercrod instance, the runtime logs a warning:
 
     - It includes the message, the expression, the scope, and the element.
 
@@ -262,7 +262,7 @@ Guidelines:
 - For Markdown or other formats:
   - Convert them to HTML in normal JavaScript (for example, `renderMarkdownToHtml(text)`).
   - Apply sanitization and then return the safe string.
-  - Nablla simply calls your function through the expression.
+  - Sercrod simply calls your function through the expression.
 
 Example with an external sanitizer:
 
@@ -274,9 +274,9 @@ Example with an external sanitizer:
   }
 </script>
 
-<na-blla id="doc" data='{"bodyMd": "# Title"}'>
+<serc-rod id="doc" data='{"bodyMd": "# Title"}'>
   <article *innerHTML="safeHtmlFromMarkdown(bodyMd)"></article>
-</na-blla>
+</serc-rod>
 ```
 
 
@@ -286,7 +286,7 @@ Example with an external sanitizer:
   - Use `*innerHTML` only when you intentionally need markup injection.
 
 - Use the `html` filter for security:
-  - Override `Nablla._filters.html` to integrate a sanitizer when working with any untrusted input.
+  - Override `Sercrod._filters.html` to integrate a sanitizer when working with any untrusted input.
 
 - Keep responsibilities separate:
   - Avoid combining `*innerHTML` with `*print` or `*textContent` on the same element; only one of them will take effect.
@@ -300,9 +300,9 @@ Example with an external sanitizer:
   - On each re-render of the host, `*innerHTML` rebuilds the inner markup from scratch.
   - Any state stored only inside the injected HTML (for example, manual event listeners or form values) may be lost unless you manage it separately.
 
-- Do not expect Nablla to process directives inside injected HTML:
-  - The inserted string is not parsed by Nablla.
-  - If you need Nablla directives inside dynamic content, use `*include` or `*import` so that `node.innerHTML` is updated before child rendering.
+- Do not expect Sercrod to process directives inside injected HTML:
+  - The inserted string is not parsed by Sercrod.
+  - If you need Sercrod directives inside dynamic content, use `*include` or `*import` so that `node.innerHTML` is updated before child rendering.
 
 
 #### Additional examples
@@ -310,7 +310,7 @@ Example with an external sanitizer:
 Fallback summary:
 
 ```html
-<na-blla id="post" data='{
+<serc-rod id="post" data='{
   "post": {
     "title": "Post title",
     "summaryHtml": null
@@ -318,7 +318,7 @@ Fallback summary:
 }'>
   <h2 *print="post.title"></h2>
   <div *innerHTML="post.summaryHtml || '<p>No summary available.</p>'"></div>
-</na-blla>
+</serc-rod>
 ```
 
 - If `summaryHtml` is `null` or `false`, the expression falls back to the HTML snippet.
@@ -334,19 +334,19 @@ Combining `*include` with `*innerHTML` on nested elements:
   </article>
 </template>
 
-<na-blla id="list" data='{"posts":[
+<serc-rod id="list" data='{"posts":[
   { "title": "First",  "summaryHtml": "<p>First summary</p>" },
   { "title": "Second", "summaryHtml": "<p>Second summary</p>" }
 ]}'>
   <section *each="post of posts">
     <div *include="'post-card'"></div>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 - `*include` copies the `post-card` template into the innerHTML of the `<div>`.
 - Inside that template, `*innerHTML` injects `post.summaryHtml` as markup.
-- This pattern keeps Nablla templates in control while using `*innerHTML` only where HTML strings already exist.
+- This pattern keeps Sercrod templates in control while using `*innerHTML` only where HTML strings already exist.
 
 
 #### Notes
@@ -354,5 +354,5 @@ Combining `*include` with `*innerHTML` on nested elements:
 - `*innerHTML` and `n-innerHTML` are functionally identical; choose one naming style per project.
 - The directive maps `null` and `false` to an empty string; other values (including `0` and empty strings) are passed to the `html` filter as-is.
 - Errors in the `html` filter produce an optional console warning and clear the element’s innerHTML.
-- Inserted HTML strings are not scanned for Nablla directives; they are treated as plain DOM content.
-- When `cleanup.directives` is enabled, `*innerHTML` and `n-innerHTML` attributes are removed from the output DOM like other Nablla directives.
+- Inserted HTML strings are not scanned for Sercrod directives; they are treated as plain DOM content.
+- When `cleanup.directives` is enabled, `*innerHTML` and `n-innerHTML` attributes are removed from the output DOM like other Sercrod directives.

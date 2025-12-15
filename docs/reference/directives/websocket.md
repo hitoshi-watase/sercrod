@@ -2,10 +2,10 @@
 
 #### Summary
 
-`*websocket` opens and manages WebSocket connections for a Nablla host and its descendants.
+`*websocket` opens and manages WebSocket connections for a Sercrod host and its descendants.
 
 - It works in two forms:
-  - As a host attribute on `<na-blla>` to automatically connect once per URL.
+  - As a host attribute on `<serc-rod>` to automatically connect once per URL.
   - As an element directive on clickable or non-clickable elements to connect from within the template.
 - WebSocket messages update dedicated `$ws_*` state fields and, optionally, a property chosen via `*into`.
 - Outgoing messages are sent with `*ws-send`, optionally directed to a specific URL with `*ws-to` / `n-ws-to`.
@@ -16,7 +16,7 @@
 Host-level connection with state flags:
 
 ```html
-<na-blla id="chat"
+<serc-rod id="chat"
          data='{"wsUrl": "wss://example.com/chat"}'
          *websocket="wsUrl"
          *into="wsData">
@@ -33,13 +33,13 @@ Host-level connection with state flags:
     <pre *if="wsData"
          *textContent="JSON.stringify(wsData, null, 2)"></pre>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 Element-level connection and sending:
 
 ```html
-<na-blla id="notify"
+<serc-rod id="notify"
          data='{
            "notifyUrl": "wss://example.com/notify",
            "payload": { "type": "ping" }
@@ -59,7 +59,7 @@ Element-level connection and sending:
 
   <pre *if="lastNotify"
        *textContent="JSON.stringify(lastNotify, null, 2)"></pre>
-</na-blla>
+</serc-rod>
 ```
 
 
@@ -67,14 +67,14 @@ Element-level connection and sending:
 
 `*websocket` can be attached to:
 
-1. The Nablla host (`<na-blla>`) as a host attribute:
+1. The Sercrod host (`<serc-rod>`) as a host attribute:
 
    - `*websocket="spec"`
    - Optional: `*into="propName"`
 
    Example:
 
-   - `<na-blla *websocket="wsUrl" *into="wsData">…</na-blla>`
+   - `<serc-rod *websocket="wsUrl" *into="wsData">…</serc-rod>`
 
    Behavior:
 
@@ -82,14 +82,14 @@ Element-level connection and sending:
    - It attempts a connection once, asynchronously, after the initial render.
    - The connection is tracked per URL and controlled by the host’s `websocket` controller.
 
-2. Any element inside a Nablla host:
+2. Any element inside a Sercrod host:
 
    - `*websocket="spec"` on a child element (for example `button`, `a`, `div`) creates or reuses a connection for that URL.
 
    Behavior:
 
    - The directive is rendered as a “special element”:
-     - Nablla clones the element (without children), wires the WebSocket logic, and appends the clone.
+     - Sercrod clones the element (without children), wires the WebSocket logic, and appends the clone.
      - Children of the original element are rendered normally into the clone.
    - The connection is still owned by the host (the WebSocket state lives on the host’s data object), but events are dispatched from the element.
 
@@ -98,7 +98,7 @@ Clickable vs non-clickable elements:
 - If the element is “clickable” (`<button>`, `<a>` without `download`, or `<input type="button|submit|reset">`):
   - The WebSocket connection is created when the user clicks the element.
 - Otherwise:
-  - Nablla automatically attempts the connection once on the next animation frame.
+  - Sercrod automatically attempts the connection once on the next animation frame.
 
 
 #### Spec expression and URL resolution
@@ -111,13 +111,13 @@ The `spec` expression on `*websocket` can be:
 
 Resolution steps (for both host and element):
 
-1. Evaluate the `spec` as a Nablla expression in `mode: "attr"`.
+1. Evaluate the `spec` as a Sercrod expression in `mode: "attr"`.
 
    - Example: `*websocket="wsUrl"` or `*websocket="config.ws"`.
 
-2. If the expression result is `null` or is exactly the same as the raw string, treat it as a template string and run Nablla’s text expansion:
+2. If the expression result is `null` or is exactly the same as the raw string, treat it as a template string and run Sercrod’s text expansion:
 
-   - `${expr}` is evaluated like other Nablla template expansions.
+   - `${expr}` is evaluated like other Sercrod template expansions.
    - `%name%` placeholders can also be used and are expanded from the current scope.
 
 3. Interpret the final value:
@@ -132,25 +132,25 @@ Examples:
 
 ```html
 <!-- Simple string or data binding -->
-<na-blla *websocket="'wss://example.com/ws'"></na-blla>
-<na-blla *websocket="wsUrl"></na-blla>
+<serc-rod *websocket="'wss://example.com/ws'"></serc-rod>
+<serc-rod *websocket="wsUrl"></serc-rod>
 
 <!-- Template-style expansion -->
-<na-blla *websocket="'wss://example.com/ws/%roomId%'"></na-blla>
+<serc-rod *websocket="'wss://example.com/ws/%roomId%'"></serc-rod>
 
 <!-- Object-style spec -->
-<na-blla *websocket="{ url: wsUrl, into: 'wsData' }"></na-blla>
+<serc-rod *websocket="{ url: wsUrl, into: 'wsData' }"></serc-rod>
 ```
 
 Placeholder guard:
 
-- Before connecting, Nablla checks whether the final URL still contains placeholder patterns such as:
+- Before connecting, Sercrod checks whether the final URL still contains placeholder patterns such as:
   - `${...}`
   - `%name%`
-- If placeholders remain, Nablla does not connect and may emit a warning:
+- If placeholders remain, Sercrod does not connect and may emit a warning:
 
-  - Host-level: `"[Nablla warn] *websocket(host): URL not expanded"`.
-  - Element-level: `"[Nablla warn] *websocket(el): URL not expanded"`.
+  - Host-level: `"[Sercrod warn] *websocket(host): URL not expanded"`.
+  - Element-level: `"[Sercrod warn] *websocket(el): URL not expanded"`.
 
 - This usually means your data is not ready yet. You can retry later (for example via a forced update).
 
@@ -178,7 +178,7 @@ Message storage:
 
   - The payload is decoded:
 
-    - If `ev.data` is a string that looks like JSON (starts with `{` / `[` and ends with `}` / `]`), Nablla attempts `JSON.parse`.
+    - If `ev.data` is a string that looks like JSON (starts with `{` / `[` and ends with `}` / `]`), Sercrod attempts `JSON.parse`.
     - Otherwise the raw string or binary value is used as-is.
 
   - Then the runtime:
@@ -210,9 +210,9 @@ Examples:
 
 ```html
 <!-- Host-level with *into -->
-<na-blla *websocket="wsUrl" *into="wsData">
+<serc-rod *websocket="wsUrl" *into="wsData">
   <pre *textContent="JSON.stringify(wsData, null, 2)"></pre>
-</na-blla>
+</serc-rod>
 
 <!-- Element-level with *into -->
 <button *websocket="wsUrl" *into="wsMessage">
@@ -220,7 +220,7 @@ Examples:
 </button>
 
 <!-- Object spec provides into -->
-<na-blla *websocket="{ url: wsUrl, into: 'wsData' }"></na-blla>
+<serc-rod *websocket="{ url: wsUrl, into: 'wsData' }"></serc-rod>
 ```
 
 
@@ -230,7 +230,7 @@ Examples:
 
 Lifecycle events:
 
-- `nablla-ws-before-connect` (cancelable):
+- `sercrod-ws-before-connect` (cancelable):
 
   - Fired just before a connection attempt.
   - `detail` includes:
@@ -241,26 +241,26 @@ Lifecycle events:
     - Modify `detail.url` and `detail.into` to override connection parameters.
     - Call `event.preventDefault()` to cancel the connection.
 
-- `nablla-ws-open`:
+- `sercrod-ws-open`:
 
   - Fired when the connection is successfully opened.
   - `detail` includes `{ url }`.
 
-- `nablla-ws-message`:
+- `sercrod-ws-message`:
 
   - Fired on each incoming message.
   - `detail` includes:
     - `url`: URL of the connection.
     - `payload`: already-decoded payload (possibly parsed from JSON).
 
-- `nablla-ws-error`:
+- `sercrod-ws-error`:
 
   - Fired on errors from the WebSocket.
   - `detail` includes:
     - `url`
     - `error`: message string.
 
-- `nablla-ws-close`:
+- `sercrod-ws-close`:
 
   - Fired when the connection closes.
   - `detail` typically includes:
@@ -271,7 +271,7 @@ Lifecycle events:
 Dispatch target:
 
 - For host-level `*websocket`:
-  - Events are dispatched from the `<na-blla>` host.
+  - Events are dispatched from the `<serc-rod>` host.
 - For element-level `*websocket`:
   - Events are dispatched from the element that carries the directive.
   - Events bubble and are composed, so you can listen at the host or further up if needed.
@@ -279,7 +279,7 @@ Dispatch target:
 
 #### WebSocket controller (`el.websocket`)
 
-Each Nablla host exposes a lightweight controller object on the host element:
+Each Sercrod host exposes a lightweight controller object on the host element:
 
 - Accessible as `host.websocket` in JavaScript.
 - Non-enumerable and safe to overwrite on reinitialization.
@@ -351,7 +351,7 @@ Sending:
 `*ws-to` / `n-ws-to`:
 
 - Used on the same element as `*ws-send`.
-- Resolved via Nablla’s text expansion (not as a full expression):
+- Resolved via Sercrod’s text expansion (not as a full expression):
 
   - `*ws-to="%notifyUrl%"` will expand `%notifyUrl%` from the current scope.
   - The result should match the WebSocket URL string.
@@ -368,20 +368,20 @@ Host-level auto connect:
 
 - On first connection:
 
-  - After the host is initialized, Nablla schedules a `*websocket` host connect on the next animation frame.
+  - After the host is initialized, Sercrod schedules a `*websocket` host connect on the next animation frame.
   - It resolves the spec and attempts the connection once per URL.
   - A one-shot guard ensures the same host and URL are not auto-connected repeatedly.
 
 - On failure or close:
 
   - If the connection fails (for example, invalid URL) or errors/ closes:
-    - Nablla clears the one-shot guard for that URL.
+    - Sercrod clears the one-shot guard for that URL.
     - It also clears internal retry flags so that the connection can be retried later.
     - It invalidates the AST cache related to the WebSocket spec so that the expression will be re-evaluated on the next forced update.
 
 - Retrying:
 
-  - Nablla does not automatically loop or schedule reconnect attempts.
+  - Sercrod does not automatically loop or schedule reconnect attempts.
   - To try again with the same host-level `*websocket`:
     - You can call `host.update(true)` (or equivalent) to trigger a forced update.
     - Or invoke `host.websocket.reconnect()` from custom code.
@@ -397,7 +397,7 @@ Element-level connect:
 
 - For non-clickable elements:
 
-  - Nablla attempts one connection on the next animation frame.
+  - Sercrod attempts one connection on the next animation frame.
   - After an error or close, you can:
     - Re-render the element.
     - Or use the host’s `websocket` controller to reconnect.
@@ -405,7 +405,7 @@ Element-level connect:
 Placeholder behavior:
 
 - If the URL still contains placeholders when evaluated:
-  - Nablla aborts the connection attempt and logs a warning.
+  - Sercrod aborts the connection attempt and logs a warning.
   - Once the data is ready and the URL expands cleanly, a new connection attempt can be triggered via forced update or user action.
 
 
@@ -413,7 +413,7 @@ Placeholder behavior:
 
 - Prefer JSON payloads:
 
-  - Sending objects from `*ws-send` is natural because Nablla automatically `JSON.stringify` values that are plain objects.
+  - Sending objects from `*ws-send` is natural because Sercrod automatically `JSON.stringify` values that are plain objects.
   - Incoming messages that look like JSON are automatically parsed.
 
 - Use `*into` for the main “current message”, `$ws_messages` for history:
@@ -429,11 +429,11 @@ Placeholder behavior:
 - Handle errors and closure:
 
   - Watch `$ws_error` and `$ws_ready` to show user-friendly status.
-  - Listen to `nablla-ws-error` and `nablla-ws-close` if you need more precise handling or logging.
+  - Listen to `sercrod-ws-error` and `sercrod-ws-close` if you need more precise handling or logging.
 
 - Design your own reconnection strategy:
 
-  - Nablla intentionally avoids automatic reconnect loops.
+  - Sercrod intentionally avoids automatic reconnect loops.
   - If you need reconnects, implement them explicitly using:
     - `host.websocket.reconnect()`.
     - Or by calling `host.websocket.connect(url, into)` from your own timers or event handlers.

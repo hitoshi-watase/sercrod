@@ -3,13 +3,13 @@
 #### Summary
 
 `*log` evaluates an expression and logs its result together with the expression and a short host snippet.
-It is meant as a lightweight debugging helper for Nablla templates.
+It is meant as a lightweight debugging helper for Sercrod templates.
 The alias `n-log` behaves the same.
 
 - On normal elements, `*log` prints to the browser console.
 - On `<pre *log>`, `*log` writes a formatted debug block into the `<pre>` element itself.
 
-Logging is side-effect free with respect to Nablla data: `*log` does not modify the host’s data.
+Logging is side-effect free with respect to Sercrod data: `*log` does not modify the host’s data.
 
 
 #### Basic example
@@ -17,19 +17,19 @@ Logging is side-effect free with respect to Nablla data: `*log` does not modify 
 Console logging a value:
 
 ```html
-<na-blla id="app" data='{"user":{"name":"Alice","age":30}}'>
+<serc-rod id="app" data='{"user":{"name":"Alice","age":30}}'>
   <div *log="user"></div>
 
   <p>
     Hello,
     <span *print="user.name"></span>
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
-- On first render, Nablla evaluates `user` in the host scope.
+- On first render, Sercrod evaluates `user` in the host scope.
 - In the browser console, it prints the value of `user` (an object), the expression string `"user"`, and a compact snippet of the `<div *log>` element.
 - The `<div>` itself stays empty in the DOM.
 
@@ -37,14 +37,14 @@ Behavior:
 Using `<pre *log>` to display logs on the page:
 
 ```html
-<na-blla id="debug" data='{"items":[1,2,3]}'>
+<serc-rod id="debug" data='{"items":[1,2,3]}'>
   <pre *log="items"></pre>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
-- Nablla evaluates `items`.
+- Sercrod evaluates `items`.
 - Instead of logging to the console, it writes a formatted block into the `<pre>` element as plain text.
 - The output includes the value of `items`, the expression, and a snippet of the `<pre *log>` itself.
 
@@ -53,7 +53,7 @@ Behavior:
 
 Core behavior:
 
-- `*log` evaluates an expression in the current Nablla scope.
+- `*log` evaluates an expression in the current Sercrod scope.
 - It formats three pieces of information:
   - The value of the expression (or the scope when no expression is given).
   - The expression string itself (or the literal `(scope)` when omitted).
@@ -62,22 +62,22 @@ Core behavior:
 Where the log is sent:
 
 - On `<pre *log="...">` or `<pre n-log="...">`:
-  - Nablla writes a multi-line debug message into `pre.textContent`.
+  - Sercrod writes a multi-line debug message into `pre.textContent`.
   - The content is plain text, not HTML, so markup is not interpreted.
 - On any other element:
-  - Nablla prints to the browser console using `console.log`.
-  - The debug entry starts with `[Nablla log]` and then prints the value, expression, snippet, and any error.
+  - Sercrod prints to the browser console using `console.log`.
+  - The debug entry starts with `[Sercrod log]` and then prints the value, expression, snippet, and any error.
 
 Single-shot semantics:
 
-- Each `*log` element logs exactly once per Nablla host instance.
+- Each `*log` element logs exactly once per Sercrod host instance.
 - On subsequent updates of the same host, the same `*log` element is skipped by an internal `+logged` flag.
 - Newly created elements with `*log` (for example from loops or conditionals) will log once when they first appear.
 
 
 #### Expression rules
 
-The attribute value of `*log` is a standard Nablla expression:
+The attribute value of `*log` is a standard Sercrod expression:
 
 - Typical usage:
 
@@ -94,12 +94,12 @@ Expression is optional:
 
 - If an expression is provided:
 
-  - Nablla calls `eval_expr(expr, scope, { el, mode: "log" })`.
+  - Sercrod calls `eval_expr(expr, scope, { el, mode: "log" })`.
   - The result is used as the value to log.
 
 - If the attribute value is empty or missing:
 
-  - Nablla uses the whole current scope as the value to log.
+  - Sercrod uses the whole current scope as the value to log.
   - The expression label in the output becomes `(scope)`.
 
 Value formatting:
@@ -112,8 +112,8 @@ Value formatting:
 - For objects:
 
   - The console receives the live object value when not using `<pre>`.
-  - For `<pre *log>`, Nablla also tries to build a pretty JSON string using `JSON.stringify(value, null, 2)`.
-  - If `JSON.stringify` fails (for example because of circular references), the string becomes `[Nablla warn] JSON stringify failed`.
+  - For `<pre *log>`, Sercrod also tries to build a pretty JSON string using `JSON.stringify(value, null, 2)`.
+  - If `JSON.stringify` fails (for example because of circular references), the string becomes `[Sercrod warn] JSON stringify failed`.
 
 - For primitive values (string, number, boolean):
 
@@ -123,16 +123,16 @@ Error handling:
 
 - If evaluation throws an error:
 
-  - The value becomes a message like `[Nablla warn] *log eval error: ...`.
+  - The value becomes a message like `[Sercrod warn] *log eval error: ...`.
   - The expression and snippet are still shown.
   - The error message is included in the console entry or `<pre>` text.
 
 
 #### Evaluation timing
 
-`*log` is tied to the lifecycle of the Nablla host:
+`*log` is tied to the lifecycle of the Sercrod host:
 
-- After the host completes its normal render (`_renderTemplate`) and the internal flag index is rebuilt, Nablla schedules log evaluation.
+- After the host completes its normal render (`_renderTemplate`) and the internal flag index is rebuilt, Sercrod schedules log evaluation.
 - The actual logging is triggered in a `requestAnimationFrame` callback:
 
   - This means the DOM tree is fully updated and painted by the time `*log` runs.
@@ -152,17 +152,17 @@ Error handling:
 
 #### Execution model
 
-Internally, Nablla executes `*log` roughly as follows:
+Internally, Sercrod executes `*log` roughly as follows:
 
-1. During render, Nablla builds an index of elements that carry `*log` or `n-log`.
-2. After the host render and index rebuild, Nablla schedules `_call_log_hooks(scope)` inside `requestAnimationFrame`.
+1. During render, Sercrod builds an index of elements that carry `*log` or `n-log`.
+2. After the host render and index rebuild, Sercrod schedules `_call_log_hooks(scope)` inside `requestAnimationFrame`.
 3. When `_call_log_hooks` runs:
    - If `this.log` is `false`, it aborts immediately (global log-off for this host).
    - It takes all elements indexed under the `*log` flag.
 4. For each element `el`:
    - If `el` already has a `+logged` flag, it is skipped.
-   - Otherwise, Nablla sets the `+logged` flag on `el`.
-   - Nablla reads `expr` from `*log` or `n-log`.
+   - Otherwise, Sercrod sets the `+logged` flag on `el`.
+   - Sercrod reads `expr` from `*log` or `n-log`.
    - It evaluates `expr` (if provided) in the current scope, or uses `scope` directly when there is no expression.
    - It computes:
      - `val`: the value used for console output.
@@ -170,16 +170,16 @@ Internally, Nablla executes `*log` roughly as follows:
      - `html`: a compact summary of `el.outerHTML`, collapsed whitespace and limited to 256 characters.
 5. Depending on the element type:
    - If `el.tagName === "PRE"`:
-     - Nablla builds a multi-line debug string with:
-       - A prefix line such as `[Nablla pr]`.
+     - Sercrod builds a multi-line debug string with:
+       - A prefix line such as `[Sercrod pr]`.
        - The stringified value.
        - A line indicating the expression or `(scope)`.
        - A line containing the snippet.
        - An optional line for the error message when evaluation failed.
-     - Nablla assigns this string to `el.textContent`.
+     - Sercrod assigns this string to `el.textContent`.
    - Otherwise:
-     - Nablla calls `console.log` with a formatted block including:
-       - A label `[Nablla log]`.
+     - Sercrod calls `console.log` with a formatted block including:
+       - A label `[Sercrod log]`.
        - The value, expression (or `(scope)`), snippet, and optional error message.
 
 This model guarantees that each `*log` node contributes at most one entry and that the entry reflects the post-render state of the DOM.
@@ -243,7 +243,7 @@ Because `*log` is read-only with respect to data:
 
 - Use `*log` sparingly in production:
 
-  - Logging is controlled by the `log` flag on the Nablla host instance.
+  - Logging is controlled by the `log` flag on the Sercrod host instance.
   - You can disable all `*log` output for a host by setting `host.log = false` in JavaScript.
 
 - Prefer simple expressions:
@@ -254,7 +254,7 @@ Because `*log` is read-only with respect to data:
 - Combine with scopes:
 
   - Use `*log="$data"` to inspect the entire host data.
-  - Use `*log="$root"` when you want to see the root Nablla data tree.
+  - Use `*log="$root"` when you want to see the root Sercrod data tree.
   - Use `*log="$parent"` inside nested hosts to understand parent-child relationships.
 
 
@@ -263,29 +263,29 @@ Because `*log` is read-only with respect to data:
 Inspect the entire host data:
 
 ```html
-<na-blla id="app" data='{"user":{"name":"Alice"},"debug":true}'>
+<serc-rod id="app" data='{"user":{"name":"Alice"},"debug":true}'>
   <pre *log="$data"></pre>
-</na-blla>
+</serc-rod>
 ```
 
 Inspect a subset of state:
 
 ```html
-<na-blla id="app" data='{"state":{"step":1,"status":"idle"}}'>
+<serc-rod id="app" data='{"state":{"step":1,"status":"idle"}}'>
   <div *log="state.status"></div>
-</na-blla>
+</serc-rod>
 ```
 
 Log per item in a list (console only):
 
 ```html
-<na-blla id="list" data='{"items":[{"id":1},{"id":2},{"id":3}]}'>
+<serc-rod id="list" data='{"items":[{"id":1},{"id":2},{"id":3}]}'>
   <ul>
     <li *for="item of items" *log="item.id">
       Item <span *print="item.id"></span>
     </li>
   </ul>
-</na-blla>
+</serc-rod>
 ```
 
 
@@ -295,9 +295,9 @@ Log per item in a list (console only):
 - `*log` is a diagnostic directive:
   - It does not update data.
   - It does not participate in structural decisions (unlike `*if`, `*for`, or `*each`).
-- Logging is controlled per Nablla host via the `log` property:
+- Logging is controlled per Sercrod host via the `log` property:
   - `this.log` defaults to `true` in the host constructor.
-  - Setting `host.log = false` (where `host` is a Nablla element) disables `*log` output for that host.
+  - Setting `host.log = false` (where `host` is a Sercrod element) disables `*log` output for that host.
 - Each element with `*log` logs only once per host instance due to the internal `+logged` flag.
 - There are no special combination restrictions for `*log`:
   - It can share the same element with other directives such as `*if`, `*for`, `*each`, `*print`, `@events`, and so on.

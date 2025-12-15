@@ -2,11 +2,11 @@
 
 #### Summary
 
-`*fetch` loads JSON from a URL and writes it into Nablla host data.
+`*fetch` loads JSON from a URL and writes it into Sercrod host data.
 The JSON response can either replace the entire root data object or be merged into a specific property path.
 `*fetch` has an alias `n-fetch`.
 
-On a Nablla host element (`<na-blla>`), `*fetch` is typically used for initial data loading.
+On a Sercrod host element (`<serc-rod>`), `*fetch` is typically used for initial data loading.
 On normal elements (such as `<button>` or `<div>`), it can be used for explicit reload buttons or one-time auto fetches.
 
 Key points:
@@ -16,7 +16,7 @@ Key points:
 - If `prop` is present, that path inside `data` is updated instead.
 - For non-clickable elements, `*fetch` auto-runs once per URL (with a special rule for `ts=` query parameters).
 - For clickable elements, `*fetch` runs on click only.
-- On the host `<na-blla>`, `*fetch` runs during `connectedCallback` before the first render.
+- On the host `<serc-rod>`, `*fetch` runs during `connectedCallback` before the first render.
 
 
 #### Basic example
@@ -24,19 +24,19 @@ Key points:
 Initial data load into a host:
 
 ```html
-<na-blla id="app" *fetch="/api/items.json:items">
+<serc-rod id="app" *fetch="/api/items.json:items">
   <h1>Items</h1>
   <ul *each="item of items">
     <li *print="item.name"></li>
   </ul>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
-- When the Nablla host is connected, it calls `fetch("/api/items.json")`.
+- When the Sercrod host is connected, it calls `fetch("/api/items.json")`.
 - The JSON response is written into `data.items`.
-- After the fetch completes, Nablla performs the first render and the list shows the loaded items.
+- After the fetch completes, Sercrod performs the first render and the list shows the loaded items.
 
 
 #### URL spec format
@@ -108,7 +108,7 @@ Data writing rules:
 - When `prop` is absent:
 
   - The entire root data object is replaced.
-  - The new root is wrapped with Nablla’s internal proxy wrapper to keep observation consistent.
+  - The new root is wrapped with Sercrod’s internal proxy wrapper to keep observation consistent.
 
   Conceptually:
 
@@ -116,21 +116,21 @@ Data writing rules:
 
 Update:
 
-- After a successful fetch, Nablla schedules `update()` on the host using `requestAnimationFrame`.
+- After a successful fetch, Sercrod schedules `update()` on the host using `requestAnimationFrame`.
 - The template is re-rendered against the updated data.
 
 Errors:
 
-- On fetch or JSON parse failure, Nablla does not modify data.
-- Instead, it emits a `nablla-load-error` event (see “Events”).
+- On fetch or JSON parse failure, Sercrod does not modify data.
+- Instead, it emits a `sercrod-load-error` event (see “Events”).
 - `update()` is not automatically called by `*fetch` in the error path.
 
 
 #### Host vs normal elements
 
-`*fetch` behaves differently depending on whether it is placed on the Nablla host or on a normal element.
+`*fetch` behaves differently depending on whether it is placed on the Sercrod host or on a normal element.
 
-1. On the Nablla host (`<na-blla>`):
+1. On the Sercrod host (`<serc-rod>`):
 
    - Handled inside `connectedCallback`.
    - Sequence:
@@ -156,13 +156,13 @@ Errors:
 
    Implications:
 
-   - When `*fetch` is on the host, the first Nablla render happens after the fetch completes.
+   - When `*fetch` is on the host, the first Sercrod render happens after the fetch completes.
    - Child hosts can check `parent._loading` and delay their own initialization until the parent is done.
 
 2. On normal elements (button, link, div, etc.):
 
    - Handled inside the element rendering pipeline.
-   - Nablla clones the element, sets up `*fetch` behavior, appends the clone, and renders its children.
+   - Sercrod clones the element, sets up `*fetch` behavior, appends the clone, and renders its children.
 
    Clickable vs non-clickable:
 
@@ -186,14 +186,14 @@ Errors:
        - `*fetch` is auto-triggered once after initial render.
        - A “once key” is derived from the spec to prevent repeated automatic fetches.
 
-       - If this once key has not been seen before, Nablla:
+       - If this once key has not been seen before, Sercrod:
 
          - Records it in an internal set for this host.
          - Schedules `_do_load(spec)` with `requestAnimationFrame`.
 
    Children:
 
-   - In both cases, after cloning and setting up `*fetch`, Nablla renders the element’s children normally.
+   - In both cases, after cloning and setting up `*fetch`, Sercrod renders the element’s children normally.
    - Child directives (`*print`, `*if`, `*each`, etc.) can immediately read from existing data.
    - After the fetch completes, the host rerender updates those children with the new data.
 
@@ -204,7 +204,7 @@ For non-clickable elements, `*fetch` auto-runs “at most once per URL spec” b
 
 The once key is derived as follows:
 
-- Nablla tries to parse the spec as a URL relative to `location.href`.
+- Sercrod tries to parse the spec as a URL relative to `location.href`.
 - If that succeeds:
 
   - It removes the `ts` query parameter from the URL.
@@ -231,24 +231,24 @@ Implications:
 
 - Before fetch starts:
 
-  - `nablla-load-start`
+  - `sercrod-load-start`
 
     - `detail`:
 
       - `stage`: `"fetch"`
-      - `host`: the Nablla host instance
+      - `host`: the Sercrod host instance
       - `spec`: the full spec string
       - `file`: the URL part (`file`)
       - `prop`: the property spec (if any)
 
 - After a successful fetch, before `update()`:
 
-  - `nablla-loaded`
+  - `sercrod-loaded`
 
     - `detail`:
 
       - `stage`: `"fetch"`
-      - `host`: the Nablla host instance
+      - `host`: the Sercrod host instance
       - `spec`: the full spec string
       - `file`: the URL part
       - `prop`: the property spec (if any)
@@ -260,12 +260,12 @@ Implications:
 
 - On error:
 
-  - `nablla-load-error`
+  - `sercrod-load-error`
 
     - `detail`:
 
       - `stage`: `"fetch"`
-      - `host`: the Nablla host instance
+      - `host`: the Sercrod host instance
       - `spec`: the full spec string
       - `file`: the URL part
       - `prop`: the property spec (if any)
@@ -333,14 +333,14 @@ Typical patterns:
 - Conditional child fetch:
 
   ```html
-  <na-blla id="app" data='{"ready": false, "items": []}'>
+  <serc-rod id="app" data='{"ready": false, "items": []}'>
     <button
       *if="ready"
       *fetch="/api/items.json:items"
     >
       Load items
     </button>
-  </na-blla>
+  </serc-rod>
   ```
 
   - `*if` is processed before `*fetch`.
@@ -373,7 +373,7 @@ Because `*post`, `*fetch`, and `*api` all treat HTTP communication as “JSON in
 
 Recommended approach on the server:
 
-- Treat Nablla-driven endpoints as JSON endpoints:
+- Treat Sercrod-driven endpoints as JSON endpoints:
 
   - Always accept a JSON request body for write operations.
   - Always return a JSON response for both success and application-level errors.
@@ -383,24 +383,24 @@ Recommended approach on the server:
 
   - Parse JSON.
   - Run validation, authentication, business logic, and logging in a shared middleware.
-  - Produce a JSON object that Nablla can store as-is into `data[prop]`, `data[base][key]`, or a target selected by `*into`.
+  - Produce a JSON object that Sercrod can store as-is into `data[prop]`, `data[base][key]`, or a target selected by `*into`.
 
 Benefits for server-side code:
 
-- You can implement a “Nablla API style” once and reuse it across multiple endpoints.
-- Monitoring and logging become easier because every Nablla request and response has the same structure.
+- You can implement a “Sercrod API style” once and reuse it across multiple endpoints.
+- Monitoring and logging become easier because every Sercrod request and response has the same structure.
 - Frontend and backend teams can agree on a single JSON contract instead of negotiating many small variations.
 
-Position in Nablla’s design:
+Position in Sercrod’s design:
 
-- Nablla does not force this server-side style, but the runtime is optimized around it:
+- Sercrod does not force this server-side style, but the runtime is optimized around it:
   - `*post` and `*fetch` share the `URL[:prop]` rule and write values back without further transformation.
   - `*api` writes the raw response into the variable named by `*into`.
   - All of them update `$pending`, `$error`, `$download`, and `$upload` in a consistent way.
-- For new projects that adopt Nablla end to end, designing server APIs to follow this unified JSON contract is strongly recommended.
+- For new projects that adopt Sercrod end to end, designing server APIs to follow this unified JSON contract is strongly recommended.
 - For existing APIs, you can:
   - Use `*api` to integrate with legacy endpoints as they are.
-  - Gradually introduce Nablla-style JSON endpoints for new features and move existing endpoints toward the same contract when possible.
+  - Gradually introduce Sercrod-style JSON endpoints for new features and move existing endpoints toward the same contract when possible.
 
 
 #### Best practices
@@ -431,7 +431,7 @@ Position in Nablla’s design:
 
 - Handle errors through events:
 
-  - Attach listeners for `nablla-load-error` when you need explicit error handling.
+  - Attach listeners for `sercrod-load-error` when you need explicit error handling.
   - For more advanced error-state tracking inside data, consider using `*api` or `*post` instead.
 
 
@@ -440,10 +440,10 @@ Position in Nablla’s design:
 Host-level full replacement:
 
 ```html
-<na-blla id="profile" *fetch="/api/profile.json">
+<serc-rod id="profile" *fetch="/api/profile.json">
   <h1 *print="name"></h1>
   <p *print="email"></p>
-</na-blla>
+</serc-rod>
 ```
 
 - The entire root data is replaced by the JSON from `/api/profile.json`.
@@ -452,13 +452,13 @@ Host-level full replacement:
 Host-level partial update:
 
 ```html
-<na-blla id="dashboard" data='{"stats": {}, "user": {}}' *fetch="/api/stats.json:stats">
+<serc-rod id="dashboard" data='{"stats": {}, "user": {}}' *fetch="/api/stats.json:stats">
   <h2>Dashboard</h2>
   <section>
     <p>Total users: <span *print="stats.totalUsers"></span></p>
     <p>Active users: <span *print="stats.activeUsers"></span></p>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 - Only `data.stats` is overwritten by the JSON response.
@@ -467,7 +467,7 @@ Host-level partial update:
 Non-clickable auto fetch:
 
 ```html
-<na-blla id="news" data='{"articles": []}'>
+<serc-rod id="news" data='{"articles": []}'>
   <section *fetch="/api/news.json:articles">
     <h2>Latest news</h2>
     <ul *each="article of articles">
@@ -477,7 +477,7 @@ Non-clickable auto fetch:
       </li>
     </ul>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 - The `<section>` is not clickable, so `*fetch` auto-runs once per spec.
@@ -486,7 +486,7 @@ Non-clickable auto fetch:
 Clickable reload button:
 
 ```html
-<na-blla id="log-viewer" data='{"log": []}'>
+<serc-rod id="log-viewer" data='{"log": []}'>
   <button *fetch="/api/log.json:log">
     Reload log
   </button>
@@ -494,7 +494,7 @@ Clickable reload button:
   <ul *each="entry of log">
     <li *print="entry.message"></li>
   </ul>
-</na-blla>
+</serc-rod>
 ```
 
 - Each click triggers a fresh GET request for `/api/log.json`.
@@ -505,8 +505,8 @@ Clickable reload button:
 
 - `*fetch` and `n-fetch` are aliases with identical behavior.
 - The spec is treated as a raw string; `*fetch` does not evaluate expressions or expand `%expr%` placeholders.
-- The directive expects JSON responses. Non-JSON responses cause `r.json()` to reject and result in `nablla-load-error`.
-- Root replacement via `*fetch` always re-wraps the new root data to maintain Nablla’s internal observation and proxy invariants.
+- The directive expects JSON responses. Non-JSON responses cause `r.json()` to reject and result in `sercrod-load-error`.
+- Root replacement via `*fetch` always re-wraps the new root data to maintain Sercrod’s internal observation and proxy invariants.
 - When used on normal elements, `*fetch` sets up behavior on a cloned element and then returns early; no additional directives on the same element are evaluated after `*fetch` in the rendering pipeline.
 - On hosts, only one `*fetch` per host is meaningful; additional fetches should be implemented via nested elements or separate buttons.
 - For complex API use cases (headers, methods, payloads, file uploads, and rich state tracking), consider using `*api` and `*post` instead of `*fetch`.

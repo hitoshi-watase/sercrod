@@ -2,13 +2,13 @@
 
 #### Summary
 
-`*lazy` is a small flag directive that makes Nablla less aggressive about full re-renders.
+`*lazy` is a small flag directive that makes Sercrod less aggressive about full re-renders.
 
 It has two main roles:
 
-- On a Nablla host (`<na-blla>`):
+- On a Sercrod host (`<serc-rod>`):
   - When `*lazy` is active, normal internal updates do not rebuild the host template.
-  - The host only propagates changes to child Nablla instances and runs `*updated` hooks.
+  - The host only propagates changes to child Sercrod instances and runs `*updated` hooks.
   - A full rebuild still happens on forced updates.
 
 - On a form control with `*input` / `n-input`:
@@ -23,7 +23,7 @@ The alias `n-lazy` behaves the same as `*lazy`.
 Delayed host re-render for a form input:
 
 ```html
-<na-blla id="app" *lazy data='{"form":{"name":""}}'>
+<serc-rod id="app" *lazy data='{"form":{"name":""}}'>
   <h2>Profile</h2>
 
   <label>
@@ -32,28 +32,28 @@ Delayed host re-render for a form input:
   </label>
 
   <p>Preview: <strong *print="form.name"></strong></p>
-</na-blla>
+</serc-rod>
 ```
 
 In this example:
 
 - Typing in the input updates `form.name`.
-- Because the host `<na-blla>` has `*lazy`, internal updates do not rebuild the host template.
+- Because the host `<serc-rod>` has `*lazy`, internal updates do not rebuild the host template.
 - Instead, child bindings (such as `*print`) are updated and `*updated` hooks run, but the outer DOM structure stays stable.
 
 
 #### Behavior
 
-`*lazy` does not create variables; it only changes how and when Nablla decides to re-render.
+`*lazy` does not create variables; it only changes how and when Sercrod decides to re-render.
 
 There are two independent behaviors:
 
-1. Host-level `*lazy` (on `<na-blla>` or another Nablla-based host)
+1. Host-level `*lazy` (on `<serc-rod>` or another Sercrod-based host)
 
 - Checked inside `update(force, caller, evt, isInit)`.
 - Implementation:
 
-  - Nablla reads
+  - Sercrod reads
 
     - `lazyAttr = this.getAttribute("*lazy") || this.getAttribute("n-lazy")`
 
@@ -66,7 +66,7 @@ There are two independent behaviors:
   - If `isLazy` is true and `force` is false:
 
     - The host skips its own template rebuild.
-    - It calls `_updateChildren(false, this)` so that child Nablla hosts see the new data.
+    - It calls `_updateChildren(false, this)` so that child Sercrod hosts see the new data.
     - It calls `*updated` hooks.
     - It finalizes and returns from `update` early.
 
@@ -84,7 +84,7 @@ Effectively, host-level `*lazy` says:
 - Checked in the `*input` binding logic for each bound node.
 - Implementation:
 
-  - Nablla reads
+  - Sercrod reads
 
     - `LazyAttr = node.getAttribute("*lazy") ?? node.getAttribute("n-lazy")`
 
@@ -98,7 +98,7 @@ Effectively, host-level `*lazy` says:
 
 - For `input` events on text-like controls:
 
-  - When `tag === "INPUT"` and `type` is neither `"checkbox"` nor `"radio"`, Nablla:
+  - When `tag === "INPUT"` and `type` is neither `"checkbox"` nor `"radio"`, Sercrod:
 
     - Updates the bound data (`assign_expr`).
     - If the host is not staging (`!this._stage`):
@@ -110,16 +110,16 @@ Effectively, host-level `*lazy` says:
 
 - For `change` events (checkbox / radio / select / other):
 
-  - After mapping the new UI value back into the model and calling `assign_expr`, Nablla checks `isLazy` for that control.
+  - After mapping the new UI value back into the model and calling `assign_expr`, Sercrod checks `isLazy` for that control.
   - If the host is not staging (`!this._stage`):
 
     - If `isLazy` is false (no `*lazy` / `n-lazy`, or expression evaluates to false):
 
-      - Nablla calls `this.update()` ? full host re-render.
+      - Sercrod calls `this.update()` ? full host re-render.
 
     - If `isLazy` is true:
 
-      - Nablla calls `_updateChildren(false, this)` ? propagating to child Nablla hosts without rebuilding the host.
+      - Sercrod calls `_updateChildren(false, this)` ? propagating to child Sercrod hosts without rebuilding the host.
 
 So on a control that uses `*input`:
 
@@ -139,7 +139,7 @@ So on a control that uses `*input`:
 - Input-level `*lazy`:
 
   - Evaluated when the `*input` binding logic runs for that node.
-  - Nablla computes `isLazy` using the current `scope`:
+  - Sercrod computes `isLazy` using the current `scope`:
 
     - If the expression evaluates successfully, its boolean value is cached for that run.
     - If evaluation fails, the fallback string logic is used.
@@ -152,14 +152,14 @@ So on a control that uses `*input`:
 1. Host-level flow (simplified):
 
 - Some internal change occurs (for example, data mutation through the reactive proxy, or an event handler that calls into data).
-- Nablla schedules or calls `update(force=false, caller, evt, isInit=false)` on the host.
+- Sercrod schedules or calls `update(force=false, caller, evt, isInit=false)` on the host.
 - Inside `update`:
 
   - It computes `isLazy` from the host attributes.
   - If `force` is false and `isLazy` is true:
 
     - It skips the host’s template rebuild.
-    - It calls `_updateChildren(false, this)` so that child Nablla hosts refresh.
+    - It calls `_updateChildren(false, this)` so that child Sercrod hosts refresh.
     - It calls `_call_updated_hooks(evt, isInit)` so `*updated` hooks still run.
     - It calls `_finalize()` and returns.
 
@@ -172,7 +172,7 @@ So on a control that uses `*input`:
 2. Input-level flow for text-like `<input>`:
 
 - User types into the input; the `input` event fires.
-- Nablla:
+- Sercrod:
 
   - Computes `nextVal`, doing some type normalization (for example numbers).
   - Applies `input_in` filters.
@@ -192,7 +192,7 @@ So on a control that uses `*input`:
 3. Input-level flow for `change` (checkbox / radio / select / others):
 
 - User changes the control and the `change` event fires.
-- Nablla:
+- Sercrod:
 
   - Derives `nextVal` from the control (for example mapping checkbox arrays, radio selection, or select values).
   - Applies `input_in` filters and writes into the model.
@@ -217,7 +217,7 @@ At all times:
 
 - It does not introduce new names into the expression scope.
 - It does not change the behavior of `*let`, `*for`, `*each`, or other data directives.
-- It only affects how frequently Nablla calls `update` and what kind of updates (host vs. children) are performed.
+- It only affects how frequently Sercrod calls `update` and what kind of updates (host vs. children) are performed.
 
 
 #### Scope layering
@@ -263,7 +263,7 @@ You can freely use `$parent` or `$root` inside expressions for `*lazy` when used
   - `*include`, `*import`, `*template`
   - Event directives like `@click`
 
-- On a host `<na-blla>`:
+- On a host `<serc-rod>`:
 
   - `*lazy` is read by the host’s `update` implementation.
   - Structural directives on child elements continue to work as usual.
@@ -279,8 +279,8 @@ You can freely use `$parent` or `$root` inside expressions for `*lazy` when used
 
 - Use host-level `*lazy` for heavy containers:
 
-  - When a Nablla host is expensive to rebuild but its child Nablla hosts can cheaply update themselves, `*lazy` reduces unnecessary work.
-  - Typical examples include dashboards or pages that host multiple independent Nablla widgets.
+  - When a Sercrod host is expensive to rebuild but its child Sercrod hosts can cheaply update themselves, `*lazy` reduces unnecessary work.
+  - Typical examples include dashboards or pages that host multiple independent Sercrod widgets.
 
 - Use input-level `*lazy` for commit-style controls:
 
@@ -293,7 +293,7 @@ You can freely use `$parent` or `$root` inside expressions for `*lazy` when used
 
 - Avoid placing `*lazy` where it has no effect:
 
-  - On elements that are not Nablla hosts and do not use `*input` / `n-input`, `*lazy` is ignored.
+  - On elements that are not Sercrod hosts and do not use `*input` / `n-input`, `*lazy` is ignored.
   - Keeping `*lazy` only on hosts and input controls makes intent clearer.
 
 - Keep expressions simple:
@@ -307,10 +307,10 @@ You can freely use `$parent` or `$root` inside expressions for `*lazy` when used
 Host-level `*lazy` on a widget:
 
 ```html
-<na-blla id="counter" *lazy data='{"count":0}'>
+<serc-rod id="counter" *lazy data='{"count":0}'>
   <button @click="count++">Increment</button>
   <p>Count is <span *print="count"></span></p>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
@@ -322,7 +322,7 @@ Behavior:
 Conditional lazy input:
 
 ```html
-<na-blla id="form-app" data='{
+<serc-rod id="form-app" data='{
   "form": { "name": "", "mode": "slow" }
 }'>
   <label>
@@ -333,7 +333,7 @@ Conditional lazy input:
   </label>
 
   <p>Mode: <span *print="form.mode"></span></p>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
@@ -344,7 +344,7 @@ Behavior:
 Lazy checkbox:
 
 ```html
-<na-blla id="flags" data='{"flags":{"debug":false}}'>
+<serc-rod id="flags" data='{"flags":{"debug":false}}'>
   <label>
     <input type="checkbox"
            *input="flags.debug"
@@ -356,13 +356,13 @@ Lazy checkbox:
     <h2>Debug panel</h2>
     <p>Extra diagnostics are now visible.</p>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
 - Toggling the checkbox updates `flags.debug`.
-- Because the checkbox has `*lazy`, Nablla uses the child-update path for the `change` event instead of rebuilding the host.
+- Because the checkbox has `*lazy`, Sercrod uses the child-update path for the `change` event instead of rebuilding the host.
 - The `*if` condition is re-evaluated and the debug section appears or disappears accordingly.
 
 
@@ -375,8 +375,8 @@ Behavior:
   - A bare attribute (enabled), or
   - An expression that decides laziness, with a fallback to string-based `"false"` semantics.
 
-- `*lazy` does not create variables or change scope; it only influences how and when Nablla schedules host and child updates.
+- `*lazy` does not create variables or change scope; it only influences how and when Sercrod schedules host and child updates.
 - There are no forbidden directive combinations specific to `*lazy`. The only limitation is that it is only meaningful:
 
-  - On Nablla hosts (where it affects `update`), and
+  - On Sercrod hosts (where it affects `update`), and
   - On controls that use `*input` / `n-input` (where it affects `change` handling).

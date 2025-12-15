@@ -13,15 +13,15 @@ Use `*textContent` when you want to explicitly bind an expression to an element�
 Simple binding to a message:
 
 ```html
-<na-blla id="app" data='{"message":"Hello Nablla"}'>
+<serc-rod id="app" data='{"message":"Hello Sercrod"}'>
   <p *textContent="message"></p>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
 - The `<p>` element is rendered.
-- Nablla evaluates `message` in the current scope.
+- Sercrod evaluates `message` in the current scope.
 - The result is converted to text via the `text` filter and assigned to `p.textContent`.
 - Any static children of `<p>` in the template are not rendered; `textContent` completely replaces them.
 
@@ -33,7 +33,7 @@ Behavior:
 - The directive is evaluated once per render of the element (and again on re-renders triggered by data updates).
 - The alias `n-textContent` behaves the same as `*textContent`; only the attribute name differs.
 
-Short manual entry (built into Nablla):
+Short manual entry (built into Sercrod):
 
 - `textContent`: set the DOM `textContent` property from an expression.
 - Example: `<div *textContent="message"></div>`
@@ -41,7 +41,7 @@ Short manual entry (built into Nablla):
 
 #### Expression evaluation
 
-When Nablla encounters an element with `*textContent` or `n-textContent`:
+When Sercrod encounters an element with `*textContent` or `n-textContent`:
 
 - It chooses a “source attribute” in this priority:
 
@@ -56,7 +56,7 @@ When Nablla encounters an element with `*textContent` or `n-textContent`:
 
 - Once the source attribute is chosen:
 
-  - Nablla reads its value as an expression string.
+  - Sercrod reads its value as an expression string.
   - If a bundler-specific `normalizeTpl` hook is available, it normalizes the expression string.
   - It evaluates the expression with `eval_expr(expr, scope, { el: node, mode: "textContent" })` for `*textContent`, or with a corresponding mode for `n-textContent`.
   - The raw evaluation result `v` is mapped to a “raw text” value:
@@ -66,7 +66,7 @@ When Nablla encounters an element with `*textContent` or `n-textContent`:
 
   - The raw text is passed through the `text` filter:
 
-    - `Nablla._filters.text(raw, { el, expr, scope })`
+    - `Sercrod._filters.text(raw, { el, expr, scope })`
     - By default, the filter is defined as `String(raw ?? "")`.
     - Projects can override this filter to change how textual values are produced (for example, to clamp length or apply additional formatting).
 
@@ -74,13 +74,13 @@ When Nablla encounters an element with `*textContent` or `n-textContent`:
 
 Error handling:
 
-- If expression evaluation or filtering throws, Nablla falls back to:
+- If expression evaluation or filtering throws, Sercrod falls back to:
 
   - `el.textContent = ""`.
 
 Cleanup:
 
-- If `this.constructor._config.cleanup.directives` is enabled, Nablla removes the directive attributes from the rendered element:
+- If `this.constructor._config.cleanup.directives` is enabled, Sercrod removes the directive attributes from the rendered element:
 
   - `*print`
   - `n-print`
@@ -101,7 +101,7 @@ Rough evaluation order for a given element:
    - `*if` / `n-if`, `*elseif` / `*else`, `*switch` / `n-switch`, `*each` / `n-each`, `*for` / `n-for`, and similar control directives run at higher stages.
    - If a structural directive decides to drop or replace the element, `*textContent` does not run.
 
-2. Nablla host checks and other element-level decisions.
+2. Sercrod host checks and other element-level decisions.
 
 3. Rendering of a concrete DOM element (`el`) for this template node.
 
@@ -109,17 +109,17 @@ Rough evaluation order for a given element:
 
    - If the element has `*print`, `n-print`, `*textContent`, or `n-textContent`, the combined branch for “print/textContent” is executed.
    - That branch sets `el.textContent` and appends `el` to the parent.
-   - After this branch returns, Nablla does not recurse into children and does not process other content directives for this element.
+   - After this branch returns, Sercrod does not recurse into children and does not process other content directives for this element.
 
 5. Fallback text handling:
 
-   - If there is no text directive, but the element has exactly one static text child, Nablla may:
+   - If there is no text directive, but the element has exactly one static text child, Sercrod may:
      - Copy the text verbatim, or
      - Expand `%expr%` placeholders via `_expand_text`, then assign the result to `textContent`.
 
 6. Other content directives:
 
-   - Only when no text directive and no simple static-text optimization applies, Nablla proceeds to check `*compose` / `n-compose`, `*innerHTML` / `n-innerHTML`, and so on.
+   - Only when no text directive and no simple static-text optimization applies, Sercrod proceeds to check `*compose` / `n-compose`, `*innerHTML` / `n-innerHTML`, and so on.
 
 Important consequence:
 
@@ -133,7 +133,7 @@ Important consequence:
 
 The execution model for `*textContent` on one element can be summarized as:
 
-1. Nablla creates a new DOM element `el` corresponding to the template node.
+1. Sercrod creates a new DOM element `el` corresponding to the template node.
 
 2. It detects whether the element has any text directive:
 
@@ -154,7 +154,7 @@ The execution model for `*textContent` on one element can be summarized as:
 
 Combined with reactivity:
 
-- When data changes and triggers an update, the containing Nablla host re-renders, repeating the same process.
+- When data changes and triggers an update, the containing Sercrod host re-renders, repeating the same process.
 - `*textContent` expressions are re-evaluated in the new scope, and the new `textContent` is applied.
 
 
@@ -169,7 +169,7 @@ Inside the expression:
   - Fields from the host data.
   - Loop variables from surrounding `*for` / `*each`.
   - Temporary variables from `*let`.
-  - Special helpers injected by Nablla such as `$data`, `$root`, and `$parent`.
+  - Special helpers injected by Sercrod such as `$data`, `$root`, and `$parent`.
 
 Scope behavior:
 
@@ -180,20 +180,20 @@ Scope behavior:
 
 #### Parent access
 
-`*textContent` has no special concept of “parent data” beyond what Nablla already supplies:
+`*textContent` has no special concept of “parent data” beyond what Sercrod already supplies:
 
-- `$parent` gives the nearest ancestor Nablla host’s data.
-- `$root` gives the outermost Nablla host’s data.
+- `$parent` gives the nearest ancestor Sercrod host’s data.
+- `$root` gives the outermost Sercrod host’s data.
 - Normal lexical names refer to the current element’s scope, including any loop or `*let` variables.
 
 Typical usage:
 
 ```html
-<na-blla id="todo" data='{"items":[{"title":"Buy milk"}]}'>
+<serc-rod id="todo" data='{"items":[{"title":"Buy milk"}]}'>
   <ul *each="item of items">
     <li *textContent="item.title"></li>
   </ul>
-</na-blla>
+</serc-rod>
 ```
 
 Here, `item` is introduced by `*each`, and `*textContent` simply reads it.
@@ -261,7 +261,7 @@ In all cases:
 
 - Static `%expr%` expansion:
 
-  - When no text directive is present, Nablla can expand inline `%expr%` placeholders in a single text node and assign the result to `textContent`.
+  - When no text directive is present, Sercrod can expand inline `%expr%` placeholders in a single text node and assign the result to `textContent`.
   - As soon as `*textContent` is present, this static expansion is skipped, because the directive takes full control of `textContent`.
 
 Recommendation:
@@ -282,7 +282,7 @@ Recommendation:
 
 - Use filters for cross-cutting concerns:
 
-  - If you need to sanitize or normalize text globally, override `Nablla._filters.text` in your application.
+  - If you need to sanitize or normalize text globally, override `Sercrod._filters.text` in your application.
   - This way, all `*textContent` and `*print` bindings automatically receive the same treatment.
 
 - Do not rely on attribute priority as a “feature”:
@@ -300,15 +300,15 @@ Recommendation:
 Using `*textContent` with derived values:
 
 ```html
-<na-blla id="price" data='{"price": 1200, "currency":"JPY"}'>
+<serc-rod id="price" data='{"price": 1200, "currency":"JPY"}'>
   <span *textContent="price + ' ' + currency"></span>
-</na-blla>
+</serc-rod>
 ```
 
 Inside a list with conditional prefix:
 
 ```html
-<na-blla id="messages" data='{
+<serc-rod id="messages" data='{
   "messages": [
     { "important": true,  "text": "System update required" },
     { "important": false, "text": "Daily backup completed" }
@@ -317,7 +317,7 @@ Inside a list with conditional prefix:
   <ul *each="msg of messages">
     <li *textContent="(msg.important ? '[!] ' : '') + msg.text"></li>
   </ul>
-</na-blla>
+</serc-rod>
 ```
 
 

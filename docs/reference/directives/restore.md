@@ -16,7 +16,7 @@ Alias:
 A typical staged form with apply and restore buttons:
 
 ```html
-<na-blla id="profile" data='{
+<serc-rod id="profile" data='{
   "user": { "name": "Alice", "email": "alice@example.com" }
 }'>
   <form *stage="draft">
@@ -32,7 +32,7 @@ A typical staged form with apply and restore buttons:
     <button type="button" *apply>Save</button>
     <button type="button" *restore>Reset</button>
   </form>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
@@ -53,7 +53,7 @@ Key points:
   - It does not create or expose new variables in the template scope.
   - The attribute value (if any) is ignored; `*restore` is used as a flag only.
 
-- `*restore` only has an effect when the host Nablla element has `*stage` or `n-stage`:
+- `*restore` only has an effect when the host Sercrod element has `*stage` or `n-stage`:
   - Without `*stage`, the click handler checks the host and does nothing.
 
 - Interaction with the staged model:
@@ -103,7 +103,7 @@ In other words:
 
 - If the element with `*restore` also has `*if` or `n-if`, the conditional is evaluated first.
   - If the condition is falsy, the element is not rendered and no restore handler is attached.
-  - If the condition is truthy, Nablla proceeds and the `*restore` logic runs.
+  - If the condition is truthy, Sercrod proceeds and the `*restore` logic runs.
 
 - When the renderer encounters `*restore`:
   - It clones the current working element (`work`) into a real DOM element (`el`).
@@ -119,7 +119,7 @@ Conceptually, for each element with `*restore` or `n-restore`:
 
 1. During render:
 
-   - Nablla detects that `work` has `*restore` or `n-restore`.
+   - Sercrod detects that `work` has `*restore` or `n-restore`.
    - It creates `el = work.cloneNode(true)`.
    - It registers:
 
@@ -160,14 +160,14 @@ Conceptually, for each element with `*restore` or `n-restore`:
 From the perspective of expressions:
 
 - After a successful restore, any expression that reads from the visible scope (for example `user.name`) will see values from the restored staged buffer.
-- Special helpers like `$data`, `$root`, and `$parent` are still provided in the usual way by Nablla’s expression engine.
+- Special helpers like `$data`, `$root`, and `$parent` are still provided in the usual way by Sercrod’s expression engine.
 
 
 #### Parent access
 
 `*restore` does not provide a dedicated handle to parent scopes on its own:
 
-- It acts on the enclosing Nablla host where `*stage` is configured.
+- It acts on the enclosing Sercrod host where `*stage` is configured.
 - The handler uses internal properties (`this._stage`, `this._data`, `this._applied`) of that host.
 - Templates can still rely on `$root` and `$parent` as usual when rendering, but those bindings are independent of `*restore` itself.
 
@@ -198,7 +198,7 @@ You can combine `*restore` with conditionals and loops on the same or surroundin
   - You can put `*restore` in a repeated area if it logically refers to the same staged host:
 
     ```html
-    <na-blla data='{"rows":[{"id":1},{"id":2}]}' *stage="draft">
+    <serc-rod data='{"rows":[{"id":1},{"id":2}]}' *stage="draft">
       <table>
         <tbody *each="row of draft.rows">
           <tr>
@@ -209,7 +209,7 @@ You can combine `*restore` with conditionals and loops on the same or surroundin
           </tr>
         </tbody>
       </table>
-    </na-blla>
+    </serc-rod>
     ```
 
     - All restore buttons operate on the same staged host.
@@ -241,7 +241,7 @@ You can combine `*restore` with conditionals and loops on the same or surroundin
 - Think in terms of “last committed change”:
 
   - `*restore` does not reconstruct an arbitrary history; it only knows the last successfully applied snapshot.
-  - If you need multi-step undo or history, you should build that at the data layer and expose it to Nablla as part of `_data` or `_stage`.
+  - If you need multi-step undo or history, you should build that at the data layer and expose it to Sercrod as part of `_data` or `_stage`.
 
 
 #### Additional examples
@@ -249,12 +249,12 @@ You can combine `*restore` with conditionals and loops on the same or surroundin
 Simple “revert to original data” without any prior apply:
 
 ```html
-<na-blla id="simple" data='{"counter": 0}' *stage="draft">
+<serc-rod id="simple" data='{"counter": 0}' *stage="draft">
   <p>Value: <span *print="draft.counter"></span></p>
 
   <button type="button" *restore>Reset</button>
   <button type="button" @click="draft.counter++">Increment</button>
-</na-blla>
+</serc-rod>
 ```
 
 - On first render:
@@ -267,12 +267,12 @@ Simple “revert to original data” without any prior apply:
 Staged form with multiple commits:
 
 ```html
-<na-blla id="multi" data='{"value": "initial"}' *stage="draft">
+<serc-rod id="multi" data='{"value": "initial"}' *stage="draft">
   <input *input="draft.value">
 
   <button type="button" *apply>Apply</button>
   <button type="button" *restore>Restore</button>
-</na-blla>
+</serc-rod>
 ```
 
 - After editing the input and clicking `Apply`:

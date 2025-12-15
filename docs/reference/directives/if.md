@@ -20,12 +20,12 @@ Only one of the branches in a single chain is rendered; the others are skipped.
 A simple visible or hidden panel:
 
 ```html
-<na-blla id="app" data='{"show": true}'>
+<serc-rod id="app" data='{"show": true}'>
   <section *if="show">
     <h2>Panel</h2>
     <p>This panel is visible when show is truthy.</p>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 When show is truthy, the section is rendered.
@@ -46,7 +46,7 @@ Core rules:
 
 For each chain:
 
-1. Nablla evaluates the branches from left to right.
+1. Sercrod evaluates the branches from left to right.
 2. The first branch whose condition is truthy is selected.
 3. If no condition is truthy and there is an *else branch, that *else branch is selected.
 4. If no branch is selected (no truthy condition and no *else), nothing is rendered for this chain.
@@ -64,7 +64,7 @@ Rendering result:
 
 #### Condition evaluation semantics
 
-The expression on *if or *elseif is evaluated using Nablla’s expression evaluator with special truthiness rules:
+The expression on *if or *elseif is evaluated using Sercrod’s expression evaluator with special truthiness rules:
 
 - If the evaluated value is exactly false, the condition is false.
 - If it is exactly true, the condition is true.
@@ -80,10 +80,10 @@ The expression on *if or *elseif is evaluated using Nablla’s expression evalua
 
 If evaluating the expression throws an error:
 
-- Nablla falls back to a simple string check:
+- Sercrod falls back to a simple string check:
   - If the raw expression text is exactly "true" (ignoring spaces and case), the condition is treated as true.
   - If it is exactly "false", the condition is treated as false.
-- Otherwise, Nablla warns (when error logging is enabled) and treats the condition as false.
+- Otherwise, Sercrod warns (when error logging is enabled) and treats the condition as false.
 
 Empty expressions:
 
@@ -98,7 +98,7 @@ The evaluation order around *if is:
    - *let or n-let on the same element can prepare or adjust the scope before *if runs.
 2. The *if / *elseif / *else chain is detected and evaluated on sibling elements.
    - If the current node is not the head of a chain, it delegates to the head.
-3. If no branch is selected, nothing in the chain is rendered and Nablla returns.
+3. If no branch is selected, nothing in the chain is rendered and Sercrod returns.
 4. If a branch is selected:
    - The chosen element is cloned.
    - Conditional attributes (*if, n-if, *elseif, n-elseif, *else, n-else) and branch-level *let are removed from the clone.
@@ -113,7 +113,7 @@ Effectively:
 
 #### Execution model
 
-Conceptually, Nablla processes *if chains like this:
+Conceptually, Sercrod processes *if chains like this:
 
 1. Starting from a given node, check whether it has any of *if, *elseif, *else, or their n- aliases.
 2. If so, find the head of the chain:
@@ -157,7 +157,7 @@ However, it interacts with *let in two ways:
 
 - Branch-level *let:
   - Each branch in a chain can have its own *let or n-let.
-  - For each branch, Nablla creates a branch scope that:
+  - For each branch, Sercrod creates a branch scope that:
     - Inherits from the current effective scope.
     - Is populated with variables and changes from branch-level *let.
   - Conditions for that branch are evaluated using this branch scope.
@@ -176,10 +176,10 @@ Important points:
 
 Within a chosen branch:
 
-- You can access the current Nablla host’s data using the names defined on the host (for example state or items).
+- You can access the current Sercrod host’s data using the names defined on the host (for example state or items).
 - You can access root-level data through $root.
-- You can access the nearest ancestor Nablla host’s data through $parent.
-- All of these are injected by Nablla’s expression engine, not by *if itself.
+- You can access the nearest ancestor Sercrod host’s data through $parent.
+- All of these are injected by Sercrod’s expression engine, not by *if itself.
 
 Branch-level *let can add or override variables on top of these, but does not remove access to parent data.
 
@@ -260,12 +260,12 @@ Typical combinations:
 
   - *if controls whether the section is rendered.
   - *import then fetches and injects HTML into the section.
-  - After *import sets node.innerHTML and removes itself, Nablla continues rendering so any *if directives inside the imported HTML are processed.
+  - After *import sets node.innerHTML and removes itself, Sercrod continues rendering so any *if directives inside the imported HTML are processed.
 
 - Conditions inside templates:
 
   ```html
-  <script type="application/nablla-partial">
+  <script type="application/sercrod-partial">
     partial.data = {
       title: "User list",
       description: "A list with conditional badges.",
@@ -340,27 +340,27 @@ Restrictions:
 Toggling content based on numeric thresholds:
 
 ```html
-<na-blla id="score-app" data='{"score": 72}'>
+<serc-rod id="score-app" data='{"score": 72}'>
   <p *if="score >= 80">Great job!</p>
   <p *elseif="score >= 50">Good effort.</p>
   <p *else>Keep trying.</p>
-</na-blla>
+</serc-rod>
 ```
 
 Checking multiple flags:
 
 ```html
-<na-blla id="flags" data='{"is_guest": false, "is_admin": true}'>
+<serc-rod id="flags" data='{"is_guest": false, "is_admin": true}'>
   <p *if="is_admin">Administrator view</p>
   <p *elseif="is_guest">Guest view</p>
   <p *else>Standard user view</p>
-</na-blla>
+</serc-rod>
 ```
 
 Using *if to guard a costly block:
 
 ```html
-<na-blla id="lazy" data='{"show_details": false}'>
+<serc-rod id="lazy" data='{"show_details": false}'>
   <button @click="show_details = !show_details">
     Toggle details
   </button>
@@ -369,7 +369,7 @@ Using *if to guard a costly block:
     <h2>Details</h2>
     <p>Only rendered when needed.</p>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 

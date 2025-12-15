@@ -3,7 +3,7 @@
 #### Summary
 
 `*else` marks the fallback branch of an `*if / *elseif / *else` chain.  
-When all previous `*if` and `*elseif` conditions in the same sibling chain are false, Nablla renders the `*else` branch instead.
+When all previous `*if` and `*elseif` conditions in the same sibling chain are false, Sercrod renders the `*else` branch instead.
 
 `n-else` is a prefix-agnostic alias with identical behavior.
 
@@ -16,7 +16,7 @@ When all previous `*if` and `*elseif` conditions in the same sibling chain are f
 - Zero or more `*elseif` / `n-elseif` branches may follow.
 - At most one `*else` / `n-else` is expected at the end of that chain.
 
-At render time, Nablla:
+At render time, Sercrod:
 
 1. Finds the “head” element for the chain by walking left from the current node until it encounters a sibling with `*if` / `n-if`. If no such element is found, the `*elseif` / `*else` is treated as invalid and ignored.
 2. Starting from the head, walks right across siblings as long as each sibling has at least one of `*if`, `*elseif`, or `*else` (or their `n-` equivalents) and they share the same parent. The run of such elements forms a single chain; the next `*if` starts a new chain.
@@ -25,9 +25,9 @@ At render time, Nablla:
    - The first branch whose condition is true becomes the chosen branch.
    - If none of the conditions are true, the `else` branch is chosen (when present).
 
-The `*else` attribute itself never has its value evaluated; Nablla only checks whether it is present. Any string given as its value is ignored and acts purely as documentation for humans.
+The `*else` attribute itself never has its value evaluated; Sercrod only checks whether it is present. Any string given as its value is ignored and acts purely as documentation for humans.
 
-Once a branch is chosen, Nablla clones that element, strips `*if`, `*elseif`, `*else`, and `*let` / `n-let` from the clone, and renders that clone with the computed branch scope into the parent. Exactly one branch per chain is rendered.
+Once a branch is chosen, Sercrod clones that element, strips `*if`, `*elseif`, `*else`, and `*let` / `n-let` from the clone, and renders that clone with the computed branch scope into the parent. Exactly one branch per chain is rendered.
 
 
 #### Basic example
@@ -51,21 +51,21 @@ A simple access check with `*if` and `*else`:
 #### Behavior
 
 - **Presence-based directive**  
-  `*else` / `n-else` is treated as a boolean marker. Nablla never reads its value as an expression; only the presence of the attribute matters.:contentReference[oaicite:9]{index=9}
+  `*else` / `n-else` is treated as a boolean marker. Sercrod never reads its value as an expression; only the presence of the attribute matters.:contentReference[oaicite:9]{index=9}
 
 - **Single-branch selection**  
-  For each chain, Nablla selects at most one branch:
+  For each chain, Sercrod selects at most one branch:
   - First matching `*if` or `*elseif` branch wins.
   - If none match, the `*else` / `n-else` branch (if any) is chosen.
   - If there is no `*else` and no condition matches, nothing is rendered for that chain.
 
 - **Template versus clone**  
-  The decision is made using the original template elements, but Nablla renders a clone:
+  The decision is made using the original template elements, but Sercrod renders a clone:
   - The clone has `*if`, `*elseif`, `*else`, and `*let` / `n-let` removed.
   - The clone is then processed as a normal element by `renderNode`.
 
 - **Invalid chains are ignored**  
-  - If Nablla cannot find a head `*if` for a `*else` or `*elseif`, the chain is considered invalid and is ignored; the current node is not rendered as part of any chain.
+  - If Sercrod cannot find a head `*if` for a `*else` or `*elseif`, the chain is considered invalid and is ignored; the current node is not rendered as part of any chain.
 
 
 #### Evaluation timing
@@ -105,7 +105,7 @@ Within a chain:
 
 - The effective scope for the head `*if` branch is the current scope (`effScope`).
 - Each branch can optionally have its own `*let` / `n-let` attribute; when present:
-  - Nablla creates a new branch scope with the current scope as prototype.
+  - Sercrod creates a new branch scope with the current scope as prototype.
   - `eval_let` is executed for that branch to populate the branch scope.
   - That branch scope is used when rendering the chosen clone.
 
@@ -118,7 +118,7 @@ For a typical chain:
 
 - **Base scope**: the effective scope at the point where the chain is rendered (`effScope`).
 - **Branch scope**:
-  - If a branch has `*let` / `n-let`, Nablla builds a new scope object that inherits from `effScope` and applies the `let` bindings into it.
+  - If a branch has `*let` / `n-let`, Sercrod builds a new scope object that inherits from `effScope` and applies the `let` bindings into it.
   - Otherwise, the branch reuses `effScope` directly.
 - **Else branch**:
   - Uses its own branch scope (with or without `*let`), just like `if` and `elseif`.
@@ -132,7 +132,7 @@ No additional scope layering is introduced by `*else` itself; it simply particip
 
 - Parent scopes,
 - Root host data,
-- And any Nablla-specific helper variables
+- And any Sercrod-specific helper variables
 
 works exactly as it does in any other element. The only responsibility of `*else` is to decide whether this branch is selected as the fallback.
 
@@ -212,7 +212,7 @@ You can mix `*if` with `n-else` in the same chain:
 
 #### Notes
 
-- `*else` / `n-else` is only meaningful as part of a valid `*if` chain. If Nablla cannot find a preceding `*if` / `n-if` in the same sibling run, the `*else` is considered part of an invalid chain and is not used in conditional rendering.
+- `*else` / `n-else` is only meaningful as part of a valid `*if` chain. If Sercrod cannot find a preceding `*if` / `n-if` in the same sibling run, the `*else` is considered part of an invalid chain and is not used in conditional rendering.
 - The attribute value of `*else` / `n-else` is ignored; do not rely on it to carry conditions.
 - Only one branch per chain is rendered. If you see multiple branches appearing, check that you did not accidentally break the chain by inserting non-conditional siblings or by misplacing `*if`.
 - Control attributes `*if`, `*elseif`, `*else`, and `*let` (and their `n-` variants) are removed from the rendered clone, so they never appear in the final DOM.:contentReference[oaicite:23]{index=23}

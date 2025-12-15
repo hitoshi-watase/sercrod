@@ -19,25 +19,25 @@ Typical uses:
 A simple counter:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "count": 0
 }'>
   <button @click="count++">
     Clicked {{%count%}} times
   </button>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
-- The Nablla host has initial data with `count: 0`.
+- The Sercrod host has initial data with `count: 0`.
 - Each click on the button evaluates `count++` in the current scope.
-- Nablla then re-renders the host according to the event update rules, so the button label reflects the new `count` value.
+- Sercrod then re-renders the host according to the event update rules, so the button label reflects the new `count` value.
 
 
 #### Accessing the event and element
 
-When a `click` event fires, Nablla evaluates the `@click` expression with a special event scope:
+When a `click` event fires, Sercrod evaluates the `@click` expression with a special event scope:
 
 - `$event` and `$e`  
   Refer to the native `MouseEvent` (or `PointerEvent`) instance for this click.
@@ -49,16 +49,16 @@ When a `click` event fires, Nablla evaluates the `@click` expression with a spec
 Example:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "log": []
 }'>
   <button @click="log.push({ x: $event.clientX, y: $event.clientY })">
     Log click position
   </button>
-</na-blla>
+</serc-rod>
 ```
 
-Assignments to `$event`, `$e`, `$el`, or `el` are not used by Nablla internally; treat them as read only in event expressions.
+Assignments to `$event`, `$e`, `$el`, or `el` are not used by Sercrod internally; treat them as read only in event expressions.
 
 
 #### Behavior
@@ -67,11 +67,11 @@ Core rules:
 
 - Target event  
   `@click` wires the native `click` event to the expression.
-  Nablla does not alter the native `click` semantics; it just adds expression evaluation.
+  Sercrod does not alter the native `click` semantics; it just adds expression evaluation.
 
 - Expression execution  
   The attribute value is treated as a JavaScript snippet (for example `count++`, `toggleOpen()`, or `doSomething($event, item)`).
-  When the click occurs, Nablla evaluates the snippet in the current scope.
+  When the click occurs, Sercrod evaluates the snippet in the current scope.
 
 - Data writes  
   Assignments to properties that exist in the host data are reflected back into the host’s data store.
@@ -82,31 +82,31 @@ Core rules:
   Side effects (writing to data, calling methods) are what matter.
 
 - Cleanup (optional)  
-  If `cleanup.handlers` is enabled in the Nablla configuration, the original `@click` attribute is removed from the DOM after the listener is attached.
+  If `cleanup.handlers` is enabled in the Sercrod configuration, the original `@click` attribute is removed from the DOM after the listener is attached.
   The compiled HTML then shows only structural and standard attributes, not the `@click` source code.
 
 
 #### Evaluation timing and re-rendering
 
-`@click` participates in the normal render and update cycle for a Nablla host:
+`@click` participates in the normal render and update cycle for a Sercrod host:
 
 1. Structural directives such as `*if`, `*for`, `*each`, `*switch`, and `*include` decide whether the element is present.
    If the element is removed by a structural directive, no handler is attached.
 
-2. During attribute processing, Nablla recognises attributes starting with the configured event prefix (by default `"@"`).
+2. During attribute processing, Sercrod recognises attributes starting with the configured event prefix (by default `"@"`).
    Each event attribute (such as `@click`) is converted into a listener with its expression and modifiers.
 
 3. When the native `click` fires:
-   - Nablla builds the merged event scope (data plus `$event`, `$el`, and global fallback).
-   - Nablla evaluates the expression.
-   - If evaluation throws, Nablla logs the error (when `error.warn` is enabled) but does not halt the framework.
+   - Sercrod builds the merged event scope (data plus `$event`, `$el`, and global fallback).
+   - Sercrod evaluates the expression.
+   - If evaluation throws, Sercrod logs the error (when `error.warn` is enabled) but does not halt the framework.
 
-4. After the expression runs, Nablla decides how to re-render:
+4. After the expression runs, Sercrod decides how to re-render:
 
    - It reads the `events.non_mutating` list from configuration.
    - It treats `click` as a mutating event by default (so it usually causes an update).
-   - For clicks on form controls (inputs, textareas, selects, or contentEditable elements) Nablla prefers a lightweight child update to preserve focus.
-   - For other clicks, Nablla triggers a full host update unless the modifiers override this (see `.update` and `.noupdate`).
+   - For clicks on form controls (inputs, textareas, selects, or contentEditable elements) Sercrod prefers a lightweight child update to preserve focus.
+   - For other clicks, Sercrod triggers a full host update unless the modifiers override this (see `.update` and `.noupdate`).
 
 You usually do not need to call any manual update function.
 Changing data in `@click` handlers is sufficient to trigger re-renders according to these rules.
@@ -154,7 +154,7 @@ Changing data in `@click` handlers is sufficient to trigger re-renders according
 `@click` often appears on form buttons:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "profile": { "name": "" },
   "saving": false
 }'>
@@ -166,7 +166,7 @@ Changing data in `@click` handlers is sufficient to trigger re-renders according
       Save
     </button>
   </form>
-</na-blla>
+</serc-rod>
 ```
 
 Typical patterns:
@@ -174,7 +174,7 @@ Typical patterns:
 - `@click.prevent` on a submit button to stop the native form submission and handle the post yourself (via `*post`, `fetch`, or any other mechanism).
 - Using `@click` on `type="button"` buttons for actions that should not submit forms at all.
 
-For clicks on form controls (inputs, textareas, selects) or on buttons that are treated as input controls, Nablla performs a lightweight child update to keep focus stable while still reflecting data changes.
+For clicks on form controls (inputs, textareas, selects) or on buttons that are treated as input controls, Sercrod performs a lightweight child update to keep focus stable while still reflecting data changes.
 
 
 #### Modifiers
@@ -185,23 +185,23 @@ There are three kinds of modifiers:
 
 - Modifiers that map to DOM listener options (`capture`, `once`, `passive`).
 - Modifiers that call standard DOM methods on the event (`prevent`, `stop`).
-- Nablla specific modifiers that control how Nablla re-renders after the event (`update`, `noupdate`).
+- Sercrod specific modifiers that control how Sercrod re-renders after the event (`update`, `noupdate`).
 
 Concretely:
 
 - `@click.prevent`  
-  Nablla specific.
+  Sercrod specific.
   Calls `event.preventDefault()` before evaluating the expression.
   Use this to block default navigation or form submission.
 
 - `@click.stop`  
-  Nablla specific.
+  Sercrod specific.
   Calls `event.stopPropagation()` before evaluating the expression.
   Use this to prevent the click from bubbling to ancestor elements with their own `@click` handlers.
 
 - `@click.once`  
   Framework syntax that maps directly to the standard DOM listener option `once: true`.
-  Nablla passes this through to `addEventListener`, so the browser detaches the listener after the first successful call.
+  Sercrod passes this through to `addEventListener`, so the browser detaches the listener after the first successful call.
   Subsequent clicks no longer trigger the handler.
 
 - `@click.capture`  
@@ -210,15 +210,15 @@ Concretely:
 
 - `@click.passive`  
   Maps directly to the standard DOM listener option `passive: true`.
-  This is mainly useful for scroll or touch events; it is rarely needed for `click`, but Nablla exposes it consistently for all events.
+  This is mainly useful for scroll or touch events; it is rarely needed for `click`, but Sercrod exposes it consistently for all events.
 
 - `@click.update` and `@click.noupdate`  
-  Nablla specific modifiers that control re-rendering only; they are not standard JS event options and are not passed to `addEventListener`.
+  Sercrod specific modifiers that control re-rendering only; they are not standard JS event options and are not passed to `addEventListener`.
 
   - `@click.update` forces a host update even if the event is listed as non mutating in configuration.
   - `@click.noupdate` suppresses host updates even though the handler runs.
 
-  These flags affect only Nablla’s internal “should we re-render?” decision.
+  These flags affect only Sercrod’s internal “should we re-render?” decision.
   They do not change the event’s propagation, default behavior, or DOM listener options.
 
 Example:
@@ -259,7 +259,7 @@ Example:
 
   Each iteration has its own `@click` that sees the iteration’s `item` in scope.
 
-When structural directives replace or remove the element, Nablla tears down and re-attaches `@click` listeners as needed, so you do not need to manage them manually.
+When structural directives replace or remove the element, Sercrod tears down and re-attaches `@click` listeners as needed, so you do not need to manage them manually.
 
 
 #### Best practices
@@ -268,7 +268,7 @@ When structural directives replace or remove the element, Nablla tears down and 
   Use `@click` handlers for small, clear pieces of logic: toggling booleans, selecting items, or delegating to well named methods.
 
 - Prefer data updates over direct DOM mutations  
-  Let Nablla re-render based on data changes instead of manually manipulating the DOM in handlers.
+  Let Sercrod re-render based on data changes instead of manually manipulating the DOM in handlers.
 
 - Use modifiers explicitly  
   Use `.prevent` and `.stop` to make intent clear, especially on links and nested clickable areas.
@@ -287,7 +287,7 @@ When structural directives replace or remove the element, Nablla tears down and 
 Toggle a menu:
 
 ```html
-<na-blla id="menu" data='{
+<serc-rod id="menu" data='{
   "open": false
 }'>
   <button @click="open = !open">
@@ -297,13 +297,13 @@ Toggle a menu:
   <nav *if="open">
     <!-- menu items -->
   </nav>
-</na-blla>
+</serc-rod>
 ```
 
 Call a shared method with the event:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "log": []
 }'>
   <button @click="logClick($event, 'primary')">
@@ -312,7 +312,7 @@ Call a shared method with the event:
   <button @click="logClick($event, 'secondary')">
     Secondary
   </button>
-</na-blla>
+</serc-rod>
 ```
 
 Attach `@click` to a container with nested controls:
@@ -338,7 +338,7 @@ In this example:
 - `@click` uses the event prefix defined by `config.events.prefix` (default `"@"`), so projects can replace it with another prefix if needed.
 - Event handlers receive `$event` / `$e` and `$el` / `el` in their scope in addition to the host data.
 - Among modifiers, `capture`, `once`, and `passive` map directly to standard DOM listener options.
-  `prevent`, `stop`, `update`, and `noupdate` are Nablla level behaviours implemented on top of the DOM event.
+  `prevent`, `stop`, `update`, and `noupdate` are Sercrod level behaviours implemented on top of the DOM event.
 - `click` is treated as a mutating event by default and triggers re-rendering after the handler runs, with special handling for form controls to keep focus stable.
-- All `@event` directives, including `@click`, share the same modifier semantics; only `update` and `noupdate` are Nablla specific controls for re-rendering and do not correspond to native JS event options.
+- All `@event` directives, including `@click`, share the same modifier semantics; only `update` and `noupdate` are Sercrod specific controls for re-rendering and do not correspond to native JS event options.
 - If `cleanup.handlers` is enabled, the original `@click` attribute is removed from the rendered DOM, while the event listener remains active.

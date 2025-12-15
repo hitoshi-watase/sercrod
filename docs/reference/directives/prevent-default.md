@@ -15,15 +15,15 @@ Use `*prevent-default` when you always want to suppress the browser’s default 
 
 #### Basic example
 
-Prevent Enter from submitting a search form, but still handle the submit event in Nablla:
+Prevent Enter from submitting a search form, but still handle the submit event in Sercrod:
 
 ```html
-<na-blla id="search" data='{}'>
+<serc-rod id="search" data='{}'>
   <form *prevent-default="'submit'" @submit="runSearch()">
     <input type="search" name="q" placeholder="Search..." />
     <button type="submit">Search</button>
   </form>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
@@ -85,7 +85,7 @@ Any other string:
 
 #### Evaluation timing
 
-`*prevent-default` is evaluated when Nablla renders the host element and sets up its event handlers:
+`*prevent-default` is evaluated when Sercrod renders the host element and sets up its event handlers:
 
 - The attribute value is read once during render.
 - The mode is determined at that time.
@@ -93,13 +93,13 @@ Any other string:
 
 On re-render:
 
-- When the element is re-rendered, Nablla creates a fresh DOM element and re-applies `*prevent-default` to that instance.
+- When the element is re-rendered, Sercrod creates a fresh DOM element and re-applies `*prevent-default` to that instance.
 - The directive does not dynamically reconfigure listeners based on later data changes; changes to the mode expression take effect on the next render of that element.
 
 
 #### Execution model
 
-Conceptually, when Nablla processes an element that has `*prevent-default` or `*prevent`:
+Conceptually, when Sercrod processes an element that has `*prevent-default` or `*prevent`:
 
 1. Determine the mode:
 
@@ -121,7 +121,7 @@ Conceptually, when Nablla processes an element that has `*prevent-default` or `*
 
 Interaction with `@event` handlers:
 
-- Nablla also registers handlers for attributes like `@click`, `@submit`, `@keydown`, etc.
+- Sercrod also registers handlers for attributes like `@click`, `@submit`, `@keydown`, etc.
 - Those handlers are attached separately from `*prevent-default`.
 - On an actual event:
 
@@ -141,13 +141,13 @@ The exact order of handler execution is an implementation detail, but you can re
 
 Use inside event handlers:
 
-- When you define `@event` handlers, Nablla evaluates expressions in the normal template scope.
+- When you define `@event` handlers, Sercrod evaluates expressions in the normal template scope.
 - The directive’s only responsibility is to add the preventive listeners; it does not change how event handler expressions are evaluated.
 
 
 #### Use with event handlers and modifiers
 
-`*prevent-default` is designed to complement Nablla’s event attributes:
+`*prevent-default` is designed to complement Sercrod’s event attributes:
 
 - With `@submit`:
 
@@ -175,7 +175,7 @@ Use inside event handlers:
 
 Relationship to event modifiers:
 
-- Nablla’s event system supports modifiers like `@click.prevent` or `@submit.stop`.
+- Sercrod’s event system supports modifiers like `@click.prevent` or `@submit.stop`.
 - Those modifiers apply per handler and control behavior only when that particular handler runs.
 - `*prevent-default` is a separate, directive-level helper that:
 
@@ -220,7 +220,7 @@ Relationship to event modifiers:
 Prevent both Enter and submit on a login form:
 
 ```html
-<na-blla id="login" data='{}'>
+<serc-rod id="login" data='{}'>
   <form *prevent-default="'all'" @submit="doLogin()">
     <label>
       Email
@@ -232,18 +232,18 @@ Prevent both Enter and submit on a login form:
     </label>
     <button type="submit">Sign in</button>
   </form>
-</na-blla>
+</serc-rod>
 ```
 
 Use the short alias `*prevent`:
 
 ```html
-<na-blla id="contact" data='{}'>
+<serc-rod id="contact" data='{}'>
   <form *prevent="'submit'" @submit="sendMessage()">
     <textarea name="body"></textarea>
     <button type="submit">Send</button>
   </form>
-</na-blla>
+</serc-rod>
 ```
 
 In both examples:

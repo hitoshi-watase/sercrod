@@ -6,7 +6,7 @@
 The host element itself is duplicated as many times as needed, and each clone is rendered with its own iteration scope.
 The directive understands JavaScript-like `in` and `of` loop syntax and has an alias `n-for`.
 
-There is also a special host-level form when `*for` is placed directly on a Nablla host (`<na-blla>`). In that case the host is not repeated; instead, the inner template is rendered multiple times inside the same host with different scopes.
+There is also a special host-level form when `*for` is placed directly on a Sercrod host (`<serc-rod>`). In that case the host is not repeated; instead, the inner template is rendered multiple times inside the same host with different scopes.
 
 Structural restriction:
 
@@ -20,20 +20,20 @@ Structural restriction:
 Classic list items:
 
 ```html
-<na-blla id="app" data='{"items":["Apple","Banana","Cherry"]}'>
+<serc-rod id="app" data='{"items":["Apple","Banana","Cherry"]}'>
   <ul>
     <li *for="item of items">
       <span *print="item"></span>
     </li>
   </ul>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
 - The `<ul>` is rendered once.
 - `*for="item of items"` clones the `<li>` for each element in `items`.
-- For each clone, Nablla renders the `<li>` subtree with a local variable `item` bound to the current value.
+- For each clone, Sercrod renders the `<li>` subtree with a local variable `item` bound to the current value.
 - The result is a `<ul>` containing three `<li>` elements as siblings.
 
 
@@ -46,11 +46,11 @@ Element-level `*for`:
 - The original element acts as a template and is not rendered directly.
 - The directive is available as both `*for` and `n-for`; they behave the same.
 
-Host-level `*for` on `<na-blla>`:
+Host-level `*for` on `<serc-rod>`:
 
-- When you put `*for` on a Nablla host (`<na-blla>`), the host is not duplicated.
+- When you put `*for` on a Sercrod host (`<serc-rod>`), the host is not duplicated.
 - Instead, the host clears its content and repeatedly renders its internal template with different iteration scopes.
-- This is useful when you want a single Nablla host that manages multiple repeated blocks of content with a shared outer container.
+- This is useful when you want a single Sercrod host that manages multiple repeated blocks of content with a shared outer container.
 
 
 #### Expression syntax
@@ -94,7 +94,7 @@ Supported patterns for element-level `*for`:
   - `(key, value) of obj`  
     Iterates over `Object.entries(obj)` and binds both `key` and `value`.
 
-Host-level `*for` on `<na-blla>` uses the same syntax but normalizes it slightly differently (see the dedicated section below).
+Host-level `*for` on `<serc-rod>` uses the same syntax but normalizes it slightly differently (see the dedicated section below).
 
 
 #### Value semantics (element-level *for)
@@ -105,12 +105,12 @@ Element-level `*for` distinguishes `of` and `in` like JavaScript:
 
   - `item of items`:
 
-    - Nablla loops with `for (const v of items)`.
+    - Sercrod loops with `for (const v of items)`.
     - For each value `v`, it clones the host and binds `item` to `v`.
 
   - `(index, item) of items`:
 
-    - Nablla uses `items.entries()`.
+    - Sercrod uses `items.entries()`.
     - `index` receives the numeric index.
     - `item` receives the value.
 
@@ -118,39 +118,39 @@ Element-level `*for` distinguishes `of` and `in` like JavaScript:
 
   - `value of obj`:
 
-    - Nablla uses `Object.entries(obj)`.
+    - Sercrod uses `Object.entries(obj)`.
     - For each `[k, v]`, it clones the host and binds:
       - `key` to the property name (implicit when you do not specify a key variable).
       - `value` to the value.
 
   - `(key, value) of obj`:
 
-    - Nablla uses `Object.entries(obj)`.
+    - Sercrod uses `Object.entries(obj)`.
     - `key` receives the property name, `value` receives the value.
 
 - For arrays and objects with `in`:
 
   - `key in expr`:
 
-    - Nablla uses `for (const k in expr)`.
+    - Sercrod uses `for (const k in expr)`.
     - The single variable receives the key (property name).
 
   - `(key, value) in expr`:
 
-    - Nablla uses `for (const k in expr)`.
+    - Sercrod uses `for (const k in expr)`.
     - `key` receives the key.
     - `value` receives `expr[k]`.
 
 Deprecation note:
 
 - `(key, value) in expr` is supported for compatibility but is discouraged.
-- Nablla prints a console warning when you use `in` with two variables.
+- Sercrod prints a console warning when you use `in` with two variables.
 - Prefer `(key, value) of expr` for new code when you need both key and value.
 
 
 #### Evaluation timing
 
-Element-level `*for` participates in Nablla’s structural evaluation order inside `renderNode`:
+Element-level `*for` participates in Sercrod’s structural evaluation order inside `renderNode`:
 
 - Text interpolation and static/dynamic handling happen first.
 - `*if` and its chain (`*elseif`, `*else`) are evaluated and may select a specific branch.
@@ -163,26 +163,26 @@ Important consequences:
 - If `*if` or `*switch` is on the same element as `*for`, the conditional logic runs first and can select or skip that element. Once an element is selected by `*if` or a `*case`, the cloned branch is fed back into `renderNode`, where `*for` is then applied inside the clone.
 - If both `*each` and `*for` are present on the same element, `*each` runs first and returns early. The `*for` block is never reached in that case. This is why combining `*each` and `*for` on a single element is considered unsupported.
 
-Host-level `*for` is evaluated during the host’s update cycle, before its template is rendered. When a host `<na-blla>` has `*for`, it clears its content, runs the host-level loop, and calls the internal template renderer once per iteration.
+Host-level `*for` is evaluated during the host’s update cycle, before its template is rendered. When a host `<serc-rod>` has `*for`, it clears its content, runs the host-level loop, and calls the internal template renderer once per iteration.
 
 
 #### Execution model
 
 Element-level `*for`:
 
-1. Nablla locates the `*for` (or `n-for`) attribute on the element.
+1. Sercrod locates the `*for` (or `n-for`) attribute on the element.
 2. It parses the expression into `keyName`, `valName`, `modeWord` (`"in"` or `"of"`), and `srcExpr`.
 3. It evaluates `srcExpr` in the current scope with `{ el: work, mode: "for" }`.
 4. If the result is falsy, `*for` acts as an empty loop and renders nothing.
 5. For each entry in the collection (interpreted according to `in` or `of`):
-   - Nablla clones the entire element subtree with `cloneNode(true)`.
+   - Sercrod clones the entire element subtree with `cloneNode(true)`.
    - It removes `*for` and `n-for` from the clone.
    - It merges the iteration variables into the scope for that clone.
    - It calls the internal element renderer on the clone.
 6. The clones are appended to the original parent in order.
 7. The original element is not appended; it serves only as the template.
 
-Host-level `*for` on `<na-blla>`:
+Host-level `*for` on `<serc-rod>`:
 
 1. During an update, the host decides whether it should re-render.
 2. The host clears its current content (`innerHTML = ""`).
@@ -195,7 +195,7 @@ Host-level `*for` on `<na-blla>`:
 7. For each `[k, v]` pair:
    - If both `keyName` and `valName` are present, the host calls its template renderer with `{ ...scope, [keyName]: k, [valName]: v }`.
    - If only `valName` is present, it renders with `{ ...scope, [valName]: v }`.
-8. The result is a single `<na-blla>` instance whose children are repeated blocks rendered from the host’s template.
+8. The result is a single `<serc-rod>` instance whose children are repeated blocks rendered from the host’s template.
 
 
 #### Variable creation and scope layering
@@ -211,7 +211,7 @@ Element-level `*for`:
 - All original scope entries remain available, including:
   - Host data.
   - `$data`, `$root`, `$parent`, and any global helpers.
-  - Methods defined through Nablla configuration.
+  - Methods defined through Sercrod configuration.
 
 Host-level `*for`:
 
@@ -231,8 +231,8 @@ Guidelines:
 `*for` does not introduce a dedicated parent reference, but you can still access parent data as usual:
 
 - Through the data tree, for example `state.items`, `config`, or `data.users`.
-- Through `$root`, which points to the root Nablla data.
-- Through `$parent`, which points to the nearest ancestor Nablla host’s data.
+- Through `$root`, which points to the root Sercrod data.
+- Through `$parent`, which points to the nearest ancestor Sercrod host’s data.
 
 Loop variables exist alongside these references and do not prevent you from reading outer scopes.
 
@@ -284,7 +284,7 @@ You can safely combine `*for` with other directives when they are placed thought
 - Typical pattern:
 
   ```html
-  <na-blla id="app" data='{"items":[{"name":"Ann"},{"name":"Bob"}]}'>
+  <serc-rod id="app" data='{"items":[{"name":"Ann"},{"name":"Bob"}]}'>
     <template *template="user-item">
       <li>
         <span *print="item.name"></span>
@@ -294,7 +294,7 @@ You can safely combine `*for` with other directives when they are placed thought
     <ul>
       <li *for="item of items" *include="'user-item'"></li>
     </ul>
-  </na-blla>
+  </serc-rod>
   ```
 
 - In this pattern:
@@ -338,14 +338,14 @@ Guideline:
   - Single container: use `*each`.
 
 
-#### Host-level *for on <na-blla> (advanced)
+#### Host-level *for on <serc-rod> (advanced)
 
-Placing `*for` directly on a Nablla host is an advanced but powerful pattern:
+Placing `*for` directly on a Sercrod host is an advanced but powerful pattern:
 
 Basic example:
 
 ```html
-<na-blla id="host" *for="user of users" data='{
+<serc-rod id="host" *for="user of users" data='{
   "users": [
     { "name": "Alice", "age": 30 },
     { "name": "Bob",   "age": 25 }
@@ -355,15 +355,15 @@ Basic example:
     <h2 *print="user.name"></h2>
     <p *print="user.age + ' years old'"></p>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
-- The `<na-blla>` element itself appears once in the DOM.
+- The `<serc-rod>` element itself appears once in the DOM.
 - Its internal template (the `<section>` block) is rendered once per `user`.
 - Each iteration receives a scope where `user` refers to the current user.
-- This is similar in spirit to `*each` on a top-level container, but it is implemented at the Nablla host level and uses the host’s template renderer.
+- This is similar in spirit to `*each` on a top-level container, but it is implemented at the Sercrod host level and uses the host’s template renderer.
 
 Notes on semantics:
 
@@ -396,7 +396,7 @@ Notes on semantics:
 
 - Do not combine `*for` with `*each` on the same element:
 
-  - In current Nablla, `*each` wins when both are present, so `*for` never runs.
+  - In current Sercrod, `*each` wins when both are present, so `*for` never runs.
   - For clarity, always keep them on separate elements.
 
 
@@ -405,7 +405,7 @@ Notes on semantics:
 Iterating over an object map with both key and value:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "users": {
     "u1": { "name": "Alice" },
     "u2": { "name": "Bob" }
@@ -417,13 +417,13 @@ Iterating over an object map with both key and value:
       <span *print="user.name"></span>
     </li>
   </ul>
-</na-blla>
+</serc-rod>
 ```
 
 Using `*for` on table rows:
 
 ```html
-<na-blla id="table" data='{
+<serc-rod id="table" data='{
   "rows": [
     { "id": 1, "name": "Alpha" },
     { "id": 2, "name": "Beta" }
@@ -443,14 +443,14 @@ Using `*for` on table rows:
       </tr>
     </tbody>
   </table>
-</na-blla>
+</serc-rod>
 ```
 
 
 #### Notes
 
 - `*for` and `n-for` are aliases; projects should choose one style and use it consistently.
-- The expression on `*for` is evaluated as normal JavaScript inside Nablla’s expression sandbox.
-- Element-level `*for` repeats the element itself, while host-level `*for` on `<na-blla>` repeats the inner template.
+- The expression on `*for` is evaluated as normal JavaScript inside Sercrod’s expression sandbox.
+- Element-level `*for` repeats the element itself, while host-level `*for` on `<serc-rod>` repeats the inner template.
 - Single-variable `x in array` is treated differently at the host level for backward compatibility; for clarity and predictability, prefer `x of expr` and `(key, value) of expr` in new code.
 - Structural combinations where `*each` and `*for` compete for control of the same host element are not supported. Use one structural directive per element.

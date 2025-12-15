@@ -3,7 +3,7 @@
 #### Summary
 
 `*template` marks a subtree as a reusable template.
-The subtree is registered under a name in the current Nablla world and is not rendered where it is declared.
+The subtree is registered under a name in the current Sercrod world and is not rendered where it is declared.
 Later, `*include` can refer to that name and copy the template’s inner content into a real element.
 If you want to share templates across files, you usually combine `*template` with `*import`: `*import` loads HTML from another file, and any `*template` declarations inside that HTML are then available to `*include`.
 
@@ -12,7 +12,7 @@ Key points:
 - `*template` / `n-template` define templates.
 - The definition is non-rendering: the host element is used only as a prototype.
 - The template name is resolved through a shared helper that is also used by `*include`.
-- Each Nablla world keeps its own template registry.
+- Each Sercrod world keeps its own template registry.
 - A single element should not combine `*template` with other structural directives such as `*include`, `*import`, `*for`, or `*each`: `*template` always runs first, registers the template, and stops rendering that node, so the other directives on that same element never take effect.
 
 
@@ -21,7 +21,7 @@ Key points:
 A simple reusable card template and a loop that includes it:
 
 ```html
-<na-blla
+<serc-rod
   id="app"
   data='{
     "users": [
@@ -42,12 +42,12 @@ A simple reusable card template and a loop that includes it:
   <section *each="user of users">
     <div *include="'userCard'"></div>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
-- `<template *template="'userCard'">` is registered once as `userCard` in the current Nablla world.
+- `<template *template="'userCard'">` is registered once as `userCard` in the current Sercrod world.
 - The `<template>` node itself is not rendered.
 - For each `user` in `users`, `*include="'userCard'"` copies the inner content of the template (`<article class="user-card">…`) and renders it in the loop’s scope.
 
@@ -55,7 +55,7 @@ Behavior:
 #### Behavior
 
 - `*template` is a structural, non-rendering directive.
-- When Nablla encounters an element with `*template` or `n-template`:
+- When Sercrod encounters an element with `*template` or `n-template`:
   - It resolves the template name via `_resolve_template_name`.
   - If the name is valid and not already registered in that world, it deep-clones the element and stores the clone in the world-local template registry.
   - The original element is not appended to the rendered output.
@@ -76,13 +76,13 @@ For an attribute like:
 <template *template="expr">...</template>
 ```
 
-Nablla resolves the name as follows:
+Sercrod resolves the name as follows:
 
 1. Convert the attribute to a string and trim it.
 2. Try to evaluate it as an expression:
 
    - `this.eval_expr(src, scope, { el, mode: "template", quiet: true })` is called.
-   - If the evaluation yields a non-null, non-undefined value, Nablla turns it into a string, trims it, and if the result is non-empty, that becomes the name.
+   - If the evaluation yields a non-null, non-undefined value, Sercrod turns it into a string, trims it, and if the result is non-empty, that becomes the name.
 
 3. If evaluation does not produce a usable name, fall back to identifier rules:
 
@@ -92,7 +92,7 @@ Nablla resolves the name as follows:
 If name resolution fails:
 
 - The template is not registered.
-- When warnings are enabled, Nablla logs a message like `*template: empty or invalid name: ...`.
+- When warnings are enabled, Sercrod logs a message like `*template: empty or invalid name: ...`.
 
 Examples:
 
@@ -116,19 +116,19 @@ Examples:
 
 #### World-local registration and duplicates
 
-Templates are registered per Nablla world:
+Templates are registered per Sercrod world:
 
-- Each `<na-blla>` instance has its own `_template_registry`.
+- Each `<serc-rod>` instance has its own `_template_registry`.
 - When `*template` registers a name, it stores a deep clone of the host element as the prototype for that template in that world.
 - When `*include` looks up a template by name, it uses `_lookupTemplateNear(name)`:
   - It checks the current world first.
-  - If not found, it walks up through parent Nablla worlds until it finds the first matching template.
+  - If not found, it walks up through parent Sercrod worlds until it finds the first matching template.
 
 Duplicate names:
 
 - If the current world’s registry already has a template with the same name:
   - `*template` does nothing for the new declaration.
-  - When warnings are enabled, Nablla logs `*template duplicated: name`.
+  - When warnings are enabled, Sercrod logs `*template duplicated: name`.
 - The first registration wins; later ones are ignored.
 
 
@@ -136,7 +136,7 @@ Duplicate names:
 
 `*template` runs early in the element pipeline:
 
-- When Nablla renders an element:
+- When Sercrod renders an element:
   - It first checks for `*template` / `n-template`.
   - If present, it resolves the name, tries to register the template, and then returns immediately for that node.
 - The children of the `*template` element are not rendered at the declaration site.
@@ -149,7 +149,7 @@ From the rendered document’s point of view:
 
 #### Execution model
 
-Conceptually, Nablla does the following for `*template`:
+Conceptually, Sercrod does the following for `*template`:
 
 1. Detect declaration:
 
@@ -178,7 +178,7 @@ Conceptually, Nablla does the following for `*template`:
    - Do not append the original node to the DOM of the rendered result.
    - Do not process its children at the declaration location.
 
-Later, when `*include` uses this name, Nablla:
+Later, when `*include` uses this name, Sercrod:
 
 - Looks up the prototype via `_lookupTemplateNear`.
 - Copies `proto.innerHTML` into the caller element’s `innerHTML`.
@@ -202,7 +202,7 @@ Declaration-time scope and usage-time scope are distinct:
 
 - At declaration time:
 
-  - Nablla uses the scope only to resolve the template name (if the name is an expression).
+  - Sercrod uses the scope only to resolve the template name (if the name is an expression).
   - The template body is not evaluated.
   - No local scope is created for the body.
 
@@ -216,7 +216,7 @@ Implications:
 - The template body sees:
 
   - Variables from the caller such as `user`, `row`, `item`.
-  - Host data from `<na-blla data="...">`.
+  - Host data from `<serc-rod data="...">`.
   - Special helpers like `$data`, `$root`, `$parent`.
   - Methods and filters configured on that world.
 
@@ -227,8 +227,8 @@ Implications:
 
 When the template content is rendered (via `*include`):
 
-- `$root` refers to the root data of the Nablla world in which the include is happening.
-- `$parent` refers to the nearest ancestor Nablla host of the include site.
+- `$root` refers to the root data of the Sercrod world in which the include is happening.
+- `$parent` refers to the nearest ancestor Sercrod host of the include site.
 - The template body behaves like any other inline markup with respect to `$root` and `$parent`.
 
 `*template` does not add any extra parent layer over this. It only defines where the content comes from.
@@ -344,7 +344,7 @@ From the template system’s point of view:
 Typical usage patterns:
 
 - Use `*include` when:
-  - The template is defined in the same document or in a Nablla world that is already in memory.
+  - The template is defined in the same document or in a Sercrod world that is already in memory.
   - You want predictable, purely in-memory reuse.
 
 - Use `*import` when:
@@ -352,8 +352,8 @@ Typical usage patterns:
   - That HTML may contain `*template` declarations, reusable snippets, or complete fragments.
   - After the import, you can use `*include` to consume any templates defined in the imported content.
 
-The string passed to `*import` is treated purely as an URL from Nablla’s perspective.
-If you use patterns like `"/partials/card.html:card"`, the `:card` part is just part of the URL and is not parsed specially by Nablla itself.
+The string passed to `*import` is treated purely as an URL from Sercrod’s perspective.
+If you use patterns like `"/partials/card.html:card"`, the `:card` part is just part of the URL and is not parsed specially by Sercrod itself.
 Any such semantics (for example, serving only one named fragment from a combined file) must be implemented on the server side.
 
 
@@ -390,9 +390,9 @@ Any such semantics (for example, serving only one named fragment from a combined
 Templates for a page shell:
 
 ```html
-<na-blla
+<serc-rod
   id="page"
-  data='{"title":"Nablla Docs","subtitle":"Attribute-first templates"}'
+  data='{"title":"Sercrod Docs","subtitle":"Attribute-first templates"}'
 >
   <template *template="'pageShell'">
     <header>
@@ -403,33 +403,33 @@ Templates for a page shell:
       <slot></slot>
     </main>
     <footer>
-      <small>Nablla example</small>
+      <small>Sercrod example</small>
     </footer>
   </template>
 
   <section *include="'pageShell'">
     <p>This paragraph is rendered inside the <main> of the pageShell template.</p>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 Templates loaded from another file via *import:
 
 ```html
-<na-blla id="root">
+<serc-rod id="root">
   <!-- Load external HTML that may define templates like "card" or "layoutHeader" -->
   <div *import="'/partials/common-templates.html'"></div>
 
   <!-- After the import, those templates are available in this world -->
   <section *include="'layoutHeader'"></section>
   <div *include="'card'"></div>
-</na-blla>
+</serc-rod>
 ```
 
 
 #### Notes
 
-- `*template` / `n-template` define reusable templates and register them per Nablla world.
+- `*template` / `n-template` define reusable templates and register them per Sercrod world.
 - Template declarations themselves do not create visible output; they only populate the template registry.
 - `*include` uses the same name resolution helper as `*template` and copies `innerHTML` from the prototype into the caller.
 - `*import` does not use template names; it only loads HTML into `innerHTML`. Any templates in that HTML are registered later when the imported children are rendered.

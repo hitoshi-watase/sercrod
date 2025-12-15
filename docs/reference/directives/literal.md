@@ -2,16 +2,16 @@
 
 #### Summary
 
-`*literal` is used when you want to keep Nablla-style markup (or any template-like text) exactly as written, without Nablla expanding or interpreting it.
+`*literal` is used when you want to keep Sercrod-style markup (or any template-like text) exactly as written, without Sercrod expanding or interpreting it.
 Typical use cases include:
 
-- Showing Nablla examples in documentation.
+- Showing Sercrod examples in documentation.
 - Emitting `%placeholders%` or `*directives` as plain text for another system to process later.
 
 Inside a `*literal` block:
 
-- Nablla does not evaluate `%...%` interpolation.
-- Nablla does not treat `*if`, `*for`, `@click`, or any other directives as behavior.
+- Sercrod does not evaluate `%...%` interpolation.
+- Sercrod does not treat `*if`, `*for`, `@click`, or any other directives as behavior.
 - Only the `*literal` / `n-literal` attribute itself is removed in the final output; the content is kept as plain text.
 
 `*literal` has an alias `n-literal`.
@@ -19,24 +19,24 @@ Inside a `*literal` block:
 
 #### Basic example
 
-Display Nablla markup as-is, so that it is shown as code instead of being executed:
+Display Sercrod markup as-is, so that it is shown as code instead of being executed:
 
 ```html
-<na-blla id="docs">
+<serc-rod id="docs">
   <h2>Counter example</h2>
   <pre *literal>
-<na-blla data='{"count":0}'>
+<serc-rod data='{"count":0}'>
   <button @click="count++">+</button>
   <span *print="count"></span>
-</na-blla>
+</serc-rod>
   </pre>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
-- Nablla does not interpret the inner `<na-blla>`, `@click`, or `*print` in the `<pre>` block.
-- The final DOM contains a `<pre>` whose text content is the Nablla snippet, exactly as written.
+- Sercrod does not interpret the inner `<serc-rod>`, `@click`, or `*print` in the `<pre>` block.
+- The final DOM contains a `<pre>` whose text content is the Sercrod snippet, exactly as written.
 - The `*literal` attribute itself is removed by the cleanup phase, so end users will not see it.
 
 
@@ -44,49 +44,49 @@ Behavior:
 
 Core rules:
 
-- If an element has `*literal` or `n-literal`, Nablla treats the element’s content as plain text.
+- If an element has `*literal` or `n-literal`, Sercrod treats the element’s content as plain text.
 - Directives and interpolation markers inside that element are not executed; they are preserved as characters.
 - The host element itself is kept (for example `<pre>`, `<p>`, `<div>`), but `*literal` / `n-literal` is removed from the output DOM when directive cleanup is enabled.
 
 Source of the text:
 
-- Nablla first looks at the attribute value:
+- Sercrod first looks at the attribute value:
 
   - If `*literal` / `n-literal` has a non-empty value, that string is used as the text.
   - Example: `<div *literal="*if=&quot;cond&quot;">...</div>` outputs `*if="cond"` as text.
 
 - If the attribute value is empty or not specified:
 
-  - Nablla uses the original `innerHTML` as the text.
+  - Sercrod uses the original `innerHTML` as the text.
   - Example: `<pre *literal>...inner markup...</pre>` outputs the inner markup exactly as characters.
 
 In both modes:
 
-- The chosen text is emitted without Nablla expression evaluation.
-- Characters like `<`, `>`, `%`, `"`, and `*` are not treated specially by Nablla.
+- The chosen text is emitted without Sercrod expression evaluation.
+- Characters like `<`, `>`, `%`, `"`, and `*` are not treated specially by Sercrod.
 
 
-#### “Keep Nablla as text” use case
+#### “Keep Sercrod as text” use case
 
-The primary design goal of `*literal` is to display Nablla markup itself:
+The primary design goal of `*literal` is to display Sercrod markup itself:
 
-- You can write Nablla templates inside `*literal` blocks to show them as examples.
+- You can write Sercrod templates inside `*literal` blocks to show them as examples.
 - You can keep `%user.name%` or `%item.price%` as placeholders, ready for a different rendering engine.
 
 Example:
 
 ```html
-<na-blla id="docs">
+<serc-rod id="docs">
   <p>Description</p>
   <pre *literal>
 %user.name% ordered %item.name% at %item.price%.
   </pre>
-</na-blla>
+</serc-rod>
 ```
 
 Result:
 
-- Nablla does not try to evaluate `%user.name%` or `%item.price%`.
+- Sercrod does not try to evaluate `%user.name%` or `%item.price%`.
 - The placeholders appear exactly as written in the rendered page.
 - Only `*literal` is removed from the markup; the rest is preserved as plain text inside `<pre>`.
 
@@ -101,14 +101,14 @@ Two common patterns:
 
      ```html
      <pre *literal>
-<na-blla data='{"count":0}'>
+<serc-rod data='{"count":0}'>
   <button @click="count++">+</button>
   <span *print="count"></span>
-</na-blla>
+</serc-rod>
      </pre>
      ```
 
-   - Nablla uses the inner HTML as the text source.
+   - Sercrod uses the inner HTML as the text source.
    - The element becomes a `<pre>` with that snippet as its text content.
    - The `*literal` attribute is removed.
 
@@ -122,11 +122,11 @@ Two common patterns:
 
    - The visible text is `*if="isVisible"`.
    - The inner content (`Will show ...`) is ignored in this mode.
-   - Nablla does not try to evaluate `isVisible`; it just prints the attribute value as text.
+   - Sercrod does not try to evaluate `isVisible`; it just prints the attribute value as text.
 
 Important:
 
-- The `*literal` value is never interpreted as a Nablla expression.
+- The `*literal` value is never interpreted as a Sercrod expression.
 - If you need data-driven text based on scope variables, use `*print` or bindings instead.
 
 
@@ -134,29 +134,29 @@ Important:
 
 `*literal` is handled early in the rendering pipeline:
 
-- In the main render flow, Nablla:
+- In the main render flow, Sercrod:
 
   - Handles static/dynamic flags.
   - Then checks for `*literal` / `n-literal`.
 
 - If `*literal` or `n-literal` is present:
 
-  - Nablla decides the text to output (from the attribute or innerHTML).
+  - Sercrod decides the text to output (from the attribute or innerHTML).
   - Sets the element’s text content or appends a text node (depending on the internal path).
   - Skips further processing for that node.
 
 Because of this:
 
 - Any other directive on the same element as `*literal` is effectively ignored by the runtime.
-- Children of that element are not visited by Nablla’s directive engine.
-- The element becomes a “literal island” with no Nablla behavior inside it.
+- Children of that element are not visited by Sercrod’s directive engine.
+- The element becomes a “literal island” with no Sercrod behavior inside it.
 
 
 #### Execution model
 
 Conceptually, for an element with `*literal`:
 
-1. Nablla detects `*literal` / `n-literal` on the element.
+1. Sercrod detects `*literal` / `n-literal` on the element.
 2. It reads:
 
    - `attr = element.getAttribute("*literal") || element.getAttribute("n-literal")`.
@@ -172,7 +172,7 @@ Conceptually, for an element with `*literal`:
    - `*literal` and `n-literal` attributes are removed from the output DOM.
    - The element itself remains in the DOM (for example `<pre>`, `<p>`).
 
-At no point does Nablla interpret or expand directives, events, or `%...%` placeholders within that element.
+At no point does Sercrod interpret or expand directives, events, or `%...%` placeholders within that element.
 
 
 #### Variable creation and scope layering
@@ -181,7 +181,7 @@ At no point does Nablla interpret or expand directives, events, or `%...%` place
 
 - No new local variables are introduced.
 - `$data`, `$root`, `$parent`, and other scope entries are unaffected.
-- There is no per-child scope inside a `*literal` block, because Nablla does not descend into the element to render children.
+- There is no per-child scope inside a `*literal` block, because Sercrod does not descend into the element to render children.
 
 You can still use scope and data around the literal element:
 
@@ -191,10 +191,10 @@ You can still use scope and data around the literal element:
 
 #### Parent access
 
-Because Nablla does not descend into `*literal` blocks:
+Because Sercrod does not descend into `*literal` blocks:
 
-- There is no Nested Nablla scope inside that element.
-- Inner markup (even if it looks like Nablla) is just text; it cannot access `$parent` or other scope variables.
+- There is no Nested Sercrod scope inside that element.
+- Inner markup (even if it looks like Sercrod) is just text; it cannot access `$parent` or other scope variables.
 - Parent scopes are only relevant for deciding whether the element itself is rendered at all (through directives on parent elements).
 
 
@@ -209,7 +209,7 @@ The rule becomes very straightforward once you think of `*literal` as “keep ev
 
 - Implementation-wise, `*literal` wins:
 
-  - Because `*literal` is handled early, Nablla does not get to the other directives on that element.
+  - Because `*literal` is handled early, Sercrod does not get to the other directives on that element.
   - So `*if`, `*for`, `@click`, or any other directives on the same element effectively do nothing.
 
 For this reason:
@@ -223,16 +223,16 @@ Instead, use an outer element for logic:
   ```html
   <section *if="showExample">
     <pre *literal>
-<na-blla data='{"count":0}'>
+<serc-rod data='{"count":0}'>
   <button @click="count++">+</button>
   <span *print="count"></span>
-</na-blla>
+</serc-rod>
     </pre>
   </section>
   ```
 
   - `*if` controls whether the whole example is shown.
-  - `*literal` ensures the inner Nablla snippet is preserved as text.
+  - `*literal` ensures the inner Sercrod snippet is preserved as text.
 
 - Looping over literal snippets:
 
@@ -252,11 +252,11 @@ Instead, use an outer element for logic:
 
 #### Best practices
 
-- Use `*literal` whenever you want Nablla markup or `%placeholders%` to appear as text:
+- Use `*literal` whenever you want Sercrod markup or `%placeholders%` to appear as text:
 
-  - Documentation for Nablla itself.
+  - Documentation for Sercrod itself.
   - Email or template previews that use `%%`-style placeholders.
-  - Raw Markdown or other template languages that should not be touched by Nablla.
+  - Raw Markdown or other template languages that should not be touched by Sercrod.
 
 - Keep `*literal` alone on its element:
 
@@ -276,40 +276,40 @@ Instead, use an outer element for logic:
 
 #### Additional examples
 
-Literal Nablla block with outer logic:
+Literal Sercrod block with outer logic:
 
 ```html
-<na-blla id="examples" data='{"show":"counter"}'>
+<serc-rod id="examples" data='{"show":"counter"}'>
   <section *if="show === 'counter'">
     <h3>Counter example</h3>
     <pre *literal>
-<na-blla data='{"count":0}'>
+<serc-rod data='{"count":0}'>
   <button @click="count++">+</button>
   <span *print="count"></span>
-</na-blla>
+</serc-rod>
     </pre>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 Literal placeholders for another system:
 
 ```html
-<na-blla id="mailer">
+<serc-rod id="mailer">
   <p *literal>
 %USER_NAME%, thank you for signing up.  
 Your order number is %ORDER_ID%.
   </p>
-</na-blla>
+</serc-rod>
 ```
 
-- Nablla does not expand `%USER_NAME%` or `%ORDER_ID%`.
+- Sercrod does not expand `%USER_NAME%` or `%ORDER_ID%`.
 - The string is emitted exactly as written, ready for another mail-merge system.
 
 
 #### Notes
 
 - `*literal` and `n-literal` are aliases; choose one style per project for consistency.
-- `*literal` is evaluated early and prevents Nablla from interpreting anything inside that element.
-- The main purpose is to keep Nablla-style markup (or other templates) as text, while removing only the `*literal` directive itself from the final HTML.
+- `*literal` is evaluated early and prevents Sercrod from interpreting anything inside that element.
+- The main purpose is to keep Sercrod-style markup (or other templates) as text, while removing only the `*literal` directive itself from the final HTML.
 - Combining `*literal` with other directives on the same element is not supported in practice, because `*literal` short-circuits those directives; use parent elements for conditionals and loops instead.

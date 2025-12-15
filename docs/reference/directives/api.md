@@ -2,7 +2,7 @@
 
 #### Summary
 
-`*api` / `n-api` is the low-level HTTP gateway directive in Nablla.
+`*api` / `n-api` is the low-level HTTP gateway directive in Sercrod.
 
 It is responsible for:
 
@@ -14,7 +14,7 @@ It is responsible for:
   - `$download` - last value from GET-like requests.
   - `$upload` - last value from non-GET or file uploads.
 - Optionally writing the response into a named data slot via `*into` / `n-into`.
-- Dispatching events (`nablla-api`, `nablla-error`) for external observers.
+- Dispatching events (`sercrod-api`, `sercrod-error`) for external observers.
 - Automatically firing once for non-clickable elements, with deduplication.
 
 Higher level helpers such as `*download` or `*upload` share the same `$pending` / `$error` / `$download` / `$upload` convention, but `*api` is the single general-purpose primitive for ad-hoc HTTP calls on normal elements.
@@ -25,7 +25,7 @@ Higher level helpers such as `*download` or `*upload` share the same `$pending` 
 A simple GET that populates `user` and exposes status to children:
 
 ```html
-<na-blla id="app" data='{"user": null}'>
+<serc-rod id="app" data='{"user": null}'>
   <section
     *api="/api/user.json"
     *into="user">
@@ -38,7 +38,7 @@ A simple GET that populates `user` and exposes status to children:
 
     <pre *if="user" *print="JSON.stringify(user, null, 2)"></pre>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 Key points in this example:
@@ -53,7 +53,7 @@ Key points in this example:
 
 ##### Core behavior
 
-When Nablla finds `*api` or `n-api` on an element during rendering:
+When Sercrod finds `*api` or `n-api` on an element during rendering:
 
 1. It clones the element (shallow clone, without children).
 2. It reads the relevant attributes:
@@ -134,7 +134,7 @@ The body expression is taken from:
 
 When `bodyExp` is non-empty and `method !== "GET"`:
 
-1. Nablla evaluates the expression with `eval_expr(bodyExp, scope, { el: work, mode: "body" })`.
+1. Sercrod evaluates the expression with `eval_expr(bodyExp, scope, { el: work, mode: "body" })`.
 2. If evaluation succeeds and the result is not `null` or `undefined`, it builds:
    - `headers: { "Content-Type": "application/json" }`
    - `body: JSON.stringify(value)`
@@ -149,7 +149,7 @@ For `method === "GET"`:
 
 After the request completes:
 
-- Nablla inspects the response `Content-Type` header (lowercased).
+- Sercrod inspects the response `Content-Type` header (lowercased).
 - If it contains `application/json`:
   - It calls `res.json()` and uses the resulting value.
 - Otherwise:
@@ -166,12 +166,12 @@ Arrays, objects, and primitive values are all stored as-is.
 When `*api` is placed on an `<input type="file">`:
 
 ```html
-<na-blla id="uploader">
+<serc-rod id="uploader">
   <input
     type="file"
     name="files[]"
     *api="/upload">
-</na-blla>
+</serc-rod>
 ```
 
 the behavior is:
@@ -179,7 +179,7 @@ the behavior is:
 - `isFile` is detected from the element type.
 - The element gets a `change` listener.
 - On `change`:
-  - Nablla collects all chosen files into a `FormData` instance.
+  - Sercrod collects all chosen files into a `FormData` instance.
   - The form field name is:
     - `name` attribute value if present, otherwise
     - `"files[]"`.
@@ -191,10 +191,10 @@ the behavior is:
 The response parsing and placement are the same as for JSON-like requests, with these differences:
 
 - `$upload` is always updated with the response value.
-- `nablla-api` is dispatched with `method: "POST(FORMDATA)"`.
+- `sercrod-api` is dispatched with `method: "POST(FORMDATA)"`.
 - On error:
   - `$error` is set to `{ code: "UPLOAD", message: String(err) }`.
-  - `nablla-error` is dispatched with `detail: { url, method: "POST(FORMDATA)", into, error: String(err) }`.
+  - `sercrod-error` is dispatched with `detail: { url, method: "POST(FORMDATA)", into, error: String(err) }`.
 
 There is no automatic request on page load for file inputs. Uploads only happen when the user selects files.
 
@@ -230,13 +230,13 @@ These flags are created even when `*into` is not set, so you can always:
 
 - The attribute value is treated as a plain string key.
 - It is not evaluated as an expression.
-- When the key is non-empty and not yet present, Nablla initializes it with `null`.
+- When the key is non-empty and not yet present, Sercrod initializes it with `null`.
 - On success, `this._data[into]` is set to the final response value.
 
 Example:
 
 ```html
-<na-blla id="app" data='{"profile": null, "logs": []}'>
+<serc-rod id="app" data='{"profile": null, "logs": []}'>
   <section
     *api="/api/profile"
     *into="profile">
@@ -246,21 +246,21 @@ Example:
 
     <h2 *if="profile" *print="profile.name"></h2>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 Important notes:
 
 - Because the key is literal, `*into="user"` always writes to `data.user`, not to a dynamic path.
 - If you reuse the same `*into` key in several `*api` blocks on the same host, the last successful request overwrites the previous value.
-- Internally, Nablla also tracks `*into` names in an internal `_intos` list, used by other features (for example update hooks). This is an implementation detail, but explains why `*into` is cheap to use even when you do not immediately read the value.
+- Internally, Sercrod also tracks `*into` names in an internal `_intos` list, used by other features (for example update hooks). This is an implementation detail, but explains why `*into` is cheap to use even when you do not immediately read the value.
 
 
 #### Events
 
 `*api` dispatches two CustomEvents on the element that owns the directive.
 
-##### `nablla-api`
+##### `sercrod-api`
 
 Dispatched after a successful request, with `detail` containing:
 
@@ -285,7 +285,7 @@ The event is configured with:
 
 so ancestor elements and outer frameworks can listen for it.
 
-##### `nablla-error`
+##### `sercrod-error`
 
 Dispatched when the request, parsing, or internal processing throws. Details differ slightly:
 
@@ -302,7 +302,7 @@ Dispatched when the request, parsing, or internal processing throws. Details dif
 
 ##### Scope used for URL and body
 
-Inside `_renderElement(node, scope, parent)`, Nablla maintains:
+Inside `_renderElement(node, scope, parent)`, Sercrod maintains:
 
 - `scope` - the scope object passed into this element from its parent (already includes ancestor `*let` effects and loop variables).
 - `effScope` - the effective scope that may be further modified by `*let` on this element before children are rendered.
@@ -363,7 +363,7 @@ For non-file elements, `*api` chooses the trigger based on the element type:
 
 For non-clickable, non-file elements, `*api` builds an automatic deduplication key and uses an internal `__apiOnce` set:
 
-- Nablla computes a body hash once at render time:
+- Sercrod computes a body hash once at render time:
   - It evaluates the body expression in the same way as `runJsonLike`.
   - It then `JSON.stringify`s the result.
   - On any error, the hash is an empty string.
@@ -412,7 +412,7 @@ For `<input type="file" *api>`, there is:
 A typical pattern is:
 
 ```html
-<na-blla id="users" data='{"items": [], "selectedId": null}'>
+<serc-rod id="users" data='{"items": [], "selectedId": null}'>
   <section *api="/api/users" *into="items">
     <p *if="$pending">Loading users...</p>
 
@@ -429,7 +429,7 @@ A typical pattern is:
       </li>
     </ul>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 Because `*api` fires automatically on the non-clickable `section`, this:
@@ -481,7 +481,7 @@ For clarity and future-proofing, it is recommended to:
 
 `*api` coexists with event directives such as `@click`, `@change`, and others:
 
-- Nablla simply adds another listener for `click` or `change` on the same element.
+- Sercrod simply adds another listener for `click` or `change` on the same element.
 - You can safely add your own handlers alongside `*api` to update state or log events.
 
 Be aware that:
@@ -495,7 +495,7 @@ Because `*post`, `*fetch`, and `*api` all treat HTTP communication as “JSON in
 
 Recommended approach on the server:
 
-- Treat Nablla-driven endpoints as JSON endpoints:
+- Treat Sercrod-driven endpoints as JSON endpoints:
 
   - Always accept a JSON request body for write operations.
   - Always return a JSON response for both success and application-level errors.
@@ -505,24 +505,24 @@ Recommended approach on the server:
 
   - Parse JSON.
   - Run validation, authentication, business logic, and logging in a shared middleware.
-  - Produce a JSON object that Nablla can store as-is into `data[prop]`, `data[base][key]`, or a target selected by `*into`.
+  - Produce a JSON object that Sercrod can store as-is into `data[prop]`, `data[base][key]`, or a target selected by `*into`.
 
 Benefits for server-side code:
 
-- You can implement a “Nablla API style” once and reuse it across multiple endpoints.
-- Monitoring and logging become easier because every Nablla request and response has the same structure.
+- You can implement a “Sercrod API style” once and reuse it across multiple endpoints.
+- Monitoring and logging become easier because every Sercrod request and response has the same structure.
 - Frontend and backend teams can agree on a single JSON contract instead of negotiating many small variations.
 
-Position in Nablla’s design:
+Position in Sercrod’s design:
 
-- Nablla does not force this server-side style, but the runtime is optimized around it:
+- Sercrod does not force this server-side style, but the runtime is optimized around it:
   - `*post` and `*fetch` share the `URL[:prop]` rule and write values back without further transformation.
   - `*api` writes the raw response into the variable named by `*into`.
   - All of them update `$pending`, `$error`, `$download`, and `$upload` in a consistent way.
-- For new projects that adopt Nablla end to end, designing server APIs to follow this unified JSON contract is strongly recommended.
+- For new projects that adopt Sercrod end to end, designing server APIs to follow this unified JSON contract is strongly recommended.
 - For existing APIs, you can:
   - Use `*api` to integrate with legacy endpoints as they are.
-  - Gradually introduce Nablla-style JSON endpoints for new features and move existing endpoints toward the same contract when possible.
+  - Gradually introduce Sercrod-style JSON endpoints for new features and move existing endpoints toward the same contract when possible.
 
 
 #### Best practices
@@ -583,7 +583,7 @@ To send JSON, change to `method="POST"`:
 ##### Button-triggered POST
 
 ```html
-<na-blla id="formHost" data='{"form": {"name": "", "email": ""}, "saved": null}'>
+<serc-rod id="formHost" data='{"form": {"name": "", "email": ""}, "saved": null}'>
   <input type="text"
          :value="form.name"
          @input="form.name = $event.target.value">
@@ -603,7 +603,7 @@ To send JSON, change to `method="POST"`:
   <p *if="$pending">Saving...</p>
   <p *if="$error" *print="$error.message"></p>
   <p *if="saved" *print="'Saved as id ' + saved.id"></p>
-</na-blla>
+</serc-rod>
 ```
 
 - The request is only sent when the button is clicked.
@@ -613,7 +613,7 @@ To send JSON, change to `method="POST"`:
 ##### Simple file upload with preview
 
 ```html
-<na-blla id="avatarHost" data='{"avatarResult": null}'>
+<serc-rod id="avatarHost" data='{"avatarResult": null}'>
   <input
     type="file"
     name="avatar"
@@ -627,18 +627,18 @@ To send JSON, change to `method="POST"`:
   <p *if="avatarResult && avatarResult.url">
     <img :src="avatarResult.url" alt="Avatar">
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 - Selecting a file sends it via `FormData` to `/api/avatar`.
 - The parsed response is written into `avatarResult` and `$upload`.
-- Errors are surfaced through `$error` and the `nablla-error` event.
+- Errors are surfaced through `$error` and the `sercrod-error` event.
 
 
 #### Notes
 
 - `*api` is the single low-level primitive for HTTP calls on normal elements. Other helpers reuse the same status fields but provide different ergonomics.
-- Responses are not transformed beyond JSON parsing. If you need special handling, do it in your template or in `@` event handlers listening for `nablla-api`.
+- Responses are not transformed beyond JSON parsing. If you need special handling, do it in your template or in `@` event handlers listening for `sercrod-api`.
 - The `*into` key is literal for now. There is no special syntax for nested paths or dynamic property names on this directive.
 - Auto-run deduplication is intentionally conservative. If you need to force a new automatic request without user action, change one of the stable components of the key (URL except for `ts`, method, `*into`, or the body expression).
-- Future versions of Nablla may refine the interaction between `*let` and `*api`. The current behavior is that `*api` sees ancestor `*let` effects and loop variables but not new names introduced by `*let` on the same element.
+- Future versions of Sercrod may refine the interaction between `*let` and `*api`. The current behavior is that `*api` sees ancestor `*let` effects and loop variables but not new names introduced by `*let` on the same element.

@@ -2,9 +2,9 @@
 
 #### Summary
 
-`*updated-propagate` requests a forced update on another Nablla host after the current host or element has been updated.
+`*updated-propagate` requests a forced update on another Sercrod host after the current host or element has been updated.
 It does not evaluate a JavaScript expression.
-Instead, it reads a small string syntax and calls `update(true, caller)` on a single target Nablla host.
+Instead, it reads a small string syntax and calls `update(true, caller)` on a single target Sercrod host.
 
 Alias:
 
@@ -13,7 +13,7 @@ Alias:
 
 Key points:
 
-- Can be placed on a `<na-blla>` host or on ordinary elements inside a Nablla host.
+- Can be placed on a `<serc-rod>` host or on ordinary elements inside a Sercrod host.
 - Interprets its value as a literal routing spec (selector, `root`, or numeric depth).
 - Does not create variables or change the data scope.
 - Runs after `*updated` on the same element, if `*updated` is present.
@@ -21,25 +21,25 @@ Key points:
 
 #### Basic example
 
-Propagate from a nested Nablla to its outer root:
+Propagate from a nested Sercrod to its outer root:
 
 ```html
-<na-blla id="root" data='{"message":"Hello"}'>
+<serc-rod id="root" data='{"message":"Hello"}'>
   <h1 *print="message"></h1>
 
-  <na-blla id="child"
+  <serc-rod id="child"
            data='{"message":"Child"}'
            *updated="onChildUpdated"
            *updated-propagate="root">
     <p *print="message"></p>
-  </na-blla>
-</na-blla>
+  </serc-rod>
+</serc-rod>
 ```
 
 Behavior:
 
 - When `child` finishes its internal update, `*updated="onChildUpdated"` is called on the child.
-- Then `*updated-propagate="root"` forces a full update on the top-level `root` Nablla host.
+- Then `*updated-propagate="root"` forces a full update on the top-level `root` Sercrod host.
 - The `root` host runs its own `*updated` hooks (if any) as part of that update.
 
 
@@ -47,16 +47,16 @@ Behavior:
 
 High level behavior:
 
-- On a Nablla host (`<na-blla>`):
+- On a Sercrod host (`<serc-rod>`):
 
-  - After the host has finished rendering and its own `*updated` hooks have been processed, Nablla checks `*updated-propagate` / `n-updated-propagate` on that host.
-  - If present, it interprets the attribute value as a routing spec and finds exactly one target Nablla host (if possible).
+  - After the host has finished rendering and its own `*updated` hooks have been processed, Sercrod checks `*updated-propagate` / `n-updated-propagate` on that host.
+  - If present, it interprets the attribute value as a routing spec and finds exactly one target Sercrod host (if possible).
   - It then calls `target.update(true, callerHost)`.
 
-- On ordinary elements inside a Nablla host:
+- On ordinary elements inside a Sercrod host:
 
-  - After the host’s update completes, the host walks its subtree and looks for `*updated-propagate` / `n-updated-propagate` on normal elements (not on child `<na-blla>`).
-  - For each such element, Nablla interprets the value as a routing spec and finds a target Nablla host (if any).
+  - After the host’s update completes, the host walks its subtree and looks for `*updated-propagate` / `n-updated-propagate` on normal elements (not on child `<serc-rod>`).
+  - For each such element, Sercrod interprets the value as a routing spec and finds a target Sercrod host (if any).
   - It then calls `target.update(true, host)`.
 
 Important:
@@ -73,29 +73,29 @@ The runtime interprets it in the following order:
 
 1. Empty or omitted
 
-   - If the attribute is present but has no value (for example `<div *updated-propagate></div>`) or an empty string, Nablla treats it as `"1"`.
+   - If the attribute is present but has no value (for example `<div *updated-propagate></div>`) or an empty string, Sercrod treats it as `"1"`.
 
-   - On a Nablla host:
-     - `"1"` means “go up one Nablla host and update that ancestor”.
+   - On a Sercrod host:
+     - `"1"` means “go up one Sercrod host and update that ancestor”.
    - On an ordinary element:
      - Due to the current implementation, `"1"` does not result in any propagation.
-     - If you want to reach the nearest Nablla host from a normal element, you must specify at least `"2"` explicitly.
+     - If you want to reach the nearest Sercrod host from a normal element, you must specify at least `"2"` explicitly.
 
 2. Parenthesized selector: `"(selector)"`
 
    - If the value matches `"(...)":`
 
-     - Nablla strips the outer parentheses and treats the inside as a CSS selector.
+     - Sercrod strips the outer parentheses and treats the inside as a CSS selector.
      - It then calls `closest(selector)` from the element where the directive lives.
-     - If the result is a Nablla host, that host receives a forced update.
+     - If the result is a Sercrod host, that host receives a forced update.
 
    Examples:
 
    ```html
-   <!-- On a Nablla host: propagate to the nearest ancestor matching .layout-root -->
-   <na-blla *updated-propagate="(.layout-root)">
+   <!-- On a Sercrod host: propagate to the nearest ancestor matching .layout-root -->
+   <serc-rod *updated-propagate="(.layout-root)">
      ...
-   </na-blla>
+   </serc-rod>
 
    <!-- On a child element: propagate to the closest .card host -->
    <div class="card-body" *updated-propagate="(.card)">
@@ -105,64 +105,64 @@ The runtime interprets it in the following order:
 
 3. Keyword `"root"`
 
-   - Special keyword that refers to the top-level Nablla host around the current element.
+   - Special keyword that refers to the top-level Sercrod host around the current element.
 
-   - On a Nablla host:
+   - On a Sercrod host:
 
-     - Nablla walks upward and uses the first Nablla host it can find above the current one.
+     - Sercrod walks upward and uses the first Sercrod host it can find above the current one.
      - That host is treated as “root” for this evaluation, and receives `update(true, caller)`.
 
    - On an ordinary element inside a host:
 
-     - The host uses its own notion of the outermost Nablla root, if available.
-     - If not available, it walks upward, finds a Nablla host, then climbs to the outermost Nablla ancestor.
+     - The host uses its own notion of the outermost Sercrod root, if available.
+     - If not available, it walks upward, finds a Sercrod host, then climbs to the outermost Sercrod ancestor.
      - That top-level host receives `update(true, host)`.
 
-   This is the recommended form when you want to ensure that “the top Nablla container for this UI” refreshes, regardless of nesting depth.
+   This is the recommended form when you want to ensure that “the top Sercrod container for this UI” refreshes, regardless of nesting depth.
 
 4. Numeric depth: `"N"`
 
-   - If the value consists only of digits, Nablla parses it as an integer depth.
+   - If the value consists only of digits, Sercrod parses it as an integer depth.
 
-   - On a Nablla host:
+   - On a Sercrod host:
 
-     - The number counts Nablla ancestors.
-     - Nablla starts from `parentElement` and climbs upward.
-     - Each time it encounters a Nablla host, it decrements the counter.
-     - When the counter reaches zero on a Nablla host, that host receives `update(true, callerHost)`.
+     - The number counts Sercrod ancestors.
+     - Sercrod starts from `parentElement` and climbs upward.
+     - Each time it encounters a Sercrod host, it decrements the counter.
+     - When the counter reaches zero on a Sercrod host, that host receives `update(true, callerHost)`.
 
      Examples:
 
-     - `"1"`: the nearest Nablla parent (if any).
-     - `"2"`: the Nablla grandparent, and so on.
+     - `"1"`: the nearest Sercrod parent (if any).
+     - `"2"`: the Sercrod grandparent, and so on.
 
    - On an ordinary element inside a host:
 
-     - The numeric depth is interpreted relative to the nearest Nablla host above the element.
-     - Before climbing the DOM, Nablla subtracts 1 from the specified depth when the directive is on a normal element.
-     - Then it climbs upwards and decrements the counter on each Nablla ancestor, similar to the host case.
+     - The numeric depth is interpreted relative to the nearest Sercrod host above the element.
+     - Before climbing the DOM, Sercrod subtracts 1 from the specified depth when the directive is on a normal element.
+     - Then it climbs upwards and decrements the counter on each Sercrod ancestor, similar to the host case.
 
      Consequences:
 
      - With the current implementation:
        - `"1"` on a normal element effectively results in no propagation.
-       - `"2"` propagates to the nearest Nablla host.
-       - Higher numbers target further Nablla ancestors.
+       - `"2"` propagates to the nearest Sercrod host.
+       - Higher numbers target further Sercrod ancestors.
 
      Recommendation:
 
      - Prefer `"root"` or `"(selector)"` when targeting from normal elements.
-     - If you do use numbers on child elements, start from `"2"` for “nearest Nablla host”.
+     - If you do use numbers on child elements, start from `"2"` for “nearest Sercrod host”.
 
 5. Fallback: bare selector string
 
-   - If the spec does not match any of the above patterns, Nablla treats it as a CSS selector and calls `closest(spec)` from the element.
-   - If the closest match is a Nablla host, that host receives `update(true, caller)`.
+   - If the spec does not match any of the above patterns, Sercrod treats it as a CSS selector and calls `closest(spec)` from the element.
+   - If the closest match is a Sercrod host, that host receives `update(true, caller)`.
 
    Example:
 
    ```html
-   <!-- Propagate to the nearest Nablla matching .panel-root -->
+   <!-- Propagate to the nearest Sercrod matching .panel-root -->
    <div *updated-propagate=".panel-root"></div>
    ```
 
@@ -171,7 +171,7 @@ The runtime interprets it in the following order:
 
 `*updated-propagate` is evaluated after the main update work of the host:
 
-- For a Nablla host:
+- For a Sercrod host:
 
   1. The host runs its internal update pipeline (bindings, directives, DOM changes).
   2. The host executes its own `*updated` / `n-updated` handler(s), if present.
@@ -180,7 +180,7 @@ The runtime interprets it in the following order:
 
 - For ordinary elements:
 
-  - After step 1?3 above, the host calls `_absorb_child_updated`, which walks the DOM under the host, skipping child `<na-blla>` instances.
+  - After step 1?3 above, the host calls `_absorb_child_updated`, which walks the DOM under the host, skipping child `<serc-rod>` instances.
   - For each normal element:
     - If `*updated` / `n-updated` is present, the host executes that handler first.
     - Regardless of `*updated`, if `*updated-propagate` / `n-updated-propagate` is present, it is then interpreted and the appropriate target host is updated.
@@ -195,13 +195,13 @@ Effects on the target host:
 
 Loop prevention:
 
-- Nablla’s `update` method ignores calls if the host is already updating.
+- Sercrod’s `update` method ignores calls if the host is already updating.
 - This prevents infinite loops where two hosts trigger each other’s propagation back and forth within the same call stack.
 
 
 #### Execution model
 
-Conceptually, Nablla performs the following steps whenever it evaluates `*updated-propagate`:
+Conceptually, Sercrod performs the following steps whenever it evaluates `*updated-propagate`:
 
 1. Read the raw attribute:
 
@@ -217,25 +217,25 @@ Conceptually, Nablla performs the following steps whenever it evaluates `*update
 3. Interpret the spec:
 
    - If it starts and ends with parentheses, treat it as a selector inside `"(...)"`.
-   - Else if it is exactly `"root"`, resolve the appropriate root Nablla host.
+   - Else if it is exactly `"root"`, resolve the appropriate root Sercrod host.
    - Else if it is all digits, treat it as a numeric depth (with the extra adjustment for normal elements).
    - Else treat it as a bare CSS selector.
 
 4. Resolve the target host:
 
    - Use `closest(selector)` on the appropriate starting element.
-   - Or walk upward through parents, counting Nablla hosts.
-   - Or use the topmost Nablla root for `"root"`.
+   - Or walk upward through parents, counting Sercrod hosts.
+   - Or use the topmost Sercrod root for `"root"`.
 
 5. Call update:
 
-   - If a Nablla host is found, call `target.update(true, caller)` where:
+   - If a Sercrod host is found, call `target.update(true, caller)` where:
      - `caller` is the current host when called from a host-level `*updated-propagate`.
      - `caller` is the scanning host when called from a normal child element.
 
 No errors are thrown to user code:
 
-- If resolution fails (no matching Nablla host, invalid selector, or runtime errors), Nablla logs a warning (if warn-level logging is enabled) and continues.
+- If resolution fails (no matching Sercrod host, invalid selector, or runtime errors), Sercrod logs a warning (if warn-level logging is enabled) and continues.
 
 
 #### Variable creation and scope layering
@@ -254,7 +254,7 @@ Any data or event context used by the target host’s `*updated` handlers is cre
 `*updated-propagate` is a routing directive, not a data access directive:
 
 - It does not provide direct access to parent data.
-- It only determines which Nablla host should be updated after the current host or element finishes its update.
+- It only determines which Sercrod host should be updated after the current host or element finishes its update.
 - If you need parent data, use the usual scope rules (`$parent`, `$root`, or explicit data structures) in the `*updated` handler or in regular expressions.
 
 The main “parent” concept here is the structural parent host in the DOM tree, as used by numeric depth and the `root` keyword.
@@ -264,17 +264,17 @@ The main “parent” concept here is the structural parent host in the DOM tree
 
 `*updated-propagate` is designed to complement `*updated`:
 
-- On a Nablla host:
+- On a Sercrod host:
 
   - Typical pattern:
 
     ```html
-    <na-blla
+    <serc-rod
       data='{"count":0}'
       *updated="onChildUpdated"
       *updated-propagate="root">
       ...
-    </na-blla>
+    </serc-rod>
     ```
 
   - `*updated` lets the host react locally to its own update (for example, scanning markers inside itself).
@@ -297,7 +297,7 @@ The main “parent” concept here is the structural parent host in the DOM tree
 
 Event objects:
 
-- For `*updated` on Nablla hosts, Nablla synthesizes an event-like object and injects it into the evaluation as `$event`.
+- For `*updated` on Sercrod hosts, Sercrod synthesizes an event-like object and injects it into the evaluation as `$event`.
 - `*updated-propagate` does not forward that event object to other hosts.
 - When a target host is updated via `update(true, caller)`, it receives its own fresh `$event` according to the `*updated` rules, not the original one.
 
@@ -313,7 +313,7 @@ Event objects:
 - On normal elements inside loops:
 
   - If elements with `*updated-propagate` are created by `*for` or `*each`, they behave like any other elements.
-  - After each host update, Nablla walks the actual DOM tree and evaluates `*updated-propagate` on whichever instances currently exist.
+  - After each host update, Sercrod walks the actual DOM tree and evaluates `*updated-propagate` on whichever instances currently exist.
   - This means you can safely attach `*updated-propagate` to repeated rows or items.
 
 There are no special rules tying `*updated-propagate` to conditionals or loops beyond the normal update timing.
@@ -323,14 +323,14 @@ There are no special rules tying `*updated-propagate` to conditionals or loops b
 
 - Prefer explicit specs:
 
-  - Use `"root"` when you want to refresh the top-level Nablla container.
-  - Use `"(selector)"` when you want to target a particular Nablla host by CSS.
+  - Use `"root"` when you want to refresh the top-level Sercrod container.
+  - Use `"(selector)"` when you want to target a particular Sercrod host by CSS.
 
 - Be careful with numeric depths:
 
-  - On Nablla hosts, `"1"` is a clear way to reach the immediate Nablla parent.
+  - On Sercrod hosts, `"1"` is a clear way to reach the immediate Sercrod parent.
   - On normal elements, the depth is adjusted internally, and `"1"` currently does not propagate.
-  - If you choose numeric depths on child elements, start from `"2"` when you intend “nearest Nablla host”.
+  - If you choose numeric depths on child elements, start from `"2"` when you intend “nearest Sercrod host”.
 
 - Keep specs static:
 
@@ -350,22 +350,22 @@ There are no special rules tying `*updated-propagate` to conditionals or loops b
 
 #### Examples
 
-Propagate to the nearest parent Nablla host:
+Propagate to the nearest parent Sercrod host:
 
 ```html
-<na-blla id="parent" data='{"value": 0}'>
-  <na-blla id="child" *updated-propagate="1">
+<serc-rod id="parent" data='{"value": 0}'>
+  <serc-rod id="child" *updated-propagate="1">
     <p>Child content</p>
-  </na-blla>
-</na-blla>
+  </serc-rod>
+</serc-rod>
 ```
 
-- After `child` updates, `"1"` points to the nearest Nablla ancestor (here, `parent`), which receives `update(true, child)`.
+- After `child` updates, `"1"` points to the nearest Sercrod ancestor (here, `parent`), which receives `update(true, child)`.
 
 Propagate from an inner element to the root:
 
 ```html
-<na-blla id="root" data='{"saved": false}'>
+<serc-rod id="root" data='{"saved": false}'>
   <form>
     <button type="submit"
             *updated="onButtonUpdated"
@@ -373,7 +373,7 @@ Propagate from an inner element to the root:
       Save
     </button>
   </form>
-</na-blla>
+</serc-rod>
 ```
 
 - The root host runs `onButtonUpdated` when the button’s update is absorbed.
@@ -382,16 +382,16 @@ Propagate from an inner element to the root:
 Using a CSS selector in parentheses:
 
 ```html
-<na-blla class="panel" data='{"message": ""}'>
+<serc-rod class="panel" data='{"message": ""}'>
   <div class="panel-body">
     <input type="text"
            *input="message = $event.target.value"
            *updated-propagate="(.panel)">
   </div>
-</na-blla>
+</serc-rod>
 ```
 
-- After the input finishes updating, Nablla finds the closest `.panel` element that is a Nablla host and forces it to update.
+- After the input finishes updating, Sercrod finds the closest `.panel` element that is a Sercrod host and forces it to update.
 
 
 #### Notes
@@ -399,7 +399,7 @@ Using a CSS selector in parentheses:
 - `*updated-propagate` and `n-updated-propagate` are simple routing directives:
   - They never evaluate JavaScript.
   - They do not touch `data`, `stage`, or any scope objects.
-  - They only call `update(true, caller)` on a chosen Nablla host.
+  - They only call `update(true, caller)` on a chosen Sercrod host.
 
 - Specs are interpreted in a strict order:
   - Parenthesized selector, then `"root"`, then numeric depth, then bare selector.
@@ -409,8 +409,8 @@ Using a CSS selector in parentheses:
   - There is no support for multiple specs separated by spaces or commas.
   - If the value contains spaces, it is treated as part of a single spec string.
 
-- If resolution fails or a selector is invalid, Nablla logs a warning (when warnings are enabled) and continues without throwing.
+- If resolution fails or a selector is invalid, Sercrod logs a warning (when warnings are enabled) and continues without throwing.
 
 - There are currently no structural incompatibilities specific to `*updated-propagate`:
   - It can be combined with `*updated`, event handlers, and other attributes on the same element.
-  - The main thing to watch for is update cascades; rely on Nablla’s internal `_updating` guard to prevent infinite loops, but try to design propagation paths that are simple and predictable.
+  - The main thing to watch for is update cascades; rely on Sercrod’s internal `_updating` guard to prevent infinite loops, but try to design propagation paths that are simple and predictable.

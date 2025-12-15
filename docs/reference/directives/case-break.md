@@ -19,13 +19,13 @@ Both names share the same behavior.
 A simple status switch that does not fall through past the matching branch:
 
 ```html
-<na-blla id="app" data='{"status": "ready"}'>
+<serc-rod id="app" data='{"status": "ready"}'>
   <div *switch="$data.status">
     <p *case="'pending'">Pending...</p>
     <p *case.break="'ready'">Ready</p>
     <p *default>Unknown status</p>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
@@ -33,7 +33,7 @@ Behavior:
 - The host `<div *switch>` evaluates `$data.status` as the switch value.
 - The second branch `*case.break="'ready'"` matches that value.
 - That branch is rendered.
-- Because it is a `*case.break` branch, Nablla stops there and does not render the `*default` branch.
+- Because it is a `*case.break` branch, Sercrod stops there and does not render the `*default` branch.
 
 
 #### Behavior
@@ -45,11 +45,11 @@ Behavior:
 
 Within a `*switch` block:
 
-- Nablla walks child elements in DOM order.
+- Sercrod walks child elements in DOM order.
 - It finds the first branch that should start rendering:
   - A matching `*case` or `*case.break`.
   - Or a `*default` when no earlier case has matched.
-- Once rendering has started, Nablla is in a fallthrough mode:
+- Once rendering has started, Sercrod is in a fallthrough mode:
   - Every subsequent `*case` or `*default` branch is also rendered, until a break-type directive is seen.
 - `*case.break` is both:
   - A case branch (its expression is matched against the switch value).
@@ -65,27 +65,27 @@ Conceptually:
 
 Within the host element that has `*switch` or `n-switch`:
 
-1. Nablla evaluates the switch expression once:
+1. Sercrod evaluates the switch expression once:
 
    - It reads the attribute value from `*switch` or `n-switch`.
    - It evaluates that expression and stores the result as the switch value.
    - The value is then exposed to children as `$switch`.
 
-2. Nablla iterates over child elements in DOM order.
+2. Sercrod iterates over child elements in DOM order.
 
 3. For each child:
 
    - If it does not have `*case`, `n-case`, `*case.break`, `n-case.break`, `*default`, or `n-default`, it is ignored by the switch logic and never rendered by this `*switch`.
    - If no branch has started yet:
      - `*case` / `n-case` / `*case.break` / `n-case.break`:
-       - Nablla evaluates the case expression and compares it to the switch value.
+       - Sercrod evaluates the case expression and compares it to the switch value.
        - If it matches, rendering starts from this branch.
      - `*default` / `n-default`:
        - If no earlier branch has matched, rendering starts from this default.
 
 4. Once a starting branch is chosen (including `*case.break`):
 
-   - Nablla clones that branch, removes control attributes, and renders it with the augmented child scope (including `$switch`).
+   - Sercrod clones that branch, removes control attributes, and renders it with the augmented child scope (including `$switch`).
    - It then continues in fallthrough mode (see below) unless a break is detected.
 
 
@@ -98,19 +98,19 @@ Given:
 - `switchVal` as the evaluated switch value.
 - `raw` as the attribute string from `*case.break="raw"`.
 
-Nablla applies the following rules:
+Sercrod applies the following rules:
 
-1. It first tries to evaluate the case expression as a normal Nablla expression, with `$switch` injected into the scope:
+1. It first tries to evaluate the case expression as a normal Sercrod expression, with `$switch` injected into the scope:
 
-   - If the result is a function, Nablla calls `fn(switchVal, scope)` and uses the truthiness of the return value.
-   - If the result is a `RegExp`, Nablla tests it against `String(switchVal)`.
-   - If the result is an array, Nablla checks whether any element is strictly equal to `switchVal` (using `Object.is` semantics).
-   - If the result is an object with a `has` method (for example a `Set`), Nablla calls `set.has(switchVal)` and uses the result.
+   - If the result is a function, Sercrod calls `fn(switchVal, scope)` and uses the truthiness of the return value.
+   - If the result is a `RegExp`, Sercrod tests it against `String(switchVal)`.
+   - If the result is an array, Sercrod checks whether any element is strictly equal to `switchVal` (using `Object.is` semantics).
+   - If the result is an object with a `has` method (for example a `Set`), Sercrod calls `set.has(switchVal)` and uses the result.
    - If the result is a boolean, the boolean itself decides the match.
-   - If the result is a string, number, or bigint, Nablla compares it to `switchVal` using strict identity.
+   - If the result is a string, number, or bigint, Sercrod compares it to `switchVal` using strict identity.
    - For other result types, this step does not produce a match.
 
-2. If evaluation throws, or if you intentionally keep the expression as a simple string, Nablla falls back to a token list:
+2. If evaluation throws, or if you intentionally keep the expression as a simple string, Sercrod falls back to a token list:
 
    - It splits the raw string on commas or pipes: `"a|b,c"` becomes tokens like `"a"`, `"b"`, `"c"`.
    - It trims empty tokens.
@@ -195,7 +195,7 @@ Syntactic equivalence:
 
   - `*case="expr" *break`
 
-Nablla implementation treats both forms in the same way:
+Sercrod implementation treats both forms in the same way:
 
 - For matching, it uses the `*case` / `n-case` / `*case.break` / `n-case.break` expression.
 - For breaking, it checks for `*break`, `n-break`, `*case.break`, or `n-case.break` on the original branch element.
@@ -203,9 +203,9 @@ Nablla implementation treats both forms in the same way:
 
 #### Fallthrough and break behavior
 
-`*switch` in Nablla uses a DOM-ordered, fallthrough model similar to JavaScript:
+`*switch` in Sercrod uses a DOM-ordered, fallthrough model similar to JavaScript:
 
-- Nablla locates the first branch that should start rendering.
+- Sercrod locates the first branch that should start rendering.
 - From that branch onward, it renders every subsequent `*case` / `*default` branch until a break is detected.
 - A break is detected when the original branch element has any of:
   - `*break`
@@ -276,38 +276,38 @@ Example showing fallthrough vs break:
 Simple status mapping with no fallthrough:
 
 ```html
-<na-blla id="status-app" data='{"status":"error"}'>
+<serc-rod id="status-app" data='{"status":"error"}'>
   <div *switch="$data.status">
     <p *case="'ok'">All good</p>
     <p *case.break="'error'">Something went wrong</p>
     <p *default>Unknown status: <span *print="$switch"></span></p>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 Using a function as a case expression:
 
 ```html
-<na-blla id="range-switch" data='{"value": 42}'>
+<serc-rod id="range-switch" data='{"value": 42}'>
   <div *switch="$data.value">
     <p *case="(v) => v < 0">Negative</p>
     <p *case="(v) => v === 0">Zero</p>
     <p *case.break="(v) => v > 0">Positive (and stop)</p>
     <p *default>Unreachable default</p>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 Membership via list syntax:
 
 ```html
-<na-blla id="role-switch" data='{"role":"admin"}'>
+<serc-rod id="role-switch" data='{"role":"admin"}'>
   <div *switch="$data.role">
     <p *case="'guest' | 'anonymous'">Guest mode</p>
     <p *case.break="'user' | 'admin'">Signed-in user</p>
     <p *default>Other role: <span *print="$switch"></span></p>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 

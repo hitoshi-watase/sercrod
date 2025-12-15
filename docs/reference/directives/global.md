@@ -2,19 +2,19 @@
 
 #### Summary
 
-`*global` executes one or more JavaScript statements with side effects that write into Nablla’s shared data or the JavaScript global object.
+`*global` executes one or more JavaScript statements with side effects that write into Sercrod’s shared data or the JavaScript global object.
 Unlike `*let`, it does not create a local scope for children; instead, it updates existing data or `globalThis` and then continues rendering.
 
 Use `*global` when you need to:
 
-- Update shared Nablla data from inside a template, especially from nested components.
-- Bridge Nablla with traditional global scripts or libraries by writing to `window` / `globalThis`.
+- Update shared Sercrod data from inside a template, especially from nested components.
+- Bridge Sercrod with traditional global scripts or libraries by writing to `window` / `globalThis`.
 
 Important points:
 
 - `*global` does not remove its own attribute. Its expression is evaluated on every render of the element.
 - Write targets are chosen dynamically:
-  - If the key already exists in Nablla data (`this._data`), that data is updated.
+  - If the key already exists in Sercrod data (`this._data`), that data is updated.
   - Otherwise the key is created on `globalThis` (for example `window` in a browser).
 
 
@@ -23,20 +23,20 @@ Important points:
 Set an app title in shared data or global scope:
 
 ```html
-<na-blla id="app" data='{"message": "Hello"}'>
+<serc-rod id="app" data='{"message": "Hello"}'>
   <h1 *print="appTitle || 'Default title'"></h1>
 
   <!-- If appTitle exists in data, update it there; otherwise create window.appTitle -->
-  <div *global="appTitle = 'Nablla Demo'"></div>
-</na-blla>
+  <div *global="appTitle = 'Sercrod Demo'"></div>
+</serc-rod>
 ```
 
 Behavior:
 
-- On the first render, Nablla evaluates `appTitle = 'Nablla Demo'` inside a sandbox.
-- If `appTitle` already exists in the Nablla data for this host, that value is updated.
+- On the first render, Sercrod evaluates `appTitle = 'Sercrod Demo'` inside a sandbox.
+- If `appTitle` already exists in the Sercrod data for this host, that value is updated.
 - If it does not exist, `globalThis.appTitle` is created.
-- After the update, Nablla schedules a re-render, so the `<h1>` sees the new value.
+- After the update, Sercrod schedules a re-render, so the `<h1>` sees the new value.
 
 
 #### Behavior
@@ -44,7 +44,7 @@ Behavior:
 - `*global` is a non-structural directive. It does not change how many times the element or its children are rendered.
 - It executes arbitrary JavaScript statements in a special sandbox that decides where writes go:
   - Reads: current scope first, then `globalThis`, then a placeholder for unknown keys.
-  - Writes: Nablla data when a matching key already exists, otherwise `globalThis`.
+  - Writes: Sercrod data when a matching key already exists, otherwise `globalThis`.
 
 Key differences from `*let`:
 
@@ -67,15 +67,15 @@ The attribute is not removed:
 
 #### Expression model
 
-The value of `*global` is treated as one or more JavaScript statements, not as a special Nablla grammar.
+The value of `*global` is treated as one or more JavaScript statements, not as a special Sercrod grammar.
 
-- Nablla wraps your text as:
+- Sercrod wraps your text as:
 
   - `with(scope){ <expr> }`
 
-- There is no parsing or rewriting by Nablla itself.
+- There is no parsing or rewriting by Sercrod itself.
 - Any valid JavaScript statement is accepted, for example:
-  - Simple assignments: `count = 0`, `appTitle = 'Nablla'`
+  - Simple assignments: `count = 0`, `appTitle = 'Sercrod'`
   - Property updates: `settings.theme = 'dark'`
   - Function calls: `logChange(message)`, `store.dispatch(action)`
   - Multiple statements separated by semicolons.
@@ -84,7 +84,7 @@ Examples:
 
 ```html
 <div *global="
-  appTitle = 'Nablla Demo';
+  appTitle = 'Sercrod Demo';
   settings.ready = true;
 "></div>
 ```
@@ -98,7 +98,7 @@ Examples:
 
 Notes:
 
-- Because the code runs inside `with(scope){ ... }`, free identifiers first resolve against Nablla’s evaluation scope, then fall back to `globalThis`.
+- Because the code runs inside `with(scope){ ... }`, free identifiers first resolve against Sercrod’s evaluation scope, then fall back to `globalThis`.
 - `*global` is intended for side effects, not for returning values.
 
 
@@ -106,7 +106,7 @@ Notes:
 
 `*global` uses a clear policy for writes:
 
-- Check if the key already exists in Nablla data (`this._data`):
+- Check if the key already exists in Sercrod data (`this._data`):
   - If yes, assign to that data field.
   - If no, assign to `globalThis`.
 
@@ -125,17 +125,17 @@ In simplified terms:
 
 Practical consequences:
 
-- If you want `*global` to update a Nablla data field, declare that field in `data` so the key already exists.
+- If you want `*global` to update a Sercrod data field, declare that field in `data` so the key already exists.
 - If you want to intentionally write to a true global variable (for example `window.appVersion`), do not define that key in `data`.
 
 
 #### Scope and special helpers
 
-Before evaluating the `*global` expression, Nablla enriches the scope:
+Before evaluating the `*global` expression, Sercrod enriches the scope:
 
 - `$parent`:
   - Injected when not already present.
-  - Points to the data object of the nearest ancestor `na-blla` element (or equivalent Nablla host).
+  - Points to the data object of the nearest ancestor `serc-rod` element (or equivalent Sercrod host).
   - Not enumerable, so it does not get accidentally copied into data.
 
 - External methods (from configuration):
@@ -144,7 +144,7 @@ Before evaluating the `*global` expression, Nablla enriches the scope:
   - If `window[name]` is a function, it is exposed as `scope[name]`.
   - If `window[name]` is an object, its function-valued properties are flattened into the scope.
 
-- Internal Nablla utilities:
+- Internal Sercrod utilities:
 
   - All functions in `this.constructor._internal_methods` are added to the scope when not already present.
 
@@ -158,7 +158,7 @@ Children of the element:
 
 `*global` participates in the non-structural phase of the render pipeline.
 
-For each element processed by Nablla:
+For each element processed by Sercrod:
 
 1. Non-structural directives (no return, can be applied multiple times):
    - `*let` is evaluated first.
@@ -183,12 +183,12 @@ Consequences:
 
 #### Execution model
 
-Conceptually, when Nablla encounters `*global` on an element:
+Conceptually, when Sercrod encounters `*global` on an element:
 
 1. It builds an evaluation scope (`scope`) that includes:
    - Current data, including `$data`, `$root`, `$parent`.
    - Methods from configuration.
-   - Nablla’s internal helper methods.
+   - Sercrod’s internal helper methods.
 
 2. It wraps this scope in a `Proxy` that:
    - Always reports `true` from `has` so that `with(scope){ ... }` sees every identifier as present.
@@ -209,7 +209,7 @@ Conceptually, when Nablla encounters `*global` on an element:
 
 Error handling:
 
-- If execution throws an exception, and `this.error?.warn` is truthy, Nablla logs a warning:
+- If execution throws an exception, and `this.error?.warn` is truthy, Sercrod logs a warning:
 
   - It includes the directive name (`*global`), the error message, and the original expression text.
 
@@ -229,7 +229,7 @@ Conditionals on the same element:
   </div>
   ```
 
-- Here `logChange` runs whenever Nablla processes the element, even when `ready` is false and the element content is not displayed.
+- Here `logChange` runs whenever Sercrod processes the element, even when `ready` is false and the element content is not displayed.
 
 Loops:
 
@@ -257,7 +257,7 @@ Events:
 
 - Prefer data-first design:
 
-  - Define your shared state under the Nablla host’s `data`.
+  - Define your shared state under the Sercrod host’s `data`.
   - Use `*global` to update known keys in that data instead of creating new global variables.
 
 - Avoid accidental global pollution:
@@ -290,16 +290,16 @@ Events:
 
 - Use `$parent` when writing from nested components:
 
-  - When placed inside a nested Nablla host, `*global` can still see `$parent`:
+  - When placed inside a nested Sercrod host, `*global` can still see `$parent`:
 
     ```html
-    <na-blla id="parent" data='{"state": {"count": 0}}'>
-      <na-blla id="child">
+    <serc-rod id="parent" data='{"state": {"count": 0}}'>
+      <serc-rod id="child">
         <button *global="$parent.state.count++">
           Increment
         </button>
-      </na-blla>
-    </na-blla>
+      </serc-rod>
+    </serc-rod>
     ```
 
     - Here, `$parent.state.count` in the child updates the parent’s data.
@@ -310,13 +310,13 @@ Events:
 Update an existing data key or create a global fallback:
 
 ```html
-<na-blla id="app" data='{"settings": { "theme": "light" }}'>
+<serc-rod id="app" data='{"settings": { "theme": "light" }}'>
   <div *global="
     if(settings.theme === 'light'){
       settings.theme = 'dark';
     }
   "></div>
-</na-blla>
+</serc-rod>
 ```
 
 Bridge with a global analytics object:
@@ -331,25 +331,25 @@ window.Analytics = {
 ```
 
 ```html
-<na-blla id="page" data='{"title": "Home"}'>
+<serc-rod id="page" data='{"title": "Home"}'>
   <div *global="Analytics.trackPage(title)"></div>
-</na-blla>
+</serc-rod>
 ```
 
 Write root-level counters:
 
 ```html
-<na-blla id="app" data='{"counter": 0}'>
+<serc-rod id="app" data='{"counter": 0}'>
   <button
     @click="counter++"
     *global="totalClicks = (totalClicks || 0) + 1"
   >
     Click
   </button>
-</na-blla>
+</serc-rod>
 ```
 
-- `counter` is stored in Nablla data.
+- `counter` is stored in Sercrod data.
 - `totalClicks` is created on `globalThis` (for example `window.totalClicks`) unless you declare it in `data` first.
 
 
@@ -358,11 +358,11 @@ Write root-level counters:
 - `*global` and `n-global` are aliases; they behave the same and differ only in attribute name.
 - The expression is executed as plain JavaScript inside a `with(scope){ ... }` block.
 - Writes follow this order:
-  - If the key already exists in Nablla data (`_data`), update data.
+  - If the key already exists in Sercrod data (`_data`), update data.
   - Otherwise, write to `globalThis`.
 - `*global` is evaluated before structural directives such as `*if`, `*switch`, `*each`, and `*for` on the same element.
 - The attribute is not removed after evaluation, so side effects happen on every render of that element.
 - There is no prohibition on combining `*global` with other directives on the same element, but you should remember that:
   - `*global` runs even when later conditionals or structural directives skip rendering.
   - Repeated structures can cause the expression to run many times.
-- For ordinary data flow within a component, prefer `*let` and direct assignments in bindings; reserve `*global` for shared state and interoperability with non-Nablla code.
+- For ordinary data flow within a component, prefer `*let` and direct assignments in bindings; reserve `*global` for shared state and interoperability with non-Sercrod code.

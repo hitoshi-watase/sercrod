@@ -16,7 +16,7 @@ In addition, `*case.break` is a shorthand that combines `*case` and `*break` on 
 A typical `*switch` with a breaking case:
 
 ```html
-<na-blla id="app" data='{"status":"ready"}'>
+<serc-rod id="app" data='{"status":"ready"}'>
   <div *switch="status">
     <p *case="'idle'">Idle…</p>
 
@@ -29,7 +29,7 @@ A typical `*switch` with a breaking case:
     <!-- Never reached in this example -->
     <p *default>Unknown status</p>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 Conceptually:
@@ -79,12 +79,12 @@ Aliases:
 `*break` participates in the evaluation of `*switch` as follows:
 
 - The `*switch` host evaluates its expression once and stores the result in `$switch` for children.
-- Nablla walks the direct child elements of the `*switch` host from top to bottom.
+- Sercrod walks the direct child elements of the `*switch` host from top to bottom.
 - It decides when to start "falling through" (rendering) by matching `*case` and `*case.break` against `$switch`, or by reaching `*default`.
 - Once falling has started:
 
   - Each child element in the fallthrough range is rendered in order.
-  - After rendering each such branch, Nablla checks the original branch element for:
+  - After rendering each such branch, Sercrod checks the original branch element for:
     - `*break` or `n-break`
     - `*case.break` or `n-case.break`
   - If any of those are present, the walk stops and no further children of the `*switch` are processed.
@@ -159,8 +159,8 @@ In a `*switch` block:
 - Branch bodies can still access:
 
   - Host data via whatever property names you used in `data`.
-  - `$root` for the root Nablla host’s data.
-  - `$parent` for the nearest ancestor Nablla host’s data.
+  - `$root` for the root Sercrod host’s data.
+  - `$parent` for the nearest ancestor Sercrod host’s data.
   - Methods injected via `*methods` or configuration.
 
 - `*break` does not expose any special information about the `*switch` beyond what `$switch` already provides.
@@ -235,13 +235,13 @@ Interaction with `*for` and `*each`:
 Unconditional break with `*break`:
 
 ```html
-<na-blla id="app" data='{"status":"processing"}'>
+<serc-rod id="app" data='{"status":"processing"}'>
   <div *switch="status">
     <p *case="'processing'" *break>Processing…</p>
     <p *case="'processing'">Also processing (not reached)</p>
     <p *default>Fallback (not reached)</p>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 - The first `*case` matches and renders.
@@ -250,7 +250,7 @@ Unconditional break with `*break`:
 Mixed fallthrough with one breaking branch:
 
 ```html
-<na-blla id="app" data='{"status":"multi"}'>
+<serc-rod id="app" data='{"status":"multi"}'>
   <div *switch="status">
     <p *case="'multi'">First line</p>
     <p *case="'multi'">Second line</p>
@@ -258,7 +258,7 @@ Mixed fallthrough with one breaking branch:
     <p *case="'multi'">Fourth line (not reached)</p>
     <p *default>Default (not reached)</p>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 - All three `*case` branches for `"multi"` are rendered in order until the `.break` case.

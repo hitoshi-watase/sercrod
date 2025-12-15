@@ -3,7 +3,7 @@
 #### Summary
 
 `*input` binds a form control’s value to a data path.
-It keeps a DOM control (such as `<input>`, `<textarea>`, or `<select>`) in sync with a field in Nablla’s data or staged data.
+It keeps a DOM control (such as `<input>`, `<textarea>`, or `<select>`) in sync with a field in Sercrod’s data or staged data.
 The alias `n-input` behaves identically.
 
 `*input` is focused on value-level binding and works together with `*lazy` and `*eager` to control how often the host re-renders after a change.
@@ -14,21 +14,21 @@ The alias `n-input` behaves identically.
 A simple text field bound to `form.name`:
 
 ```html
-<na-blla id="app" data='{"form":{"name":"Alice"}}'>
+<serc-rod id="app" data='{"form":{"name":"Alice"}}'>
   <label>
     Name:
     <input type="text" *input="form.name">
   </label>
 
   <p>Hello, <span *print="form.name"></span>!</p>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
 - On initial render, the `<input>` shows `"Alice"`.
 - When the user edits the field, `form.name` is updated.
-- The `<span *print="form.name">` reflects the new value after Nablla’s update cycle.
+- The `<span *print="form.name">` reflects the new value after Sercrod’s update cycle.
 
 
 #### Behavior
@@ -36,9 +36,9 @@ Behavior:
 `*input` provides a two-way binding between a control and a data expression:
 
 - Data to UI:
-  - On render, Nablla evaluates the expression from `*input` and sets the control’s current value, checked state, or selection.
+  - On render, Sercrod evaluates the expression from `*input` and sets the control’s current value, checked state, or selection.
 - UI to data:
-  - When the user interacts with the control, Nablla writes the new value back to the expression using `assign_expr`.
+  - When the user interacts with the control, Sercrod writes the new value back to the expression using `assign_expr`.
   - Optional filters (`model_out` and `input_in`) can transform data when rendering or capturing input.
 - Staged vs live data:
   - If the host has staged data (`this._stage`), `*input` writes into the staging area.
@@ -55,7 +55,7 @@ Other elements with a `.value` property may technically work, but `*input` is de
 
 #### Expression syntax
 
-The `*input` expression is evaluated as a normal Nablla expression and used as an assignment target:
+The `*input` expression is evaluated as a normal Sercrod expression and used as an assignment target:
 
 - Typical pattern:
 
@@ -70,11 +70,11 @@ The `*input` expression is evaluated as a normal Nablla expression and used as a
 
 Assignment semantics:
 
-- Nablla’s `assign_expr(lhs, value, scope)`:
+- Sercrod’s `assign_expr(lhs, value, scope)`:
   - Uses a sandboxed `with(scope){ lhs = __val }`.
   - For unknown top-level identifiers, it allocates nested objects on demand.
     - For example, `*input="profile.name"` on an initially empty data object will create `data.profile` if needed.
-  - If the assignment fails, Nablla logs a warning (when warn logging is enabled) and keeps the UI functional.
+  - If the assignment fails, Sercrod logs a warning (when warn logging is enabled) and keeps the UI functional.
 
 Best practice:
 
@@ -88,7 +88,7 @@ Best practice:
 
 1. Initial reflection (data to UI):
 
-   - During render, after Nablla has prepared the scope, it:
+   - During render, after Sercrod has prepared the scope, it:
      - Evaluates the `*input` expression on either staged or main data.
      - Applies the value to the control:
        - For `input[type="checkbox"]`: sets `checked` from a boolean or array value.
@@ -98,7 +98,7 @@ Best practice:
 
 2. Event-driven updates (UI to data):
 
-   - Nablla attaches event listeners:
+   - Sercrod attaches event listeners:
      - `input` for text-like controls.
      - `change` for checkboxes, radios, selects, and others.
    - On those events, it:
@@ -116,12 +116,12 @@ A simplified execution model for `*input`:
 
 1. Resolve binding:
 
-   - Nablla obtains the expression string from `n-input` or `*input`.
+   - Sercrod obtains the expression string from `n-input` or `*input`.
    - It chooses a target object:
      - Prefer staged data (`this._stage`) when present.
      - Otherwise use main data (`this._data`).
    - It tests evaluation:
-     - If evaluating the expression on staged or main data throws a `ReferenceError`, Nablla falls back to the current scope object.
+     - If evaluating the expression on staged or main data throws a `ReferenceError`, Sercrod falls back to the current scope object.
      - This allows bindings to work when the path only exists in the scope, not yet in the main data.
 
 2. Initial data to UI:
@@ -151,7 +151,7 @@ A simplified execution model for `*input`:
 
 3. IME composition handling:
 
-   - For text-like controls (`input` except checkbox/radio, and `textarea`), Nablla tracks IME composition:
+   - For text-like controls (`input` except checkbox/radio, and `textarea`), Sercrod tracks IME composition:
      - While composing (between `compositionstart` and `compositionend`), `input` events are ignored.
      - After composition ends, normal `input` handling resumes.
 
@@ -210,7 +210,7 @@ Scope behavior:
 
 Guidelines:
 
-- Prefer to bind to stable data paths derived from `data` on `<na-blla>`.
+- Prefer to bind to stable data paths derived from `data` on `<serc-rod>`.
 - Avoid binding directly to transient local variables created by `*let` unless you understand the implications.
 
 
@@ -242,7 +242,7 @@ The binding still obeys the same assignment semantics: the expression is the lef
 - With `*for`:
 
   ```html
-  <na-blla id="list" data='{
+  <serc-rod id="list" data='{
     "tags":["HTML","CSS","JavaScript"]
   }'>
     <ul>
@@ -255,7 +255,7 @@ The binding still obeys the same assignment semantics: the expression is the lef
     </ul>
 
     <p>Selected: <span *print="selectedTags.join(', ')"></span></p>
-  </na-blla>
+  </serc-rod>
   ```
 
   - Here, `selectedTags` is expected to be an array.
@@ -274,7 +274,7 @@ The binding still obeys the same assignment semantics: the expression is the lef
 - With `*stage`:
 
   ```html
-  <na-blla id="profile" data='{"profile":{"name":"Taro","email":"taro@example.com"}}'>
+  <serc-rod id="profile" data='{"profile":{"name":"Taro","email":"taro@example.com"}}'>
     <form *stage="'profile'">
       <label>
         Name:
@@ -289,7 +289,7 @@ The binding still obeys the same assignment semantics: the expression is the lef
       <button type="button" *apply="'profile'">Save</button>
       <button type="button" *restore="'profile'">Reset</button>
     </form>
-  </na-blla>
+  </serc-rod>
   ```
 
   - Inside the staged area, `profile` refers to staged data under `stage.profile`.
@@ -308,7 +308,7 @@ The binding still obeys the same assignment semantics: the expression is the lef
 
   - `*eager` and `n-eager` affect text-style inputs and textarea on `input` events:
     - When `*eager` is enabled, text changes cause a full `update()` of the host.
-    - Without `*eager`, Nablla only updates the host’s children, which can be cheaper.
+    - Without `*eager`, Sercrod only updates the host’s children, which can be cheaper.
   - Similar to `*lazy`, it can be:
     - Present as a bare attribute (`*eager`).
     - Or have an expression value (`*eager="expr"`) that decides whether eager behavior is active.
@@ -334,8 +334,8 @@ Project-level recommendation:
 
 - Use filters for formatting and parsing:
 
-  - Implement `Nablla._filters.model_out` to format bound values before they appear in controls.
-  - Implement `Nablla._filters.input_in` to parse or validate input before storing it in data (for example trimming whitespace or coercing to domain-specific types).
+  - Implement `Sercrod._filters.model_out` to format bound values before they appear in controls.
+  - Implement `Sercrod._filters.input_in` to parse or validate input before storing it in data (for example trimming whitespace or coercing to domain-specific types).
 
 - Combine with `*stage` for editing flows:
 
@@ -358,20 +358,20 @@ Project-level recommendation:
 Checkbox bound to a boolean:
 
 ```html
-<na-blla id="flag" data='{"settings":{"enabled":true}}'>
+<serc-rod id="flag" data='{"settings":{"enabled":true}}'>
   <label>
     <input type="checkbox" *input="settings.enabled">
     Enabled
   </label>
 
   <p>Status: <span *print="settings.enabled ? 'ON' : 'OFF'"></span></p>
-</na-blla>
+</serc-rod>
 ```
 
 Checkbox group bound to an array:
 
 ```html
-<na-blla id="colors" data='{"colors":["red","green","blue"],"selected":["red"]}'>
+<serc-rod id="colors" data='{"colors":["red","green","blue"],"selected":["red"]}'>
   <div *for="color of colors">
     <label>
       <input type="checkbox" *input="selected" :value="color">
@@ -380,13 +380,13 @@ Checkbox group bound to an array:
   </div>
 
   <p>Selected: <span *print="selected.join(', ')"></span></p>
-</na-blla>
+</serc-rod>
 ```
 
 Radio group bound to a single value:
 
 ```html
-<na-blla id="plan" data='{"plan":"basic"}'>
+<serc-rod id="plan" data='{"plan":"basic"}'>
   <label>
     <input type="radio" name="plan" *input="plan" value="basic">
     Basic
@@ -397,13 +397,13 @@ Radio group bound to a single value:
   </label>
 
   <p>Current plan: <span *print="plan"></span></p>
-</na-blla>
+</serc-rod>
 ```
 
 Select with multiple:
 
 ```html
-<na-blla id="multi" data='{
+<serc-rod id="multi" data='{
   "allOptions":["A","B","C"],
   "chosen":["A","C"]
 }'>
@@ -415,7 +415,7 @@ Select with multiple:
   </label>
 
   <p>Chosen: <span *print="chosen.join(', ')"></span></p>
-</na-blla>
+</serc-rod>
 ```
 
 
@@ -423,7 +423,7 @@ Select with multiple:
 
 - `*input` and `n-input` are aliases; choose one style and use it consistently.
 - `*input` is designed for `<input>`, `<textarea>`, and `<select>`.
-- The bound expression is treated as an assignment target; Nablla will attempt to create missing intermediate objects when necessary.
+- The bound expression is treated as an assignment target; Sercrod will attempt to create missing intermediate objects when necessary.
 - `*lazy` and `*eager` are optional helpers for tuning update timing; they do not change the core binding semantics.
 - IME composition is respected for text-like fields, so partial compositions do not repeatedly overwrite data.
-- As with other directives, `*input` follows Nablla’s general rules for expressions, filters, and scope resolution; there are no special restrictions on combining it with other directives on the same element, as long as the result is still a well-formed form control.
+- As with other directives, `*input` follows Sercrod’s general rules for expressions, filters, and scope resolution; there are no special restrictions on combining it with other directives on the same element, as long as the result is still a well-formed form control.

@@ -2,7 +2,7 @@
 
 #### Summary
 
-`*methods` and `n-methods` import global functions into a Nablla host so that they can be called from expressions inside that host.
+`*methods` and `n-methods` import global functions into a Sercrod host so that they can be called from expressions inside that host.
 
 - The attribute value is a space-separated list of names.
 - Each name refers to either:
@@ -26,9 +26,9 @@ Single global function:
   }
 </script>
 
-<na-blla id="app" data='{"value": 1}' *methods="toLabel">
+<serc-rod id="app" data='{"value": 1}' *methods="toLabel">
   <p *print="toLabel(value)"></p>
-</na-blla>
+</serc-rod>
 ```
 
 Object of functions:
@@ -42,27 +42,27 @@ Object of functions:
   };
 </script>
 
-<na-blla id="app" data='{"value": 2}' *methods="calc">
+<serc-rod id="app" data='{"value": 2}' *methods="calc">
   <p *print="inc(value)"></p>
   <p *print="double(value)"></p>
-</na-blla>
+</serc-rod>
 ```
 
 In this example:
 
 - `*methods="calc"` looks up `window.calc`.
-- Because it is an object, Nablla imports each function property as a top-level name in the expression scope:
+- Because it is an object, Sercrod imports each function property as a top-level name in the expression scope:
   - `inc` and `double` become available directly.
 - There is no implicit `calc` variable in expressions. You call `inc(value)`, not `calc.inc(value)`.
 
 
 #### Behavior
 
-`*methods` is an attribute on the Nablla host element:
+`*methods` is an attribute on the Sercrod host element:
 
 - It is observed by the custom element class via `observedAttributes`.
 - When the attribute changes, the value is split into tokens and stored as `_methods_names`.
-- When Nablla evaluates expressions or `*let` blocks inside this host, it uses `_methods_names` to inject functions into the evaluation scope.
+- When Sercrod evaluates expressions or `*let` blocks inside this host, it uses `_methods_names` to inject functions into the evaluation scope.
 
 Key properties:
 
@@ -77,28 +77,28 @@ Key properties:
 
 `*methods` and `n-methods` accept a space-separated list of identifiers:
 
-- On the Nablla host:
+- On the Sercrod host:
 
   ```html
-  <na-blla
+  <serc-rod
     id="app"
     data='{"value": 10}'
     *methods="toLabel calc"
   >
     ...
-  </na-blla>
+  </serc-rod>
   ```
 
 - Equivalent alias:
 
   ```html
-  <na-blla
+  <serc-rod
     id="app"
     data='{"value": 10}'
     n-methods="toLabel calc"
   >
     ...
-  </na-blla>
+  </serc-rod>
   ```
 
 Resolution for each token `name`:
@@ -118,16 +118,16 @@ The import model is intentionally simple:
 
 #### Evaluation timing
 
-`*methods` influences expression evaluation at the point where Nablla builds the sandbox for each expression.
+`*methods` influences expression evaluation at the point where Sercrod builds the sandbox for each expression.
 
-- For general expressions (such as `*if`, `*for`, `*each`, `*input`, interpolations, and most bindings), Nablla calls `eval_expr(expr, scope, opt)`:
+- For general expressions (such as `*if`, `*for`, `*each`, `*input`, interpolations, and most bindings), Sercrod calls `eval_expr(expr, scope, opt)`:
   - It creates a `merged` scope object from the current `scope`.
   - It injects special values such as `$data` and `$root`.
   - It injects `$parent` if needed.
   - It then injects functions from `*methods` via `_methods_names`.
-  - Finally, it injects Nablla’s internal methods from `_internal_methods`.
+  - Finally, it injects Sercrod’s internal methods from `_internal_methods`.
 
-- For `*let`, Nablla calls `eval_let(expr, scope, opt)`:
+- For `*let`, Sercrod calls `eval_let(expr, scope, opt)`:
   - It starts from the current `scope`.
   - It injects `$parent` if needed.
   - It injects functions from `*methods`.
@@ -154,7 +154,7 @@ In pseudocode, evaluation with `*methods` looks like this:
   2. Inject reserved helpers:
      - `$data` from this host’s `data`.
      - `$root` from the root host’s `data`, if any.
-     - `$parent` from the nearest ancestor Nablla host’s `data`, if not already set.
+     - `$parent` from the nearest ancestor Sercrod host’s `data`, if not already set.
   3. For each `name` in `_methods_names`:
      - If `window[name]` is a function and `merged[name]` is undefined:
        - Inject `merged[name] = window[name]`.
@@ -162,7 +162,7 @@ In pseudocode, evaluation with `*methods` looks like this:
        - For each `k` in `window[name]`:
          - If `window[name][k]` is a function and `merged[k]` is undefined:
            - Inject `merged[k] = window[name][k]`.
-  4. For each `k` in `Nablla._internal_methods`:
+  4. For each `k` in `Sercrod._internal_methods`:
      - If `merged[k]` is undefined:
        - Inject the built-in helper as `merged[k]`.
   5. Evaluate the expression in `with(merged){ return (expr) }`.
@@ -184,7 +184,7 @@ This model guarantees:
 
 #### Scope and resolution order
 
-When you call `foo()` inside an expression on a host with `*methods`, Nablla resolves `foo` in the following effective order:
+When you call `foo()` inside an expression on a host with `*methods`, Sercrod resolves `foo` in the following effective order:
 
 1. Local scope (loop variables, `*let` bindings, and similar).
 2. Host `data` and any stage buffer associated with it.
@@ -230,7 +230,7 @@ Example: formatting in conditionals and loops
   };
 </script>
 
-<na-blla
+<serc-rod
   id="users"
   data='{"users":[{"first":"Ann","last":"Lee","age":22},{"first":"Bob","last":"Smith","age":15}]}'
   *methods="userHelpers"
@@ -240,7 +240,7 @@ Example: formatting in conditionals and loops
       <span *print="displayName(user)"></span>
     </li>
   </ul>
-</na-blla>
+</serc-rod>
 ```
 
 Example: derived values via `*let`
@@ -252,7 +252,7 @@ Example: derived values via `*let`
   }
 </script>
 
-<na-blla
+<serc-rod
   id="cart"
   data='{"price": 1000, "taxRate": 0.1}'
   *methods="priceWithTax"
@@ -261,7 +261,7 @@ Example: derived values via `*let`
     Subtotal: <span *print="price"></span><br>
     Total: <span *print="total"></span>
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 
@@ -281,11 +281,11 @@ Example:
   }
 </script>
 
-<na-blla id="app" data='{"label":"Hello"}'>
+<serc-rod id="app" data='{"label":"Hello"}'>
   <button @click="logClick(label)">
     Click
   </button>
-</na-blla>
+</serc-rod>
 ```
 
 This works even without `*methods`, because:
@@ -320,9 +320,9 @@ In short:
     };
   </script>
 
-  <na-blla data='{"name":"Ann"}' *methods="str">
+  <serc-rod data='{"name":"Ann"}' *methods="str">
     <p *print="upper(name)"></p>
-  </na-blla>
+  </serc-rod>
   ```
 
 - Keep the list small and explicit:
@@ -341,9 +341,9 @@ In short:
   - Prefer methods that are pure or idempotent for use in `*if`, `*for`, `*each`, and formatting.
   - Reserve side-effect-heavy operations for event handlers or dedicated APIs.
 
-- Do not rely on `*methods` outside Nablla hosts:
+- Do not rely on `*methods` outside Sercrod hosts:
 
-  - The attribute is only observed on the Nablla custom element.
+  - The attribute is only observed on the Sercrod custom element.
   - Using `*methods` on a normal HTML element has no effect.
 
 
@@ -365,7 +365,7 @@ Multiple containers:
   };
 </script>
 
-<na-blla
+<serc-rod
   id="checkout"
   data='{"unitPrice": 1200, "quantity": 3}'
   *methods="math format"
@@ -373,12 +373,12 @@ Multiple containers:
   <p *let="total = mul(unitPrice, quantity)">
     Total: <span *print="asCurrency(total)"></span>
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 Overriding internal helpers:
 
-- Nablla injects internal helper methods after `*methods`.
+- Sercrod injects internal helper methods after `*methods`.
 - If you want to override a built-in helper, you can define a function with the same name in data or import it via `*methods` before it would be filled from `_internal_methods`.
 
 Example (conceptual):
@@ -393,23 +393,23 @@ Example (conceptual):
   };
 </script>
 
-<na-blla
+<serc-rod
   id="app"
   data='{"text": "<b>unsafe</b>"}'
   *methods="helpers"
 >
   <p *print="htmlEscape(text)"></p>
-</na-blla>
+</serc-rod>
 ```
 
-Here, if Nablla has a built-in `htmlEscape`, your version imported via `*methods` will be used instead, because expression scopes are filled from data and imported methods before `_internal_methods`.
+Here, if Sercrod has a built-in `htmlEscape`, your version imported via `*methods` will be used instead, because expression scopes are filled from data and imported methods before `_internal_methods`.
 
 
 #### Notes
 
-- `*methods` and `n-methods` are attributes on the Nablla host. They are not general-purpose directives for arbitrary elements.
+- `*methods` and `n-methods` are attributes on the Sercrod host. They are not general-purpose directives for arbitrary elements.
 - The attribute value is parsed as a space-separated list each time it changes.
-- For each name, Nablla looks at `window[name]` at evaluation time:
+- For each name, Sercrod looks at `window[name]` at evaluation time:
   - Functions are imported as-is under their own name.
   - Objects contribute their function properties as top-level names.
 - Imported methods affect:
@@ -418,4 +418,4 @@ Here, if Nablla has a built-in `htmlEscape`, your version imported via `*methods
   - They do not change how `eval_event` falls back to `window`, although using `*methods` keeps usage consistent.
 - Imports only fill missing names. They never overwrite existing entries in the scope, data, or previously imported methods.
 - Internal helpers from `_internal_methods` are always available as a last resort, unless you override them via data or `*methods`.
-- There is no special runtime handling for `type="application/nablla-methods"` by itself. How you define and attach functions to `window` is up to your application; `*methods` simply imports those global functions into Nablla’s expression scope.
+- There is no special runtime handling for `type="application/sercrod-methods"` by itself. How you define and attach functions to `window` is up to your application; `*methods` simply imports those global functions into Sercrod’s expression scope.

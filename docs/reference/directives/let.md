@@ -2,9 +2,9 @@
 
 #### Summary
 
-`*let` runs a small piece of JavaScript in Nablla’s sandbox to define local helper variables.
+`*let` runs a small piece of JavaScript in Sercrod’s sandbox to define local helper variables.
 These variables are available to expressions on the same element and all of its descendants.
-Newly created variable names are also promoted into the host data so that later elements inside the same `<na-blla>` can read them.
+Newly created variable names are also promoted into the host data so that later elements inside the same `<serc-rod>` can read them.
 
 Alias:
 
@@ -16,11 +16,11 @@ Alias:
 Compute a derived value once and reuse it in the element’s subtree:
 
 ```html
-<na-blla id="invoice" data='{"price": 1200, "qty": 3}'>
+<serc-rod id="invoice" data='{"price": 1200, "qty": 3}'>
   <p *let="total = price * qty">
     Subtotal: <span *print="total"></span> JPY
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 In this example:
@@ -28,14 +28,14 @@ In this example:
 - `*let` runs before any other directive on the `<p>`.
 - The code `total = price * qty` creates a new variable `total` in the local scope.
 - The child `<span *print="total">` can read `total` directly.
-- Because `total` did not exist in the host data before, it is also promoted into the Nablla data scope for this `<na-blla>`.
+- Because `total` did not exist in the host data before, it is also promoted into the Sercrod data scope for this `<serc-rod>`.
 
 
 #### Behavior
 
 At a high level, `*let` behaves like “execute this code in the current data scope and keep any new variables”:
 
-- It reads the current data for the host `<na-blla>` and any in-scope iteration variables.
+- It reads the current data for the host `<serc-rod>` and any in-scope iteration variables.
 - It executes the `*let` string as JavaScript (expressions or simple statements) in a sandboxed scope.
 - It updates the effective scope for the current element and its descendants.
 - It promotes newly created variable names into the host data, but does not overwrite existing ones.
@@ -43,7 +43,7 @@ At a high level, `*let` behaves like “execute this code in the current data sc
 Key points:
 
 - `*let` is a non-structural directive: it does not clone or repeat elements; it just prepares values for other directives.
-- The attribute remains on the element; internally Nablla re-evaluates it on each re-render.
+- The attribute remains on the element; internally Sercrod re-evaluates it on each re-render.
 - `*let` runs before `*if`, `*switch`, `*each`, and `*for` on the same element, so later directives can rely on variables created by `*let`.
 
 
@@ -51,7 +51,7 @@ Key points:
 
 The value of `*let` is treated as JavaScript code:
 
-- The code runs inside Nablla’s expression sandbox using a dedicated scope object.
+- The code runs inside Sercrod’s expression sandbox using a dedicated scope object.
 - You can write one or more simple statements.
 
 Typical patterns:
@@ -130,20 +130,20 @@ Here `*if` can safely use `is_expensive` because `*let` runs first.
 
 #### Execution model
 
-Conceptually, Nablla handles `*let` on an element like this:
+Conceptually, Sercrod handles `*let` on an element like this:
 
 1. Compute the current effective scope `effScope` for this element:
-   - Based on the host data for the `<na-blla>`.
+   - Based on the host data for the `<serc-rod>`.
    - Including any variables from surrounding loops or parent `*let` directives.
 
 2. If the element has `*let` or `n-let`:
 
    - Create a new scope object whose prototype points to `effScope`.
    - Copy the current values from `effScope` into this new scope.
-   - Inject `$parent` so that branch-local code has access to the nearest ancestor Nablla’s data.
-   - Inject any methods that were registered via `*methods` and Nablla’s internal helper methods.
+   - Inject `$parent` so that branch-local code has access to the nearest ancestor Sercrod’s data.
+   - Inject any methods that were registered via `*methods` and Sercrod’s internal helper methods.
 
-3. Run the `*let` code inside Nablla’s sandbox:
+3. Run the `*let` code inside Sercrod’s sandbox:
 
    - Reads go through the scope or, as a fallback, the real global environment for standard objects (such as `Math`).
    - Writes update only the local scope object created for `*let`.
@@ -151,13 +151,13 @@ Conceptually, Nablla handles `*let` on an element like this:
 
 4. After the code runs:
 
-   - Nablla copies any variables that did not exist in the host data into the host data object.
+   - Sercrod copies any variables that did not exist in the host data into the host data object.
    - Existing host data keys are not overwritten by `*let`.
    - The new scope becomes the effective scope for this element and its descendants.
 
-5. Nablla schedules a re-render if necessary so that bindings see the updated values.
+5. Sercrod schedules a re-render if necessary so that bindings see the updated values.
 
-This model keeps `*let` local by default, but still lets you share newly defined helper variables with other elements in the same `<na-blla>`.
+This model keeps `*let` local by default, but still lets you share newly defined helper variables with other elements in the same `<serc-rod>`.
 
 
 #### Variable creation and promotion
@@ -174,7 +174,7 @@ Rules:
   - The new name lives in the local `*let` scope and is visible to:
 
     - The current element and its descendants.
-    - Later elements in the same `<na-blla>`, because Nablla promotes this name into the host data.
+    - Later elements in the same `<serc-rod>`, because Sercrod promotes this name into the host data.
 
 - When `*let` assigns to a name that already exists in the host data (for example `price`):
 
@@ -198,9 +198,9 @@ Inside `*let`:
   - Loop variables like `item`, `index`, `row`, `cell` when used inside `*each` or `*for` bodies.
   - Methods referenced via `*methods` for the host.
 
-- Additionally, Nablla injects `$parent` into the scope:
+- Additionally, Sercrod injects `$parent` into the scope:
 
-  - `$parent` refers to the data of the nearest ancestor `<na-blla>` component (if any).
+  - `$parent` refers to the data of the nearest ancestor `<serc-rod>` component (if any).
   - This makes it possible to compute values based on both local data and parent data.
 
 The local `*let` scope then becomes the base scope for:
@@ -216,7 +216,7 @@ The local `*let` scope then becomes the base scope for:
 On the same element as `*if` / `*elseif` / `*else`:
 
 - `*let` is evaluated before the condition for that branch.
-- Each branch can have its own `*let`, and Nablla uses a branch-specific scope when checking its condition.
+- Each branch can have its own `*let`, and Sercrod uses a branch-specific scope when checking its condition.
 
 Example:
 
@@ -292,7 +292,7 @@ You can also use `*let` on the loop container:
 Sharing a derived variable with siblings:
 
 ```html
-<na-blla id="totals" data='{"items":[{"name":"A","price":100},{"name":"B","price":200}]}'>
+<serc-rod id="totals" data='{"items":[{"name":"A","price":100},{"name":"B","price":200}]}'>
   <section *let="
     subtotal = 0;
     for(const item of items){
@@ -304,31 +304,31 @@ Sharing a derived variable with siblings:
 
   <!-- Later element can also see subtotal, because it was a new name -->
   <p>Summary: total amount is <span *print="subtotal"></span> JPY</p>
-</na-blla>
+</serc-rod>
 ```
 
 Using `$parent` data in a nested component:
 
 ```html
-<na-blla id="root" data='{"currency":"JPY"}'>
-  <na-blla id="child" data='{"price": 500}'>
+<serc-rod id="root" data='{"currency":"JPY"}'>
+  <serc-rod id="child" data='{"price": 500}'>
     <p *let="text = price + ' ' + $parent.currency">
       <span *print="text"></span>
     </p>
-  </na-blla>
-</na-blla>
+  </serc-rod>
+</serc-rod>
 ```
 
 Here:
 
-- The inner Nablla host defines `price` in its own data.
+- The inner Sercrod host defines `price` in its own data.
 - `*let` reads `$parent.currency` from the outer host and combines it with `price`.
 
 
 #### Notes
 
 - `*let` and `n-let` are aliases.
-- The code runs inside Nablla’s sandbox and uses a special scope; it is not the same as writing code directly into global script tags.
+- The code runs inside Sercrod’s sandbox and uses a special scope; it is not the same as writing code directly into global script tags.
 - `*let` does not overwrite existing host data properties; it only promotes newly created names into the host data.
 - Reads can see global built-in objects like `Math`, but writes go into the local scope instead of the real global environment.
 - `*let` is evaluated on each render of the element. Ensure that the code is safe to run multiple times.

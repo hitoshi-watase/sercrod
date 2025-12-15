@@ -2,10 +2,10 @@
 
 #### Summary
 
-`*rem` removes an element from the rendered output and treats it as a Nablla-only comment.
+`*rem` removes an element from the rendered output and treats it as a Sercrod-only comment.
 The directive has an alias `n-rem`.
 
-Use `*rem` when you want to keep blocks of markup, notes, or alternate versions in your templates for Nablla, while ensuring that nothing from those blocks appears in the final HTML that the browser or user sees.
+Use `*rem` when you want to keep blocks of markup, notes, or alternate versions in your templates for Sercrod, while ensuring that nothing from those blocks appears in the final HTML that the browser or user sees.
 
 
 #### Basic example
@@ -13,14 +13,14 @@ Use `*rem` when you want to keep blocks of markup, notes, or alternate versions 
 A debug-only block that you want to keep in the template, but never ship:
 
 ```html
-<na-blla id="app" data='{"debug": true}'>
+<serc-rod id="app" data='{"debug": true}'>
   <div *rem>
-    This block is visible only to Nablla and your editor,
+    This block is visible only to Sercrod and your editor,
     not to end users.
   </div>
 
   <p>Real content goes here.</p>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
@@ -32,8 +32,8 @@ Behavior:
 
 #### Behavior
 
-- `*rem` and `n-rem` mark an element and its entire subtree as a Nablla-only comment.
-- When Nablla encounters an element with `*rem` or `n-rem`:
+- `*rem` and `n-rem` mark an element and its entire subtree as a Sercrod-only comment.
+- When Sercrod encounters an element with `*rem` or `n-rem`:
   - It does not evaluate child nodes or directives inside that element.
   - It does not keep the element in the final rendered tree.
 - The contents are effectively erased from the runtime DOM, while remaining in the source template for development and maintenance.
@@ -87,8 +87,8 @@ Common situations where `*rem` is useful:
 
 #### Evaluation timing
 
-- `*rem` is checked when Nablla visits a node during rendering.
-- As soon as Nablla sees `*rem` or `n-rem` on a node:
+- `*rem` is checked when Sercrod visits a node during rendering.
+- As soon as Sercrod sees `*rem` or `n-rem` on a node:
   - It stops further processing for that node.
   - It does not traverse or render the children.
   - Any other directives on the same node are effectively ignored for rendering.
@@ -103,13 +103,13 @@ Practical effect:
 
 Conceptually, the renderer behaves like this:
 
-1. Nablla visits a node in the template.
+1. Sercrod visits a node in the template.
 2. It checks whether the node has `*rem` or `n-rem`.
 3. If neither attribute is present:
    - Rendering proceeds normally, and other directives are considered.
 4. If `*rem` or `n-rem` is present:
-   - Nablla does not evaluate any directives on that node.
-   - Nablla does not descend into children.
+   - Sercrod does not evaluate any directives on that node.
+   - Sercrod does not descend into children.
    - The element is omitted from the rendered output.
 
 The important points:
@@ -119,7 +119,7 @@ The important points:
   - No conditional evaluation.
   - No loops.
   - No event bindings.
-- The block is treated as a Nablla-only comment that is simply not emitted to the final DOM.
+- The block is treated as a Sercrod-only comment that is simply not emitted to the final DOM.
 
 
 #### Variable creation and scope layering
@@ -190,12 +190,12 @@ Recommended usage:
 
 - Avoid combining `*rem` with other host-level directives:
 
-  - While Nablla ignores them under `*rem`, mixing them makes templates harder to reason about.
+  - While Sercrod ignores them under `*rem`, mixing them makes templates harder to reason about.
   - Prefer a clean split: either a block is a comment (`*rem`) or it participates in rendering (no `*rem`).
 
 - Use `*literal` for literal output instead:
 
-  - If you want to show raw text or markup without Nablla expansion, use `*literal`.
+  - If you want to show raw text or markup without Sercrod expansion, use `*literal`.
   - If you want to hide a block entirely, use `*rem`.
 
 - Keep the intent obvious:
@@ -243,6 +243,6 @@ Inline TODO reminder:
 
 - `*rem` and `n-rem` are aliases; they are treated the same by the renderer.
 - The subtree under `*rem` is not evaluated; it is safe to leave incomplete directives or expressions inside.
-- `*rem` is specifically intended as a Nablla-only comment mechanism, not as a runtime toggle.
-- For literal output without Nablla expansion, use `*literal` instead.
+- `*rem` is specifically intended as a Sercrod-only comment mechanism, not as a runtime toggle.
+- For literal output without Sercrod expansion, use `*literal` instead.
 - For runtime conditions, loops, or structural changes, use `*if`, `*for`, `*each`, and related directives on elements that do not carry `*rem`.

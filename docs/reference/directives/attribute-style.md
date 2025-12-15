@@ -2,7 +2,7 @@
 
 #### Summary
 
-:style is an attribute binding directive that controls an element’s inline style through a Nablla expression.
+:style is an attribute binding directive that controls an element’s inline style through a Sercrod expression.
 It evaluates the expression and assigns the result directly to element.style.cssText.
 The binding is one way: changes in data update the inline styles, but changing styles in the DOM does not modify data.
 
@@ -15,13 +15,13 @@ It is a thin, direct bridge between your expression and the element’s inline C
 Simple inline style binding:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "highlight": true
 }'>
   <p :style="highlight ? 'color: red; font-weight: bold;' : ''">
     This paragraph is red when highlight is true.
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
@@ -39,12 +39,12 @@ Behavior:
   :style is recognized when the element has an attribute whose name is exactly :style.
 
 - Expression evaluation  
-  Nablla reads the attribute value (for example :style="expr") and evaluates expr in the current scope with mode attr:style and el set to the current element.
+  Sercrod reads the attribute value (for example :style="expr") and evaluates expr in the current scope with mode attr:style and el set to the current element.
 
 - Value handling  
   On successful evaluation:
 
-  - Nablla takes the raw expression result as val.
+  - Sercrod takes the raw expression result as val.
   - It assigns element.style.cssText = val || "".
   - If val is a non empty string, the inline style is applied as written.
   - If val is falsy (for example "", 0, null, undefined, or false), the inline style string becomes "", effectively clearing inline styles.
@@ -52,13 +52,13 @@ Behavior:
 - Error handling  
   If the expression throws during evaluation:
 
-  - Nablla forces a safe fallback and sets element.style.cssText = "".
+  - Sercrod forces a safe fallback and sets element.style.cssText = "".
   - No custom filter is applied in this path.
 
 - Cleanup  
   After processing the attribute:
 
-  - If Nablla configuration _config.cleanup.handlers is truthy, Nablla removes the original :style attribute from the element.
+  - If Sercrod configuration _config.cleanup.handlers is truthy, Sercrod removes the original :style attribute from the element.
   - The resulting DOM only contains the computed style attribute (as produced by style.cssText), not the binding syntax.
 
 
@@ -67,15 +67,15 @@ Behavior:
 :style is evaluated as part of the element render pass, alongside other colon bindings:
 
 - Structural directives (such as *if, *for, *each, *include, *switch, and others) decide first whether the element is present and what its child structure is.
-- After structural processing, Nablla walks through the element’s attributes.
+- After structural processing, Sercrod walks through the element’s attributes.
 - All attributes whose name starts with : are handled by the colon-binding logic.
-- For key === "style", Nablla runs the dedicated :style branch and assigns style.cssText accordingly.
-- If the Nablla host re renders because data changed or an explicit update was requested, :style is re evaluated with the new scope and the inline style is updated.
+- For key === "style", Sercrod runs the dedicated :style branch and assigns style.cssText accordingly.
+- If the Sercrod host re renders because data changed or an explicit update was requested, :style is re evaluated with the new scope and the inline style is updated.
 
 
 #### Execution model
 
-Conceptually, Nablla’s execution model for :style looks like this:
+Conceptually, Sercrod’s execution model for :style looks like this:
 
 1. Detect the colon attribute:
    - When rendering an element node, inspect its attributes.
@@ -102,7 +102,7 @@ There is no additional filter step and no special handling for objects or arrays
 
 #### Interaction with *style and n-style
 
-Nablla also provides *style and n-style directives that assign inline styles using a separate, filter aware pipeline:
+Sercrod also provides *style and n-style directives that assign inline styles using a separate, filter aware pipeline:
 
 - *style / n-style:
   - These directives evaluate an expression and then run the result through the style filter.
@@ -119,7 +119,7 @@ Order and precedence on the same element:
 
 This means:
 
-- Nablla does not prohibit combining :style with *style or n-style on the same element, but *style / n-style will overwrite the effect of :style when both are present.
+- Sercrod does not prohibit combining :style with *style or n-style on the same element, but *style / n-style will overwrite the effect of :style when both are present.
 - For clarity and predictability, it is recommended to choose either :style or *style / n-style per element, rather than using both at once.
 
 
@@ -199,7 +199,7 @@ Because :style only binds an attribute, it composes freely with structural direc
 Using a computed style string in data:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "styles": {
     "warning": "color: #b45309; background-color: #fffbeb; padding: 0.5rem;",
     "normal": ""
@@ -209,13 +209,13 @@ Using a computed style string in data:
   <p :style="styles[mode]">
     This paragraph style is controlled via data.styles[mode].
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 Combining multiple conditions into one style string:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "isActive": true,
   "isDisabled": false
 }'>
@@ -223,7 +223,7 @@ Combining multiple conditions into one style string:
                   (isDisabled ? ' opacity: 0.5; pointer-events: none;' : '')">
     Click me
   </button>
-</na-blla>
+</serc-rod>
 ```
 
 
@@ -231,7 +231,7 @@ Combining multiple conditions into one style string:
 
 - :style is a dedicated colon style attribute binding that writes directly to element.style.cssText.
 - It does not use the style filter; only *style / n-style do.
-- The expression result is treated as read only from Nablla’s perspective and is not written back into data.
+- The expression result is treated as read only from Sercrod’s perspective and is not written back into data.
 - Falsy values (including "", 0, null, undefined, and false) clear style.cssText by setting it to the empty string.
 - If _config.cleanup.handlers is enabled, the original :style attribute will be removed from the rendered DOM, leaving only the actual style attribute content that results from style.cssText.
 - When :style and *style / n-style are present on the same element, :style is applied first and *style / n-style wins last; prefer choosing one per element to avoid confusion.

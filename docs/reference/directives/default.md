@@ -18,13 +18,13 @@ It participates in a JavaScript-like switch/fall-through model:
 A simple switch with a default branch:
 
 ```html
-<na-blla id="app" data='{"status":"idle"}'>
+<serc-rod id="app" data='{"status":"idle"}'>
   <div *switch="status">
     <p *case="'ready'">Ready</p>
     <p *case="'error'">An error occurred</p>
     <p *default>Unknown status</p>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
@@ -118,7 +118,7 @@ Notes about `*default` in this model:
 Inside a `*default` branch:
 
 - You can access everything that is normally visible in the scope:
-  - Data bound on the Nablla host (`data` or similar).
+  - Data bound on the Sercrod host (`data` or similar).
   - Special helpers like `$data`, `$root`, and `$parent`.
   - Methods injected via `*methods` or other configuration.
 - You can also access `$switch`, which is injected by the surrounding `*switch` host.
@@ -140,8 +140,8 @@ Here, the default branch reports the unknown value by reading `$switch` from the
 
 `*default` does not change the way parent data is accessed:
 
-- `$parent` (if present) still refers to the nearest ancestor Nablla host’s data.
-- `$root` still refers to the outermost Nablla host’s data.
+- `$parent` (if present) still refers to the nearest ancestor Sercrod host’s data.
+- `$root` still refers to the outermost Sercrod host’s data.
 - Regular data paths (such as `state`, `config`, or `data.something`) behave as usual.
 
 In other words, `*default` only affects where rendering starts and how branches fall through; it does not introduce a new “parent” concept.
@@ -219,7 +219,7 @@ Inside a `*default` branch you can freely use other directives:
 
   - Similarly, `*case.break` or `n-case.break` on any branch stops rendering after that branch, so any later `*default` is ignored in that case.
 
-Nablla-specific constraints and recommendations:
+Sercrod-specific constraints and recommendations:
 
 - Do not put `*default` and `*case` / `*case.break` on the same element.
   - The implementation will effectively treat the element as a default branch and ignore the case condition.
@@ -262,7 +262,7 @@ Nablla-specific constraints and recommendations:
 Default with a detailed fallback view:
 
 ```html
-<na-blla id="dashboard" data='{
+<serc-rod id="dashboard" data='{
   "mode": "unknown",
   "knownModes": ["list","detail"]
 }'>
@@ -288,7 +288,7 @@ Default with a detailed fallback view:
       </ul>
     </div>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 Default plus break to isolate fallback:

@@ -14,7 +14,7 @@ Typical uses include synchronising derived state, running validation at commit t
 A select that updates a selected value when the user chooses an option:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "selected": "apple",
   "options": ["apple", "banana", "orange"]
 }'>
@@ -32,15 +32,15 @@ A select that updates a selected value when the user chooses an option:
     You chose:
     <span *textContent="selected"></span>
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 Behaviour:
 
 - When the user selects a different option, the browser fires change on the select element.
-- Nablla evaluates the @change expression in the current scope, using the native event as $event.
+- Sercrod evaluates the @change expression in the current scope, using the native event as $event.
 - The expression writes back into data, updating selected.
-- After the handler runs, Nablla performs a lightweight child update of the host so that the rendered content stays in sync.
+- After the handler runs, Sercrod performs a lightweight child update of the host so that the rendered content stays in sync.
 
 
 #### Behavior
@@ -53,7 +53,7 @@ Core rules for @change:
 
 - Expression evaluation  
   The attribute value is parsed as an expression, for example selected = $event.target.value or onChange($event, el).
-  When the event fires, Nablla evaluates this expression against the current host data and local scope.
+  When the event fires, Sercrod evaluates this expression against the current host data and local scope.
 
 - Access to the event and element  
   Inside the expression:
@@ -61,7 +61,7 @@ Core rules for @change:
   - el and $el refer to the current DOM element.
 
 - Data updates  
-  When the expression assigns to properties that live on the host data object, Nablla updates both the scoped view and the underlying host data.
+  When the expression assigns to properties that live on the host data object, Sercrod updates both the scoped view and the underlying host data.
   The result value of the expression is ignored; only its side effects matter.
 
 - Modifiers  
@@ -73,7 +73,7 @@ Core rules for @change:
   These modifiers are parsed from the attribute name, for example @change.prevent.stop or @change.once.
 
 - Cleanup  
-  If cleanup.handlers is enabled in Nablla configuration, the original @change attribute is removed from the output DOM after it has been processed, leaving only the attached listener and normal attributes visible.
+  If cleanup.handlers is enabled in Sercrod configuration, the original @change attribute is removed from the output DOM after it has been processed, leaving only the attached listener and normal attributes visible.
 
 
 #### Evaluation timing
@@ -81,19 +81,19 @@ Core rules for @change:
 @change follows the normal rendering and event wiring phases:
 
 1. Structural directives such as *if, *for, *each, *switch, *include and *import decide whether an element exists and what its children look like.
-2. Once an element is kept, Nablla walks its attributes.
+2. Once an element is kept, Sercrod walks its attributes.
    Attributes whose names start with the configured events prefix (by default @) are treated as event handlers.
-3. For an attribute named @change or equivalent with modifiers, Nablla calls the dedicated event renderer to register a change listener.
-4. On later renders, Nablla reattaches handlers as needed, replacing previous listeners for the same event name on the same element.
+3. For an attribute named @change or equivalent with modifiers, Sercrod calls the dedicated event renderer to register a change listener.
+4. On later renders, Sercrod reattaches handlers as needed, replacing previous listeners for the same event name on the same element.
 
 When the browser fires change on the element, the expression is executed immediately in the same turn as the native event.
 
 
 #### Execution model
 
-At a high level, Nablla processes @change as follows:
+At a high level, Sercrod processes @change as follows:
 
-1. During rendering, Nablla finds an attribute whose name starts with the events prefix and whose event name part is change.
+1. During rendering, Sercrod finds an attribute whose name starts with the events prefix and whose event name part is change.
 2. It extracts:
    - The event name change.
    - The set of modifiers such as prevent, stop, once, capture or passive.
@@ -102,26 +102,26 @@ At a high level, Nablla processes @change as follows:
    - Exposes host data and local scope variables.
    - Provides $event and $e for the native event and el and $el for the element.
    - Propagates writes back into host data when assigning to known keys.
-4. Nablla defines a handler function that:
+4. Sercrod defines a handler function that:
    - Applies .prevent and .stop modifiers to the native event if requested.
-   - Evaluates the expression through Nablla’s event evaluator with the prepared scope and context.
+   - Evaluates the expression through Sercrod’s event evaluator with the prepared scope and context.
    - Decides how to update the host after the handler runs.
-5. For each element, Nablla stores a per event handler map so that re rendering removes the previous handler for that event before adding the new one.
+5. For each element, Sercrod stores a per event handler map so that re rendering removes the previous handler for that event before adding the new one.
    For the change event there is at most one active handler per element; the last declaration wins.
 
 Error handling:
 
-- If evaluation of the @change expression throws, Nablla logs a warning through its error.warn channel but keeps the application running.
+- If evaluation of the @change expression throws, Sercrod logs a warning through its error.warn channel but keeps the application running.
 - Errors in one handler do not prevent other elements from updating.
 
 
 #### Update behaviour after @change
 
-After a @change handler finishes, Nablla decides how to refresh the view:
+After a @change handler finishes, Sercrod decides how to refresh the view:
 
 - The runtime classifies input, change, beforeinput, keydown, keyup, composition events and clicks on form controls as input like events.
-- For these input like events, Nablla always performs a lightweight child update on the host:
-  - It calls the internal update children method for that host, which propagates updates into child Nablla instances without forcing a full re render of the host itself.
+- For these input like events, Sercrod always performs a lightweight child update on the host:
+  - It calls the internal update children method for that host, which propagates updates into child Sercrod instances without forcing a full re render of the host itself.
   - This strategy is chosen to keep focus stable while reflecting changes.
 
 For @change specifically:
@@ -143,7 +143,7 @@ With n input or *input:
 Example: normalise and mark dirty when a field changes:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "profile": { "age": 30 },
   "dirty":   { "age": false }
 }'>
@@ -153,13 +153,13 @@ Example: normalise and mark dirty when a field changes:
            profile.age = Number($event.target.value || 0);
            dirty.age = true;
          ">
-</na-blla>
+</serc-rod>
 ```
 
 With checkbox and radio:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "newsletter": false
 }'>
   <label>
@@ -168,13 +168,13 @@ With checkbox and radio:
            @change="newsletter = $event.target.checked">
     Receive newsletter
   </label>
-</na-blla>
+</serc-rod>
 ```
 
 With select multiple:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "selected_tags": []
 }'>
   <select multiple
@@ -186,7 +186,7 @@ With select multiple:
     <option value="offers">Offers</option>
     <option value="tips">Tips</option>
   </select>
-</na-blla>
+</serc-rod>
 ```
 
 In each case, @change runs only when the control’s value is committed by the browser, not on every key stroke, making it suitable for validations or side effects that should not run too frequently.
@@ -218,10 +218,10 @@ Inside loops:
 ```
 
 Each instance inside the loop receives its own @change handler bound to that iteration’s item.
-If a structural directive removes or replaces the element on update, Nablla re attaches the @change handler to the new element as part of the normal render process.
+If a structural directive removes or replaces the element on update, Sercrod re attaches the @change handler to the new element as part of the normal render process.
 
 
-#### Nablla specific restrictions
+#### Sercrod specific restrictions
 
 @change follows the general rules for event directives and has no extra, unique prohibitions:
 
@@ -260,7 +260,7 @@ No additional exclusion rules are imposed that are specific to @change.
 Trigger validation logic on change:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "value": "",
   "error": ""
 }'>
@@ -273,13 +273,13 @@ Trigger validation logic on change:
          ">
 
   <p *if="error" *textContent="error"></p>
-</na-blla>
+</serc-rod>
 ```
 
 Integrate with a manual save action:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "draft": "",
   "saved": "",
   "dirty": false
@@ -298,13 +298,13 @@ Integrate with a manual save action:
   <p *if="dirty">
     You have unsaved changes.
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 
 #### Notes
 
-- @change wires a native change event on the element and evaluates a Nablla expression when that event fires.
+- @change wires a native change event on the element and evaluates a Sercrod expression when that event fires.
 - The handler expression has access to $event and $e for the event object, and el and $el for the element, and can write back into host data.
-- Nablla treats change as an input like event and always performs a lightweight child update of the host after the handler runs.
+- Sercrod treats change as an input like event and always performs a lightweight child update of the host after the handler runs.
 - Cleanup options such as cleanup.handlers can be used to remove the @change attribute from the final DOM while keeping the behaviour intact.

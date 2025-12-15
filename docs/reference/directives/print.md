@@ -3,7 +3,7 @@
 #### Summary
 
 `*print` evaluates an expression and writes the result into the element as plain text by setting `textContent`.
-The value is passed through Nablla’s `text` filter and then rendered as a string, with `null`, `undefined`, and `false` treated as empty.
+The value is passed through Sercrod’s `text` filter and then rendered as a string, with `null`, `undefined`, and `false` treated as empty.
 The alias `n-print` behaves the same and shares the same implementation.
 
 Related low level variants:
@@ -17,22 +17,22 @@ Related low level variants:
 The simplest case, printing a single property from host data:
 
 ```html
-<na-blla id="app" data='{"name":"Alice"}'>
+<serc-rod id="app" data='{"name":"Alice"}'>
   <p *print="name"></p>
-</na-blla>
+</serc-rod>
 ```
 
 A simple greeting based on host data:
 
 ```html
-<na-blla id="app" data='{"user":{"name":"Alice"}}'>
+<serc-rod id="app" data='{"user":{"name":"Alice"}}'>
   <p *print="`Hello, ${user.name}!`"></p>
-</na-blla>
+</serc-rod>
 ```
 
 At runtime:
 
-- Nablla evaluates `` `Hello, ${user.name}!` `` in the current scope.
+- Sercrod evaluates `` `Hello, ${user.name}!` `` in the current scope.
 - The result "Hello, Alice!" is given to the `text` filter.
 - The `<p>` element’s `textContent` becomes `Hello, Alice!`.
 - Any child nodes inside the original `<p>` template are ignored when `*print` is present.
@@ -42,15 +42,15 @@ At runtime:
 
 Core behavior of `*print` and `n-print`:
 
-- Nablla reads the expression from the attribute (`*print` or `n-print`).
-- The expression string is optionally normalized by `normalizeTpl` if it is defined on the Nablla class (otherwise it is used as is).
+- Sercrod reads the expression from the attribute (`*print` or `n-print`).
+- The expression string is optionally normalized by `normalizeTpl` if it is defined on the Sercrod class (otherwise it is used as is).
 - The expression is evaluated with `eval_expr(expr, scope, { el: node, mode: "print" })` or `mode: "n-print"`.
 - The result value `v` is normalized:
 
-  - If `v` is `null`, `undefined`, or `false`, Nablla treats it as an empty value.
-  - For any other value, Nablla uses it as is.
+  - If `v` is `null`, `undefined`, or `false`, Sercrod treats it as an empty value.
+  - For any other value, Sercrod uses it as is.
 
-- The value is passed to `Nablla._filters.text`:
+- The value is passed to `Sercrod._filters.text`:
 
   - Default `text` filter simply returns `String(raw ?? "")`.
 
@@ -59,7 +59,7 @@ Core behavior of `*print` and `n-print`:
 Important details:
 
 - Because `textContent` is used, any `<` or `>` characters in the value are treated as literal text by the browser. They do not become HTML markup.
-- When `cleanup.directives` is enabled in the global config, Nablla removes `*print`, `n-print`, `*textContent`, and `n-textContent` from the output DOM after rendering.
+- When `cleanup.directives` is enabled in the global config, Sercrod removes `*print`, `n-print`, `*textContent`, and `n-textContent` from the output DOM after rendering.
 - On unexpected internal errors in this pass, the element’s `textContent` falls back to an empty string.
 
 
@@ -86,7 +86,7 @@ The implementation normalizes values in two steps:
      - `true` becomes "true".
      - Objects become "[object Object]" unless you override the `text` filter.
 
-You can override `Nablla._filters.text` (or provide `window.__Nablla_filter.text` before Nablla is loaded) to change how `*print` and `*textContent` values are normalized.
+You can override `Sercrod._filters.text` (or provide `window.__Sercrod_filter.text` before Sercrod is loaded) to change how `*print` and `*textContent` values are normalized.
 The same `text` filter is also used by the fallback path that renders `%expr%` text expansions into plain text.
 
 
@@ -100,7 +100,7 @@ More precisely:
 - Structural directives such as `*if`, `*elseif`, `*else`, `*for`, `*each`, `*switch`, and `*let` are processed in `renderNode`.
   - They may clone or skip the element before `_renderElement` is called.
   - If a structural directive decides that the element should be skipped, `_renderElement` is never reached and `*print` never runs.
-- Only when none of the structural branches take over, Nablla calls `_renderElement(node, scope, parent)`.
+- Only when none of the structural branches take over, Sercrod calls `_renderElement(node, scope, parent)`.
 
 Inside `_renderElement`:
 
@@ -120,7 +120,7 @@ Conceptually, the runtime behaves as follows for `*print` and `n-print`:
 
 1. Detect directive:
 
-   - If the element has `*print` or `n-print` or `*textContent` or `n-textContent`, Nablla enters the text assignment path.
+   - If the element has `*print` or `n-print` or `*textContent` or `n-textContent`, Sercrod enters the text assignment path.
 
 2. Choose the active attribute:
 
@@ -136,7 +136,7 @@ Conceptually, the runtime behaves as follows for `*print` and `n-print`:
 3. Prepare the expression:
 
    - Read the raw attribute value.
-   - If `normalizeTpl` exists on the Nablla class, pass the expression string through it.
+   - If `normalizeTpl` exists on the Sercrod class, pass the expression string through it.
    - Otherwise use the original string.
 
 4. Evaluate:
@@ -170,13 +170,13 @@ Functionally they are equivalent to `*print` and `n-print` in the current implem
 - It only reads from the current effective scope.
 - Any variables available in expressions come from:
 
-  - Host data (`data="..."` or `data={...}` on `<na-blla>`).
+  - Host data (`data="..."` or `data={...}` on `<serc-rod>`).
   - Variables introduced by `*let` or `n-let` on this element or ancestors.
   - Variables introduced by loops, such as `item` in `*for="item of items"` or `*each="item of items"`.
   - Special helper variables injected by `eval_expr`:
     - `$data` for the host data object.
-    - `$root` for the root Nablla host’s data.
-    - `$parent` for the nearest ancestor Nablla host’s data.
+    - `$root` for the root Sercrod host’s data.
+    - `$parent` for the nearest ancestor Sercrod host’s data.
   - Functions and methods injected via `*methods` and internal helper methods.
 
 The expression on `*print` is evaluated in exactly the same environment as other expression based directives.
@@ -204,21 +204,21 @@ The expression on `*print` is evaluated in exactly the same environment as other
 
 #### Parent access
 
-Because `*print` uses `eval_expr`, it supports the usual Nablla special variables for accessing parent data:
+Because `*print` uses `eval_expr`, it supports the usual Sercrod special variables for accessing parent data:
 
-- `$data` refers to the data of the current Nablla host.
-- `$root` refers to the data of the root Nablla host.
-- `$parent` refers to the data of the nearest ancestor Nablla host.
+- `$data` refers to the data of the current Sercrod host.
+- `$root` refers to the data of the root Sercrod host.
+- `$parent` refers to the data of the nearest ancestor Sercrod host.
 
 Examples:
 
 ```html
-<na-blla id="app" data='{"title":"Dashboard","user":{"name":"Alice"}}'>
+<serc-rod id="app" data='{"title":"Dashboard","user":{"name":"Alice"}}'>
   <header>
     <h1 *print="$data.title"></h1>
     <p *print="`Signed in as ${$data.user.name}`"></p>
   </header>
-</na-blla>
+</serc-rod>
 ```
 
 In nested hosts, you can use `$parent` or `$root` when the inner host wants to display some outer header information inside a `*print` expression.
@@ -272,7 +272,7 @@ There is no special interaction with loops beyond using the scope that loops pro
 
 #### Comparison with text interpolation (%expr%)
 
-Nablla supports `%expr%` style text interpolation inside plain text nodes using the configured delimiters.
+Sercrod supports `%expr%` style text interpolation inside plain text nodes using the configured delimiters.
 By default the delimiters are `%` and `%`, and interpolation is implemented by `_expand_text`.
 
 Key differences between `*print` and `%expr%`:
@@ -297,19 +297,19 @@ Key differences between `*print` and `%expr%`:
 Example with `%expr%` only:
 
 ```html
-<na-blla id="app" data='{"user":{"name":"Alice"}}'>
+<serc-rod id="app" data='{"user":{"name":"Alice"}}'>
   <p>Hello, %user.name%!</p>
-</na-blla>
+</serc-rod>
 ```
 
 Example with `*print` taking precedence:
 
 ```html
-<na-blla id="app" data='{"user":{"name":"Alice"}}'>
+<serc-rod id="app" data='{"user":{"name":"Alice"}}'>
   <p *print="`Hello, ${user.name}!`">
     This inner text, including %user.name%, is ignored.
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 In this second case:
@@ -368,7 +368,7 @@ To keep behavior predictable, treat `*print`, `*textContent`, `*innerHTML`, and 
 
 - Remember the `text` filter:
 
-  - If you need custom normalization (for example trimming whitespace or mapping specific values), override `Nablla._filters.text`.
+  - If you need custom normalization (for example trimming whitespace or mapping specific values), override `Sercrod._filters.text`.
   - Keep in mind that this affects all uses of `*print` and `*textContent` as well as the fallback `%expr%` text expansion path that uses the same basic stringification rules.
 
 - Prefer simple expressions:
@@ -382,17 +382,17 @@ To keep behavior predictable, treat `*print`, `*textContent`, `*innerHTML`, and 
 Display a number with a suffix:
 
 ```html
-<na-blla id="counter" data='{"count": 42}'>
+<serc-rod id="counter" data='{"count": 42}'>
   <p *print="`${count} items`"></p>
-</na-blla>
+</serc-rod>
 ```
 
 Fallback for missing values:
 
 ```html
-<na-blla id="app" data='{"user":{}}'>
+<serc-rod id="app" data='{"user":{}}'>
   <p *print="user.name || 'Anonymous'"></p>
-</na-blla>
+</serc-rod>
 ```
 
 Using methods:
@@ -406,9 +406,9 @@ function formatUser(user) {
 ```
 
 ```html
-<na-blla id="app" data='{"user":{"name":"Alice"}}' *methods="formatUser">
+<serc-rod id="app" data='{"user":{"name":"Alice"}}' *methods="formatUser">
   <p *print="formatUser(user)"></p>
-</na-blla>
+</serc-rod>
 ```
 
 The `*methods="formatUser"` directive makes `formatUser` available in the expression scope for `*print` and other directives.
@@ -419,4 +419,4 @@ The `*methods="formatUser"` directive makes `formatUser` available in the expres
 - `*print` and `n-print` share the same manual entry in `*man`.
 - `*print` is implemented as a non structural directive inside `_renderElement` and does not affect layout or siblings beyond replacing the element’s text content.
 - `*textContent` and `n-textContent` are currently implemented with the same behavior as `*print` and `n-print`, using the same value normalization and `text` filter.
-- Behavior described here is based on the current `nablla.js` implementation and may evolve if the text or HTML filters are customized through the official extension points.
+- Behavior described here is based on the current `sercrod.js` implementation and may evolve if the text or HTML filters are customized through the official extension points.

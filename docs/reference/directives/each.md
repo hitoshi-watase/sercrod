@@ -19,18 +19,18 @@ Important restriction:
 A simple list:
 
 ```html
-<na-blla id="app" data='{"items":["Apple","Banana","Cherry"]}'>
+<serc-rod id="app" data='{"items":["Apple","Banana","Cherry"]}'>
   <ul *each="item of items">
     <li *print="item"></li>
   </ul>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
 - `<ul>` is rendered once.
 - `*each="item of items"` iterates the array.
-- For each item, Nablla renders the original `<li>` subtree with a local variable `item` bound to the current value.
+- For each item, Sercrod renders the original `<li>` subtree with a local variable `item` bound to the current value.
 - The result is a single `<ul>` containing three `<li>` elements.
 
 
@@ -39,7 +39,7 @@ Behavior:
 - `*each` is a structural directive that controls how many times the original child nodes are rendered.
 - The host element is cloned once as a container; its original children are used as a template for each iteration.
 - The expression on `*each` is evaluated once per render of the host.
-- Inside each iteration, Nablla renders the original children with an iteration-specific scope.
+- Inside each iteration, Sercrod renders the original children with an iteration-specific scope.
 
 Alias:
 
@@ -76,7 +76,7 @@ Supported and recommended patterns:
 
 Collection evaluation:
 
-- The right-hand side is evaluated as a normal Nablla expression.
+- The right-hand side is evaluated as a normal Sercrod expression.
 - If the expression returns a falsy value (such as `null`, `undefined`, `false`, `0`, or an empty string), `*each` treats it as an empty collection and renders nothing.
 - Arrays and plain objects are the primary targets; other iterables may work but are not the main focus.
 
@@ -92,10 +92,10 @@ For `modeWord = "of"`:
 
 - `(index, item) of items`:
 
-  - If `items` is an array, Nablla uses `Array.from(items.entries())`.
+  - If `items` is an array, Sercrod uses `Array.from(items.entries())`.
     - `index` receives the numeric index.
     - `item` receives the element.
-  - If `items` is a non-null object, Nablla uses `Object.entries(items)`.
+  - If `items` is a non-null object, Sercrod uses `Object.entries(items)`.
     - `index` receives the key.
     - `item` receives the value.
 
@@ -103,7 +103,7 @@ For `modeWord = "in"`:
 
 - `key in obj`:
 
-  - Nablla runs a `for...in` style enumeration.
+  - Sercrod runs a `for...in` style enumeration.
   - The single variable (`key` in this example) receives each property name.
   - To access values, you write expressions like `obj[key]` inside the body.
 
@@ -122,7 +122,7 @@ Recommendation:
 
 #### Evaluation timing
 
-`*each` participates in Nablla’s structural evaluation order:
+`*each` participates in Sercrod’s structural evaluation order:
 
 - Host-level `*if` and `n-if` run before `*each`.
   - If a host `*if` condition is falsy, the host and its children are dropped and `*each` does not run.
@@ -152,7 +152,7 @@ Conceptually, the runtime behaves like this when it encounters `*each`:
 
 On re-renders:
 
-- When the surrounding Nablla host re-renders, `*each` re-evaluates the expression and rebuilds the loop body from the original template children.
+- When the surrounding Sercrod host re-renders, `*each` re-evaluates the expression and rebuilds the loop body from the original template children.
 - There is no diffing or keyed patching; the children are regenerated from the template, which keeps the implementation small and predictable.
 
 
@@ -163,8 +163,8 @@ Inside the body of `*each`:
 - The loop variables (`item`, `index`, `key`, `value`, or whatever names you choose) are added to the scope for each iteration.
 - These variables shadow any outer variables with the same names.
 - All existing scope entries remain available:
-  - Data from the host (`data` or whatever you bound on `<na-blla>`).
-  - Special helpers like `$data`, `$root`, and `$parent` injected by Nablla.
+  - Data from the host (`data` or whatever you bound on `<serc-rod>`).
+  - Special helpers like `$data`, `$root`, and `$parent` injected by Sercrod.
   - Methods injected via `*methods` or similar configuration.
 
 Guidelines:
@@ -175,11 +175,11 @@ Guidelines:
 
 #### Parent access
 
-`*each` does not introduce a separate parent object, but parent data remain available through the normal Nablla scope model:
+`*each` does not introduce a separate parent object, but parent data remain available through the normal Sercrod scope model:
 
 - You can access outer data through whatever names you used in `data` (for example `items`, `state`, `config`).
 - You can access the root data with `$root`.
-- You can access the nearest ancestor Nablla host’s data with `$parent`.
+- You can access the nearest ancestor Sercrod host’s data with `$parent`.
 
 The only additional names introduced by `*each` are the loop variables themselves.
 
@@ -368,7 +368,7 @@ Recommendations:
 Iterating over an object map:
 
 ```html
-<na-blla id="app" data='{
+<serc-rod id="app" data='{
   "users": {
     "u1": { "name": "Alice" },
     "u2": { "name": "Bob" }
@@ -378,13 +378,13 @@ Iterating over an object map:
     <dt *print="id"></dt>
     <dd *print="user.name"></dd>
   </dl>
-</na-blla>
+</serc-rod>
 ```
 
 Using `*each` on `<tbody>`:
 
 ```html
-<na-blla id="table" data='{
+<serc-rod id="table" data='{
   "rows": [
     { "id": 1, "name": "Alpha" },
     { "id": 2, "name": "Beta" }
@@ -404,14 +404,14 @@ Using `*each` on `<tbody>`:
       </tr>
     </tbody>
   </table>
-</na-blla>
+</serc-rod>
 ```
 
 
 #### Notes
 
 - `*each` and `n-each` are aliases; choose one style per project for consistency.
-- The expression on `*each` is evaluated as normal JavaScript inside Nablla’s expression sandbox.
+- The expression on `*each` is evaluated as normal JavaScript inside Sercrod’s expression sandbox.
 - In the current implementation:
   - `*each` expects arrays, plain objects, or other iterable values.
   - Falsy results behave like an empty collection.

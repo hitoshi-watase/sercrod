@@ -18,13 +18,13 @@ Key points:
 Simple switch over a status value:
 
 ```html
-<na-blla id="app" data='{"status":"ready"}'>
+<serc-rod id="app" data='{"status":"ready"}'>
   <div *switch="status">
     <p *case="'idle'">Idle</p>
     <p *case="'ready'">Ready</p>
     <p *default>Unknown</p>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
@@ -66,7 +66,7 @@ Cloning and attributes:
   - `*case`, `n-case`, `*case.break`, `n-case.break`
   - `*default`, `n-default`
   - `*break`, `n-break`
-- The clone is then passed to Nablla’s normal rendering pipeline with a scope that includes `$switch`.
+- The clone is then passed to Sercrod’s normal rendering pipeline with a scope that includes `$switch`.
 
 
 #### Case expression semantics
@@ -76,22 +76,22 @@ They evaluate their attribute value in the current scope (augmented with `$switc
 
 The raw attribute string is processed as follows:
 
-1. Nablla first tries to evaluate the full expression:
+1. Sercrod first tries to evaluate the full expression:
 
    - The expression is evaluated using `eval_expr(raw, {...scope, $switch: switchVal})`.
    - If evaluation succeeds, the resulting value `v` is matched by type.
-   - If evaluation throws, Nablla falls back to a string-based list mechanism (see below).
+   - If evaluation throws, Sercrod falls back to a string-based list mechanism (see below).
 
 2. If evaluation succeeded, the result `v` is matched according to its type:
 
    - Function:
 
-     - If `typeof v === "function"`, Nablla calls `v(switchVal, scope)`.
+     - If `typeof v === "function"`, Sercrod calls `v(switchVal, scope)`.
      - If the call returns a truthy value, the case matches.
 
    - Regular expression:
 
-     - If `v` is a `RegExp`, Nablla tests `v.test(String(switchVal))`.
+     - If `v` is a `RegExp`, Sercrod tests `v.test(String(switchVal))`.
      - If the test returns `true`, the case matches.
 
    - Array:
@@ -100,7 +100,7 @@ The raw attribute string is processed as follows:
 
    - Objects with `has`:
 
-     - If `v` is an object and has a `has` method (for example a `Set`), Nablla calls `v.has(switchVal)`.
+     - If `v` is an object and has a `has` method (for example a `Set`), Sercrod calls `v.has(switchVal)`.
      - If `has` returns truthy, the case matches.
 
    - Boolean:
@@ -110,19 +110,19 @@ The raw attribute string is processed as follows:
 
    - Primitive string / number / bigint:
 
-     - For `typeof v` in `{ "string", "number", "bigint" }`, Nablla compares `v` and `switchVal` with `Object.is`.
+     - For `typeof v` in `{ "string", "number", "bigint" }`, Sercrod compares `v` and `switchVal` with `Object.is`.
      - `Object.is` is used rather than `===`, so `NaN` matches `NaN`, and `+0` and `-0` are distinguished.
 
    - Any other type:
 
      - If `v` does not fit any of the above categories, the case does not match.
 
-3. If evaluation failed (expression threw), Nablla falls back to a token list:
+3. If evaluation failed (expression threw), Sercrod falls back to a token list:
 
    - The raw string is split on commas and pipes: `/[,|]/`.
    - Each token is trimmed; empty tokens are ignored.
    - For each token `t`:
-     - Nablla tries to evaluate `t` as an expression.
+     - Sercrod tries to evaluate `t` as an expression.
      - If that evaluation fails, it falls back to treating `t` as a string literal.
      - The token value `vv` is then compared to `switchVal` with `Object.is`.
      - If any `vv` matches `switchVal`, the case matches.
@@ -218,8 +218,8 @@ Instead, they rely on the scope prepared by the switch host:
   - case expressions.
   - default branches.
   - the body content of all rendered branches.
-- All existing scope variables (from the Nablla host and outer scopes) remain available.
-- Case expressions may introduce additional values via normal Nablla expressions (for example, calling functions or reading from the data model), but `*case` does not persist any new names into the shared scope.
+- All existing scope variables (from the Sercrod host and outer scopes) remain available.
+- Case expressions may introduce additional values via normal Sercrod expressions (for example, calling functions or reading from the data model), but `*case` does not persist any new names into the shared scope.
 
 The scope used inside each branch is effectively:
 
@@ -254,14 +254,14 @@ The scope used inside each branch is effectively:
 Example with fallthrough and break:
 
 ```html
-<na-blla id="app" data='{"level":2}'>
+<serc-rod id="app" data='{"level":2}'>
   <div *switch="level">
     <p *case="1">Level 1</p>
     <p *case="2">Level 2</p>
     <p *case="3" *break>Level 3 (stop here)</p>
     <p *default>Level is 4 or more</p>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 - When `level` is `2`:
@@ -343,7 +343,7 @@ Branches can freely combine `*case` with other directives:
 
 - Keep branch ordering explicit:
 
-  - Nablla always processes branches in DOM order.
+  - Sercrod always processes branches in DOM order.
   - Place more specific cases before more general ones when using patterns such as regular expressions or predicate functions.
 
 - Keep switch blocks shallow:
@@ -357,26 +357,26 @@ Branches can freely combine `*case` with other directives:
 Multiple values and regular expression:
 
 ```html
-<na-blla id="router" data='{"path":"/admin/users"}'>
+<serc-rod id="router" data='{"path":"/admin/users"}'>
   <div *switch="path">
     <p *case="['/', '/home']">Home</p>
     <p *case="/^\\/admin\\//">Admin area</p>
     <p *default>Unknown path</p>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 Predicate function:
 
 ```html
-<na-blla id="grader" data='{"score":82}'>
+<serc-rod id="grader" data='{"score":82}'>
   <div *switch="score">
     <p *case="value => value >= 90">Grade A</p>
     <p *case="value => value >= 80">Grade B</p>
     <p *case="value => value >= 70">Grade C</p>
     <p *default>Needs improvement</p>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 Here the first predicate that returns `true` determines the starting branch, and fallthrough behavior applies as usual.

@@ -2,8 +2,8 @@
 
 #### Summary
 
-`*post` sends the current Nablla host data as JSON via HTTP POST to a given URL and writes the JSON response back into host data.
-It is typically attached to a button or similar control inside a Nablla host.
+`*post` sends the current Sercrod host data as JSON via HTTP POST to a given URL and writes the JSON response back into host data.
+It is typically attached to a button or similar control inside a Sercrod host.
 `*post` and `n-post` are aliases.
 
 Key points:
@@ -21,7 +21,7 @@ Key points:
 A minimal contact form that posts all data and stores the response in `result`:
 
 ```html
-<na-blla id="contact" data='{
+<serc-rod id="contact" data='{
   "form": { "name": "", "message": "" },
   "result": null
 }'>
@@ -45,7 +45,7 @@ A minimal contact form that posts all data and stores the response in `result`:
     <strong>Server response:</strong>
     <span *print="result.status"></span>
   </p>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior in this example:
@@ -60,7 +60,7 @@ Behavior in this example:
 
 Attachment and rendering:
 
-- `*post` is evaluated when Nablla renders a normal element inside a Nablla host.
+- `*post` is evaluated when Sercrod renders a normal element inside a Sercrod host.
 - The runtime clones the element deep, including all attributes and children:
 
   - Internally this is equivalent to `work.cloneNode(true)`.
@@ -70,9 +70,9 @@ Attachment and rendering:
 
 Important consequence:
 
-- Nablla does not recursively process directives on the children of the `*post` element itself.
+- Sercrod does not recursively process directives on the children of the `*post` element itself.
 - The children of a `*post` button or link are treated as static markup.
-  - Do not put `*print`, `*if`, or other Nablla directives on the same element or its direct children if you expect them to run.
+  - Do not put `*print`, `*if`, or other Sercrod directives on the same element or its direct children if you expect them to run.
   - Place dynamic content in sibling elements or in the surrounding layout instead.
 
 Trigger timing:
@@ -195,7 +195,7 @@ Data writeback:
 
       - `this._data = this._wrap_data(value)`.
 
-    - This re-wraps the root in Nablla's proxy layer similarly to other data entry points.
+    - This re-wraps the root in Sercrod's proxy layer similarly to other data entry points.
 
 Tracking:
 
@@ -248,7 +248,7 @@ Log output:
 
 Ephemeral nature of `$upload` and `$download`:
 
-- After each update cycle, Nablla's finalize phase resets `$upload` and `$download` back to `null`.
+- After each update cycle, Sercrod's finalize phase resets `$upload` and `$download` back to `null`.
 - Treat these properties as one-shot state indicators rather than long term storage.
 
 
@@ -256,27 +256,27 @@ Ephemeral nature of `$upload` and `$download`:
 
 `*post` emits three dedicated events during its lifecycle:
 
-- `nablla-post-start`
+- `sercrod-post-start`
 
   - Fired just before the request is issued.
   - Only fired when the URL and spec are valid and JSON encoding succeeded.
   - Event detail:
 
     - `stage` - `"post"`.
-    - `host` - the Nablla host instance.
+    - `host` - the Sercrod host instance.
     - `url` - the request URL.
     - `spec` - the original attribute string.
     - `prop` - the parsed property key, possibly an empty string.
     - `json` - the JSON string that will be sent as the request body.
 
-- `nablla-post-done`
+- `sercrod-post-done`
 
   - Fired after a successful fetch and writeback.
   - This includes non 2xx HTTP statuses as long as the response could be read and interpreted.
   - Event detail:
 
     - `stage`    - `"post"`.
-    - `host`     - the Nablla host instance.
+    - `host`     - the Sercrod host instance.
     - `url`      - the request URL.
     - `spec`     - the original attribute string.
     - `prop`     - the parsed property key.
@@ -286,13 +286,13 @@ Ephemeral nature of `$upload` and `$download`:
     - `json`     - the JSON request body that was sent.
     - `paths`    - array of touched paths such as `["result"]` or `["items[id]"]`.
 
-- `nablla-post-error`
+- `sercrod-post-error`
 
   - Fired when the POST operation fails at the transport or JSON decoding level.
   - Event detail:
 
     - `stage` - `"post"`.
-    - `host`  - the Nablla host instance.
+    - `host`  - the Sercrod host instance.
     - `url`   - the request URL.
     - `spec`  - the original attribute string.
     - `prop`  - the parsed property key.
@@ -303,7 +303,7 @@ All three events bubble and are composed, so you can listen for them at the host
 
 #### Integration with staged data (*stage, *apply, *restore)
 
-`*post` is designed to cooperate with Nablla's staging directives:
+`*post` is designed to cooperate with Sercrod's staging directives:
 
 - When the host uses `*stage` or `n-stage`, the host maintains a staging buffer `_stage` that holds an editable snapshot of data.
 - `*post` looks at this buffer first:
@@ -332,7 +332,7 @@ Implications:
   - Always sends JSON built from the whole staged or live data object.
   - Uses `URL[:prop]` and the same writeback rules as `*fetch`.
   - Maintains state flags (`$pending`, `$error`, `$download`, `$upload`).
-  - Emits dedicated `nablla-post-*` events.
+  - Emits dedicated `sercrod-post-*` events.
 
 - `*fetch`:
 
@@ -368,7 +368,7 @@ Because `*post`, `*fetch`, and `*api` all treat HTTP communication as “JSON in
 
 Recommended approach on the server:
 
-- Treat Nablla-driven endpoints as JSON endpoints:
+- Treat Sercrod-driven endpoints as JSON endpoints:
 
   - Always accept a JSON request body for write operations.
   - Always return a JSON response for both success and application-level errors.
@@ -378,24 +378,24 @@ Recommended approach on the server:
 
   - Parse JSON.
   - Run validation, authentication, business logic, and logging in a shared middleware.
-  - Produce a JSON object that Nablla can store as-is into `data[prop]`, `data[base][key]`, or a target selected by `*into`.
+  - Produce a JSON object that Sercrod can store as-is into `data[prop]`, `data[base][key]`, or a target selected by `*into`.
 
 Benefits for server-side code:
 
-- You can implement a “Nablla API style” once and reuse it across multiple endpoints.
-- Monitoring and logging become easier because every Nablla request and response has the same structure.
+- You can implement a “Sercrod API style” once and reuse it across multiple endpoints.
+- Monitoring and logging become easier because every Sercrod request and response has the same structure.
 - Frontend and backend teams can agree on a single JSON contract instead of negotiating many small variations.
 
-Position in Nablla’s design:
+Position in Sercrod’s design:
 
-- Nablla does not force this server-side style, but the runtime is optimized around it:
+- Sercrod does not force this server-side style, but the runtime is optimized around it:
   - `*post` and `*fetch` share the `URL[:prop]` rule and write values back without further transformation.
   - `*api` writes the raw response into the variable named by `*into`.
   - All of them update `$pending`, `$error`, `$download`, and `$upload` in a consistent way.
-- For new projects that adopt Nablla end to end, designing server APIs to follow this unified JSON contract is strongly recommended.
+- For new projects that adopt Sercrod end to end, designing server APIs to follow this unified JSON contract is strongly recommended.
 - For existing APIs, you can:
   - Use `*api` to integrate with legacy endpoints as they are.
-  - Gradually introduce Nablla-style JSON endpoints for new features and move existing endpoints toward the same contract when possible.
+  - Gradually introduce Sercrod-style JSON endpoints for new features and move existing endpoints toward the same contract when possible.
 
 
 #### Best practices
@@ -403,7 +403,7 @@ Position in Nablla’s design:
 - Keep the `*post` element simple:
 
   - Treat it as a button or link with static content.
-  - Avoid placing other Nablla directives on the same element or inside it.
+  - Avoid placing other Sercrod directives on the same element or inside it.
 
 - Choose `prop` carefully:
 
@@ -413,7 +413,7 @@ Position in Nablla’s design:
 - Use the bracket notation for keyed maps:
 
   - `*post="/api/save.php:items[id]"` writes the response into `data.items[id]`.
-  - Nablla initializes `data[base]` as an object if needed.
+  - Sercrod initializes `data[base]` as an object if needed.
 
 - Watch `$pending` and `$error`:
 
@@ -422,17 +422,17 @@ Position in Nablla’s design:
 
 - Use events for advanced handling:
 
-  - Listen for `nablla-post-done` when you need status code based handling or logging.
-  - Listen for `nablla-post-error` when you need centralized error reporting.
+  - Listen for `sercrod-post-done` when you need status code based handling or logging.
+  - Listen for `sercrod-post-error` when you need centralized error reporting.
 
 - Avoid non-serializable values:
 
   - Ensure that the staged or live data does not contain functions, DOM nodes, or cyclic references that cannot be JSON encoded.
   - If JSON encoding fails, no request is sent and only a warning is produced when warnings are enabled.
 
-- Align server APIs with Nablla’s JSON contract:
+- Align server APIs with Sercrod’s JSON contract:
 
-  - Prefer designing endpoints that accept JSON bodies and return JSON values that can be stored directly in Nablla data.
+  - Prefer designing endpoints that accept JSON bodies and return JSON values that can be stored directly in Sercrod data.
   - Use a consistent envelope or field naming scheme so that `URL[:prop]` and `*into` can be mapped mechanically.
   - This reduces glue code on both sides and makes error handling and logging easier.
 
@@ -440,10 +440,10 @@ Position in Nablla’s design:
 #### Notes
 
 - `*post` and `n-post` are exact aliases. Only one should be used per element.
-- `*post` is only handled on regular elements inside a Nablla host. It does not have special host level behavior.
+- `*post` is only handled on regular elements inside a Sercrod host. It does not have special host level behavior.
 - The `*post` attribute is treated as a literal string. There is no expression expansion or base URL resolution.
 - The response is always treated as successful from a data perspective as long as it can be read:
-  - HTTP status codes other than 2xx still result in a `nablla-post-done` event.
+  - HTTP status codes other than 2xx still result in a `sercrod-post-done` event.
   - If you need application level error handling, use the status code in that event.
 - The writeback rule follows the same design as `*fetch`:
   - `:prop` writes into `data[prop]` or `data[base][key]` for bracket syntax.

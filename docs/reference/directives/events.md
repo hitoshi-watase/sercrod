@@ -1,6 +1,6 @@
 ### Event bindings (fallback for @name)
 
-This page describes the general behavior of Nablla’s **event bindings** for `@name` when there is **no dedicated manual** for that event.
+This page describes the general behavior of Sercrod’s **event bindings** for `@name` when there is **no dedicated manual** for that event.
 
 Typical examples that rely on this fallback:
 
@@ -32,9 +32,9 @@ This page explains the **common rules** for all `@name` event bindings that do n
 #### Overview
 
 - `@name` attaches a DOM event listener for the event `name` on that element.
-- When the event fires, Nablla evaluates the attribute value as **JavaScript** in the current Nablla scope.
+- When the event fires, Sercrod evaluates the attribute value as **JavaScript** in the current Sercrod scope.
 - The scope contains:
-  - the `data` object from the `<na-blla>` host,
+  - the `data` object from the `<serc-rod>` host,
   - stage data if you use staging (`*stage`),
   - local variables from `*let`, loops, and other structural directives.
 - The **DOM `Event` object** is available as:
@@ -64,11 +64,11 @@ General form:
 
 ##### Recognized modifiers and categories
 
-Nablla understands the following modifier names.  
+Sercrod understands the following modifier names.  
 They fall into three categories:
 
 1. **DOM listener option modifiers**  
-   These map directly to standard `addEventListener` options and are **not** Nablla specific:
+   These map directly to standard `addEventListener` options and are **not** Sercrod specific:
 
    - `.capture`  
      - Sets the listener option `capture: true`.  
@@ -82,8 +82,8 @@ They fall into three categories:
      - Sets the listener option `passive: true`.  
      - Signals that the handler will not call `preventDefault()` in normal browser semantics.
 
-2. **DOM method helpers (Nablla specific syntax, standard DOM behavior)**  
-   These modifiers are **Nablla syntax** that call standard methods on the event object.
+2. **DOM method helpers (Sercrod specific syntax, standard DOM behavior)**  
+   These modifiers are **Sercrod syntax** that call standard methods on the event object.
    They are not native event options and are not passed to `addEventListener`:
 
    - `.prevent`  
@@ -92,8 +92,8 @@ They fall into three categories:
    - `.stop`  
      - Calls `event.stopPropagation()` for that event before evaluating the handler code.
 
-3. **Nablla specific re-rendering modifiers**  
-   These modifiers control Nablla’s update logic only.
+3. **Sercrod specific re-rendering modifiers**  
+   These modifiers control Sercrod’s update logic only.
    They are **not** standard JS event options and are **not** passed to `addEventListener`:
 
    - `.update`  
@@ -102,7 +102,7 @@ They fall into three categories:
    - `.noupdate`  
      - Suppresses host re-rendering after the handler, even if the event type would normally trigger an update.
 
-   These flags affect only Nablla’s internal “should we update the host?” decision.
+   These flags affect only Sercrod’s internal “should we update the host?” decision.
    They do not change event propagation, default behavior, or listener options.
 
 Examples:
@@ -122,7 +122,7 @@ Examples:
 </button>
 ```
 
-The `code` part is arbitrary JavaScript that runs inside a Nablla evaluation context similar to:
+The `code` part is arbitrary JavaScript that runs inside a Sercrod evaluation context similar to:
 
 ```js
 with (scope) {
@@ -182,15 +182,15 @@ function updateDrag($event){
 
 Notes:
 
-- There is no special variable named `event` injected by Nablla.
+- There is no special variable named `event` injected by Sercrod.
   - Use `$event` or `$e` instead.
 - `el` and `$el` always refer to the element that owns the `@name` attribute.
-- Assigning to `$event`, `$e`, `el`, or `$el` has no effect on Nablla and should be treated as read only in handlers.
+- Assigning to `$event`, `$e`, `el`, or `$el` has no effect on Sercrod and should be treated as read only in handlers.
 
 
 #### Data updates and re-render timing
 
-Event handlers often mutate data. Nablla’s event pipeline is tuned so that:
+Event handlers often mutate data. Sercrod’s event pipeline is tuned so that:
 
 - High frequency events (such as pointer moves) do **not** force heavy re-renders by default.
 - Input related events perform **lightweight** updates that keep focus stable.
@@ -200,9 +200,9 @@ The basic rules are:
 1. **During the handler**:
 
    - Writes like `count++` or `state.value = ...` go into the current evaluation scope.
-   - If a written key also exists in the host `data` object, Nablla updates `data[key]` as well and marks it as dirty.
+   - If a written key also exists in the host `data` object, Sercrod updates `data[key]` as well and marks it as dirty.
 
-2. **After the handler**, Nablla decides how to update based on:
+2. **After the handler**, Sercrod decides how to update based on:
 
    - the event type (`ev`),
    - the `events.non_mutating` configuration list,
@@ -211,7 +211,7 @@ The basic rules are:
 
    Concretely:
 
-   - Nablla maintains a set `NON_MUTATING` derived from `config.events.non_mutating`.  
+   - Sercrod maintains a set `NON_MUTATING` derived from `config.events.non_mutating`.  
      By default it contains events like:
 
      - `mouseover`, `mouseenter`, `mousemove`, `mouseout`, `mouseleave`, `mousedown`
@@ -232,13 +232,13 @@ The basic rules are:
      - Start with `wantsUpdate = !NON_MUTATING.has(ev)`.
      - If `.update` is present, set `wantsUpdate = true`.
      - If `.noupdate` is present, set `wantsUpdate = false`.
-     - If `.once` is present and `ev` is in `NON_MUTATING`, Nablla forces `wantsUpdate = false` to avoid re-creating a one time listener on a non mutating event.
+     - If `.once` is present and `ev` is in `NON_MUTATING`, Sercrod forces `wantsUpdate = false` to avoid re-creating a one time listener on a non mutating event.
 
    - Finally, it applies the update:
 
-     - If the event is input like (as defined above), or a `click` on a form control, Nablla performs a **lightweight children update**:
+     - If the event is input like (as defined above), or a `click` on a form control, Sercrod performs a **lightweight children update**:
        - it calls an internal `_updateChildren(...)` so only the host’s children are reconciled, preserving focus.
-     - Otherwise, if `wantsUpdate` is true, Nablla triggers a normal host update.
+     - Otherwise, if `wantsUpdate` is true, Sercrod triggers a normal host update.
      - If `wantsUpdate` is false, no re-render is triggered by this handler.
 
 3. **Modifiers override defaults**:
@@ -295,7 +295,7 @@ Example:
 
 #### Interaction with *prevent-default and *prevent
 
-Nablla also provides **structural directives** for some common default behaviors:
+Sercrod also provides **structural directives** for some common default behaviors:
 
 - `*prevent-default`
 - `*prevent` (alias)
@@ -319,9 +319,9 @@ The directives do **not** stop propagation, and they do not automatically cover 
 For fine grained control on a specific `@name` binding, use **modifiers on the event attribute**:
 
 - `.prevent` on `@name`:
-  - Nablla specific syntax that calls `event.preventDefault()` for that particular handler.
+  - Sercrod specific syntax that calls `event.preventDefault()` for that particular handler.
 - `.stop` on `@name`:
-  - Nablla specific syntax that calls `event.stopPropagation()` for that particular handler.
+  - Sercrod specific syntax that calls `event.stopPropagation()` for that particular handler.
 
 Typical patterns:
 
@@ -377,9 +377,9 @@ Inside the handler code, `$event.detail` contains the payload passed by the disp
 
 - **If handler code throws**:
 
-  - Nablla catches the error.
-  - If `config.error.warn` (or the equivalent runtime flag) is enabled, Nablla logs a warning such as:
-    - `[Nablla warn] @event handler: ...`
+  - Sercrod catches the error.
+  - If `config.error.warn` (or the equivalent runtime flag) is enabled, Sercrod logs a warning such as:
+    - `[Sercrod warn] @event handler: ...`
   - The event listener remains attached.
   - Later events still trigger the handler.
 
@@ -392,14 +392,14 @@ Inside the handler code, `$event.detail` contains the payload passed by the disp
 
 - **Manual listeners**:
 
-  - Nablla’s listeners coexist with listeners added via `addEventListener`.
+  - Sercrod’s listeners coexist with listeners added via `addEventListener`.
   - The firing order follows normal browser rules (capture vs bubble, registration order, passive listeners).
 
 - **Multiple re-renders**:
 
-  - Nablla tracks listeners by event name and element.
+  - Sercrod tracks listeners by event name and element.
   - On re-render, it removes old listeners for that event on that element and reattaches them.
-  - You should not manually remove Nablla’s event handlers.
+  - You should not manually remove Sercrod’s event handlers.
 
 
 #### Relation to specific event manuals

@@ -2,7 +2,7 @@
 
 #### Summary
 
-`*load` loads JSON data from a user-selected file and merges it into the Nablla host’s data.
+`*load` loads JSON data from a user-selected file and merges it into the Sercrod host’s data.
 If a staged view is active (via `*stage`), the JSON is merged into the stage; otherwise it is merged into the live data.
 The directive has an alias `n-load`.
 
@@ -10,7 +10,7 @@ Typical use:
 
 - Put `*load` on a button or other clickable element.
 - Optionally specify a list of top-level properties to copy from the JSON.
-- Nablla reads the file via the browser’s file dialog, parses the JSON, merges it into data or stage, and triggers a re-render.
+- Sercrod reads the file via the browser’s file dialog, parses the JSON, merges it into data or stage, and triggers a re-render.
 
 
 #### Basic example
@@ -18,12 +18,12 @@ Typical use:
 A simple load button that merges the entire JSON into host data:
 
 ```html
-<na-blla id="profile" data='{"user":{"name":"","email":""}}'>
+<serc-rod id="profile" data='{"user":{"name":"","email":""}}'>
   <p>Name: <span *print="user.name"></span></p>
   <p>Email: <span *print="user.email"></span></p>
 
   <button type="button" *load>Load profile…</button>
-</na-blla>
+</serc-rod>
 ```
 
 If the user selects a JSON file like:
@@ -59,7 +59,7 @@ then after loading:
   - No value: merge the entire JSON object into the target object with `Object.assign`.
   - Value present: treat it as a whitespace-separated list of top-level property names and copy only those properties.
 
-- After a successful load, Nablla dispatches a `nablla-loaded` event and calls `update()` on the host to re-render the view.
+- After a successful load, Sercrod dispatches a `sercrod-loaded` event and calls `update()` on the host to re-render the view.
 
 Alias:
 
@@ -73,7 +73,7 @@ Attribute value:
 - If `*load` (or `n-load`) is empty or omitted:
 
   - The parsed JSON must be an object.
-  - Nablla merges all enumerable properties into `_stage` or `_data`:
+  - Sercrod merges all enumerable properties into `_stage` or `_data`:
 
     - With stage: `Object.assign(this._stage, json)`
     - Without stage: `Object.assign(this._data, json)`
@@ -96,9 +96,9 @@ Attribute value:
 Error handling:
 
 - The chosen file is read as text and parsed with `JSON.parse`.
-- If parsing fails and Nablla is configured to warn, the runtime logs:
+- If parsing fails and Sercrod is configured to warn, the runtime logs:
 
-  - `[Nablla warn] *load JSON parse: ...`
+  - `[Sercrod warn] *load JSON parse: ...`
 
 - On parse error, no merge is performed and the view is not updated.
 
@@ -109,20 +109,20 @@ Error handling:
 
 - If the element is an `<input type="file">`:
 
-  - Nablla reuses the native file input.
-  - If the input has no `accept` attribute, Nablla sets it to `"application/json"` by default.
+  - Sercrod reuses the native file input.
+  - If the input has no `accept` attribute, Sercrod sets it to `"application/json"` by default.
   - On `change`, the first selected file is read and processed.
 
 - If the element is not an `<input type="file">`:
 
-  - Nablla attaches a `click` handler to the element.
-  - When clicked, Nablla creates a hidden `<input type="file">`, sets its `accept` attribute, and forwards the selection to `*load`.
+  - Sercrod attaches a `click` handler to the element.
+  - When clicked, Sercrod creates a hidden `<input type="file">`, sets its `accept` attribute, and forwards the selection to `*load`.
   - The temporary file input is not meant to be visible or controlled directly.
 
 Accept attribute:
 
-- If the element has an `accept` attribute, Nablla respects it.
-- If not, Nablla uses `"application/json"` as the default.
+- If the element has an `accept` attribute, Sercrod respects it.
+- If not, Sercrod uses `"application/json"` as the default.
 - This influences what the browser shows in the file picker but does not perform additional runtime validation beyond JSON parsing.
 
 
@@ -136,7 +136,7 @@ Accept attribute:
 Typical pattern:
 
 ```html
-<na-blla id="editor" data='{"doc":{"title":"","body":""}}'>
+<serc-rod id="editor" data='{"doc":{"title":"","body":""}}'>
   <section *stage>
     <label>
       Title:
@@ -152,7 +152,7 @@ Typical pattern:
     <button type="button" *apply>Apply</button>
     <button type="button" *restore>Restore</button>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 In this pattern:
@@ -164,27 +164,27 @@ In this pattern:
 
 #### Evaluation timing
 
-- `*load` is evaluated when Nablla renders the element that carries it.
+- `*load` is evaluated when Sercrod renders the element that carries it.
 - During rendering:
 
-  - Nablla clones the original element.
+  - Sercrod clones the original element.
   - It attaches the necessary event listeners for file selection.
   - It appends the cloned element to the DOM and returns from the internal render function.
 
 - `*load` does not perform any data changes during rendering itself.
   - Data changes happen later, in response to user interaction (file selection).
-- When a file is successfully loaded and merged, Nablla explicitly calls `update()` on the host to re-run the render pipeline and update the view.
+- When a file is successfully loaded and merged, Sercrod explicitly calls `update()` on the host to re-run the render pipeline and update the view.
 
 
 #### Execution model
 
 Conceptually, the runtime behaves like this for `*load`:
 
-1. Nablla detects `*load` or `n-load` on an element.
+1. Sercrod detects `*load` or `n-load` on an element.
 2. It clones the element.
 
    - All attributes and children are copied as-is.
-   - The `*load` / `n-load` attribute is preserved on the clone for visibility, but Nablla does not re-interpret it later.
+   - The `*load` / `n-load` attribute is preserved on the clone for visibility, but Sercrod does not re-interpret it later.
 
 3. It reads the `*load` attribute:
 
@@ -217,7 +217,7 @@ Conceptually, the runtime behaves like this for `*load`:
 
      - Parses the JSON.
      - Merges it into `_stage` or `_data` according to `props`.
-     - Dispatches a `nablla-loaded` event with details.
+     - Dispatches a `sercrod-loaded` event with details.
      - Calls `update()`.
 
 7. The cloned element is appended to the parent in the rendered DOM; the original template node is not appended.
@@ -236,7 +236,7 @@ Conceptually, the runtime behaves like this for `*load`:
 
 `*load` respects the existing scope model:
 
-- It operates on the Nablla host’s data or stage, not on local loop scopes.
+- It operates on the Sercrod host’s data or stage, not on local loop scopes.
 - It does not change how `$data`, `$root`, or `$parent` are injected.
 - After a successful load, any expressions that read from the updated data see the new values at the next render.
 
@@ -270,12 +270,12 @@ You can place `*load` inside conditional blocks or loops just like any other act
   - Each iteration can have its own `*load` element, although typically you want just one loader per host.
 
   ```html
-  <na-blla data='{"sections":[{"id":1},{"id":2}]}'>
+  <serc-rod data='{"sections":[{"id":1},{"id":2}]}'>
     <section *each="section of sections">
       <h2 *print="section.id"></h2>
       <button type="button" *load="section">Load section…</button>
     </section>
-  </na-blla>
+  </serc-rod>
   ```
 
 Restrictions:
@@ -314,12 +314,12 @@ Restrictions:
 - Keep `*load` elements structurally simple:
 
   - The element with `*load` is cloned and used as-is.
-  - Avoid relying on nested Nablla directives inside the `*load` element itself; keep its content mostly static (plain text or icons).
+  - Avoid relying on nested Sercrod directives inside the `*load` element itself; keep its content mostly static (plain text or icons).
 
 - Validate externally if needed:
 
   - `*load` does basic JSON parsing only.
-  - If you require more validation (schema checks, versioning), perform it in code that reacts to `nablla-loaded`.
+  - If you require more validation (schema checks, versioning), perform it in code that reacts to `sercrod-loaded`.
 
 
 #### Examples
@@ -327,28 +327,28 @@ Restrictions:
 Full data import:
 
 ```html
-<na-blla id="app" data='{"config":{"theme":"light","lang":"en"}}'>
+<serc-rod id="app" data='{"config":{"theme":"light","lang":"en"}}'>
   <pre *literal="JSON.stringify(config, null, 2)"></pre>
   <button type="button" *load>Load config…</button>
-</na-blla>
+</serc-rod>
 ```
 
 Partial import:
 
 ```html
-<na-blla id="app" data='{"user":{},"settings":{}}'>
+<serc-rod id="app" data='{"user":{},"settings":{}}'>
   <button type="button" *load="user settings">
     Load user and settings
   </button>
-</na-blla>
+</serc-rod>
 ```
 
 Custom accept type on a native file input:
 
 ```html
-<na-blla id="app" data='{"user":{}}'>
+<serc-rod id="app" data='{"user":{}}'>
   <input type="file" accept="application/json,.json" *load="user">
-</na-blla>
+</serc-rod>
 ```
 
 
@@ -357,11 +357,11 @@ Custom accept type on a native file input:
 - `*load` and `n-load` are aliases; choose one style for consistency.
 - `*load` is designed for browser environments where `FileReader` and file dialogs are available.
 - The directive expects JSON text; other content types will fail JSON parsing.
-- When JSON parsing fails and warnings are enabled, Nablla logs a warning and does not modify data.
-- After a successful load, Nablla dispatches a `nablla-loaded` event:
+- When JSON parsing fails and warnings are enabled, Sercrod logs a warning and does not modify data.
+- After a successful load, Sercrod dispatches a `sercrod-loaded` event:
 
   - `detail.stage`: `"load"`
-  - `detail.host`: the Nablla host element
+  - `detail.host`: the Sercrod host element
   - `detail.fileName`: the selected file name (or `null`)
   - `detail.props`: the property list used for partial merge (or `null`)
   - `detail.json`: the parsed JSON object

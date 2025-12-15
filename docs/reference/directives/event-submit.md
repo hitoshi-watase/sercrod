@@ -15,7 +15,7 @@ It does not automatically prevent the browser’s default submission; use modifi
 Intercept form submission and mark the form as submitted without leaving the page:
 
 ```html
-<na-blla id="contact" data='{
+<serc-rod id="contact" data='{
   "form": {
     "name": "",
     "message": ""
@@ -39,13 +39,13 @@ Intercept form submission and mark the form as submitted without leaving the pag
       Thank you, we received your message.
     </p>
   </form>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
 - When the user clicks the button or presses Enter in a field, the browser fires a submit event on the form.
-- Nablla invokes the expression submitted = true on that host.
+- Sercrod invokes the expression submitted = true on that host.
 - The modifier .prevent on @submit.prevent calls event.preventDefault, so the browser does not perform a full page navigation.
 - The paragraph shows after the first successful submit event.
 
@@ -60,11 +60,11 @@ Core rules:
   Usually this is a form element, but you can also listen on an ancestor and rely on event bubbling.
 
 - Expression evaluation  
-  Nablla treats the attribute value as a script expression, for example handleSubmit($event) or submitted = true.
-  When the event fires, Nablla evaluates this expression in the current scope.
+  Sercrod treats the attribute value as a script expression, for example handleSubmit($event) or submitted = true.
+  When the event fires, Sercrod evaluates this expression in the current scope.
 
 - Event context  
-  Inside the expression, Nablla provides:
+  Inside the expression, Sercrod provides:
 
   - $event and $e: the native Event or SubmitEvent instance.
   - el and $el: the element that has @submit (typically the form).
@@ -98,19 +98,19 @@ Core rules:
   - noupdate: skip automatic updates after the handler.
 
 - Cleanup  
-  If Nablla configuration sets cleanup.handlers to a truthy value, the original @submit attribute is removed from the output DOM after the listener has been registered.
+  If Sercrod configuration sets cleanup.handlers to a truthy value, the original @submit attribute is removed from the output DOM after the listener has been registered.
   The listener itself remains attached; only the attribute string disappears from the markup.
 
 
 #### Evaluation timing
 
-@submit participates in the normal Nablla render and event lifecycle:
+@submit participates in the normal Sercrod render and event lifecycle:
 
 - Structural phase  
   Structural directives such as *if, *for, *each, *switch, and *include run first, deciding whether the form is present and what its children look like.
 
 - Attribute and directive phase  
-  Once Nablla decides to keep the element, it processes its attributes.
+  Once Sercrod decides to keep the element, it processes its attributes.
   Event attributes whose names start with the configured events.prefix (by default "@") are handled in this phase.
   For @submit, the handler is registered at this time.
 
@@ -121,20 +121,20 @@ Core rules:
   - If @submit is on an ancestor, the handler runs when the submit event bubbles to that ancestor, unless the event was stopped earlier.
 
 - Re renders  
-  On subsequent renders, Nablla reattaches or updates the handler so it always reflects the latest expression and scope.
+  On subsequent renders, Sercrod reattaches or updates the handler so it always reflects the latest expression and scope.
 
 
 #### Execution model
 
-Conceptually, Nablla handles @submit as follows:
+Conceptually, Sercrod handles @submit as follows:
 
-1. During rendering, Nablla encounters an element with an attribute whose name begins with the events prefix and whose base name is submit, such as @submit or @submit.prevent.stop.
-2. Nablla strips the prefix and splits the remaining part on dots:
+1. During rendering, Sercrod encounters an element with an attribute whose name begins with the events prefix and whose base name is submit, such as @submit or @submit.prevent.stop.
+2. Sercrod strips the prefix and splits the remaining part on dots:
 
    - "submit.prevent.stop" becomes event name submit and modifiers prevent and stop.
 
-3. Nablla reads the attribute value as an expression string, for example handleSubmit($event) or submitted = true.
-4. Nablla builds a handler function handler(e) that:
+3. Sercrod reads the attribute value as an expression string, for example handleSubmit($event) or submitted = true.
+4. Sercrod builds a handler function handler(e) that:
 
    - Applies the prevent modifier by calling e.preventDefault() if present.
    - Applies the stop modifier by calling e.stopPropagation() if present.
@@ -150,9 +150,9 @@ Conceptually, Nablla handles @submit as follows:
 
    - Removes itself if the once modifier is set.
 
-5. Nablla registers this handler with addEventListener("submit", handler, options) on the element, where options reflect capture, passive, and once.
+5. Sercrod registers this handler with addEventListener("submit", handler, options) on the element, where options reflect capture, passive, and once.
 
-6. When the handler finishes without throwing, Nablla applies its default update strategy:
+6. When the handler finishes without throwing, Sercrod applies its default update strategy:
 
    - It treats submit as a mutating event, so by default it triggers a full host update, unless modifiers override this behavior.
 
@@ -172,7 +172,7 @@ Because @submit hooks into the native submit event, it integrates with normal fo
   Without any prevention:
 
   - The browser submits the form to its action URL (or to the current URL if action is absent).
-  - Nablla still runs the @submit expression before or alongside the browser’s default action, depending on modifiers and other listeners.
+  - Sercrod still runs the @submit expression before or alongside the browser’s default action, depending on modifiers and other listeners.
 
 - Preventing navigation  
 
@@ -196,7 +196,7 @@ Because @submit hooks into the native submit event, it integrates with normal fo
 - Button clicks and keyboard submit  
 
   @submit fires when the submit event fires, regardless of whether it was initiated by a button click or pressing Enter in a field.
-  The exact triggering rules follow native browser behavior; Nablla does not change which interactions emit submit.
+  The exact triggering rules follow native browser behavior; Sercrod does not change which interactions emit submit.
 
 
 #### Update strategy and performance
@@ -208,7 +208,7 @@ The generic event engine applies an update strategy after each handler:
   That means wantsUpdate is true unless you explicitly mark submit as non mutating.
 
 - Default behavior  
-  For a submit event, Nablla performs a full host update after the handler, unless:
+  For a submit event, Sercrod performs a full host update after the handler, unless:
 
   - You explicitly add the noupdate modifier, for example @submit.noupdate="handleSubmit()".
   - You add submit to the events.non_mutating configuration set and do not force update with a modifier.
@@ -236,12 +236,12 @@ This strategy ensures that typical form flows see an updated UI after submit (fo
   ```
 
   :action and :method control the visible form attributes; @submit controls what happens when the form is submitted.
-  Nablla does not automatically couple @submit to :action; they are separate mechanisms that share the same DOM element.
+  Sercrod does not automatically couple @submit to :action; they are separate mechanisms that share the same DOM element.
 
 - With staged data via *stage  
 
   ```html
-  <na-blla id="profile" data='{
+  <serc-rod id="profile" data='{
     "profile": { "name": "", "email": "" },
     "saved": false
   }'>
@@ -255,7 +255,7 @@ This strategy ensures that typical form flows see an updated UI after submit (fo
       <input type="email" :value="profile.email">
       <button type="submit">Save</button>
     </form>
-  </na-blla>
+  </serc-rod>
   ```
 
   Here, @submit.prevent is used to mark the form as saved and to coordinate with other directives that commit staged data.
@@ -296,9 +296,9 @@ Like other event directives, @submit can be used with structural directives that
   Each iteration receives a dedicated handler whose expression is evaluated with that iteration’s item in scope.
 
 
-#### Nablla-specific restrictions
+#### Sercrod-specific restrictions
 
-For @submit itself, there are no special Nablla only restrictions beyond the general event rules:
+For @submit itself, there are no special Sercrod only restrictions beyond the general event rules:
 
 - You may add @submit to any element; in practice it is most useful on form elements or ancestors that receive the bubbling submit event.
 - You may combine @submit with other event directives on the same element, as long as they use distinct event names (for example @click, @keydown).
@@ -324,7 +324,7 @@ Unlike structural directives such as *each, *include, or *import, @submit does n
   Use flags such as pending, submitted, or error on the host data to drive visual feedback (for example disabling the button or showing status messages) after submit.
 
 - Tune updates when needed  
-  If a submit handler only triggers an external side effect and does not need to update the Nablla host, consider using @submit.prevent.noupdate to avoid unnecessary re renders.
+  If a submit handler only triggers an external side effect and does not need to update the Sercrod host, consider using @submit.prevent.noupdate to avoid unnecessary re renders.
 
 
 #### Additional examples
@@ -332,7 +332,7 @@ Unlike structural directives such as *each, *include, or *import, @submit does n
 Minimal custom submit with validation:
 
 ```html
-<na-blla id="signup" data='{
+<serc-rod id="signup" data='{
   "email": "",
   "error": "",
   "ok": false
@@ -351,13 +351,13 @@ Minimal custom submit with validation:
       Check your inbox to confirm your email.
     </p>
   </form>
-</na-blla>
+</serc-rod>
 ```
 
 Listening on a wrapper element instead of the form:
 
 ```html
-<na-blla id="host" data='{
+<serc-rod id="host" data='{
   "count": 0
 }'>
   <div @submit.prevent="count = count + 1">
@@ -368,7 +368,7 @@ Listening on a wrapper element instead of the form:
   </div>
 
   <p>Submits in this area: {{%count%}}</p>
-</na-blla>
+</serc-rod>
 ```
 
 In this pattern, the form still fires submit, and the event bubbles to the wrapper div where @submit is attached.
@@ -378,6 +378,6 @@ In this pattern, the form still fires submit, and the event bubbles to the wrapp
 
 - @submit is an event handler directive for the native submit event.
 - The expression runs with $event and $e set to the native event, and el and $el set to the element that declared @submit.
-- By default, submit is treated as a mutating event, so Nablla performs a host update after the handler unless you explicitly suppress it with noupdate.
+- By default, submit is treated as a mutating event, so Sercrod performs a host update after the handler unless you explicitly suppress it with noupdate.
 - Use .prevent on @submit or *prevent-default="submit" on a form when you need to intercept submission without letting the browser navigate away.
 - If cleanup.handlers is enabled, the @submit attribute is removed from the rendered DOM after listener registration; this does not affect behavior, only the visible markup.

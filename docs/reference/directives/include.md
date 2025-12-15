@@ -6,8 +6,8 @@
 The host element stays in the DOM as a single wrapper, and only its `innerHTML` is replaced.
 It has an alias `n-include`.
 
-`*include` works with templates declared by `*template` (or `n-template`) in the current Nablla world or ancestor worlds.
-After injecting the template content, Nablla continues to process that content as normal children (conditions, loops, bindings, events, and so on).
+`*include` works with templates declared by `*template` (or `n-template`) in the current Sercrod world or ancestor worlds.
+After injecting the template content, Sercrod continues to process that content as normal children (conditions, loops, bindings, events, and so on).
 
 Important structural restriction:
 
@@ -20,7 +20,7 @@ Important structural restriction:
 A local template and an include:
 
 ```html
-<na-blla id="app" data='{"user":{"name":"Alice","role":"admin"}}'>
+<serc-rod id="app" data='{"user":{"name":"Alice","role":"admin"}}'>
 
   <!-- Template declaration -->
   <template *template="user-card">
@@ -35,7 +35,7 @@ A local template and an include:
     <div *include="user-card"></div>
   </section>
 
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
@@ -81,7 +81,7 @@ Key points:
 
 #### Template name and expression syntax
 
-The value of `*include` is a Nablla expression that must resolve to a template name string.
+The value of `*include` is a Sercrod expression that must resolve to a template name string.
 
 Typical patterns:
 
@@ -94,9 +94,9 @@ Typical patterns:
 - Bare identifier resolved from data:
 
   ```html
-  <na-blla data='{"currentTemplate":"user-card"}'>
+  <serc-rod data='{"currentTemplate":"user-card"}'>
     <div *include="currentTemplate"></div>
-  </na-blla>
+  </serc-rod>
   ```
 
 - Expression that computes a name:
@@ -107,12 +107,12 @@ Typical patterns:
 
 Resolution rules (as implemented by `_resolve_template_name`):
 
-1. Nablla first tries to evaluate the raw text as an expression in the current scope, in `include` mode.
+1. Sercrod first tries to evaluate the raw text as an expression in the current scope, in `include` mode.
    - If evaluation succeeds and yields a non-empty string, that string is used as the template name.
    - Errors such as `ReferenceError` are suppressed (quiet mode), so they do not print console warnings.
 
 2. If expression evaluation does not yield a usable name:
-   - If the raw text looks like a simple identifier (letters, digits, underscore, hyphen), Nablla uses it directly as the name.
+   - If the raw text looks like a simple identifier (letters, digits, underscore, hyphen), Sercrod uses it directly as the name.
    - Otherwise, the name resolution fails.
 
 3. If the final name is empty or no template with that name exists in any accessible world, `*include` fails and behaves as described in the error handling section below.
@@ -125,13 +125,13 @@ Practical guidance:
 
 #### Template lookup and worlds
 
-Templates are stored per Nablla world:
+Templates are stored per Sercrod world:
 
-- When you declare `*template="name"` inside a `<na-blla>` host, Nablla saves a deep clone of that element as a template prototype in that host’s world.
+- When you declare `*template="name"` inside a `<serc-rod>` host, Sercrod saves a deep clone of that element as a template prototype in that host’s world.
 - `*include` searches for the template name in two stages:
   1. The current world’s registry (`this._template_registry`) if it exists.
   2. Parent worlds via `_lookupTemplateNear(name)`:
-     - Nablla climbs the chain of Nablla instances (worlds) upward.
+     - Sercrod climbs the chain of Sercrod instances (worlds) upward.
      - The first world that has a matching template returns its prototype.
 
 Effect:
@@ -146,10 +146,10 @@ Within the rendering pipeline, `*include` is evaluated after `*template` registr
 
 - First, `*template` or `n-template` on elements is processed and registered.
 - Then, for each node with `*include` or `n-include`:
-  1. Nablla resolves the template name.
+  1. Sercrod resolves the template name.
   2. If successful, it sets `node.innerHTML` to the template prototype’s `innerHTML`.
   3. It removes `*include` / `n-include` from the rendered element.
-- After that, Nablla proceeds to render the children, which now consist of the included content.
+- After that, Sercrod proceeds to render the children, which now consist of the included content.
 
 Important:
 
@@ -162,21 +162,21 @@ Important:
 At a high level, the implementation behaves as follows for a node `node` with `*include` or `n-include`:
 
 1. Determine include depth:
-   - Nablla uses an internal map `_include_depth_map` plus `_get_nearest_include_depth(node)` to compute the nesting depth of this `*include` relative to surrounding `*include` and `*import` directives.
+   - Sercrod uses an internal map `_include_depth_map` plus `_get_nearest_include_depth(node)` to compute the nesting depth of this `*include` relative to surrounding `*include` and `*import` directives.
    - If the depth exceeds the configured maximum (`config.include.max_depth`, default 16):
-     - If `config.include.warn_on_element` is `true`, Nablla marks the rendered element with `nablla-include-depth-overflow="<max_depth>"`.
+     - If `config.include.warn_on_element` is `true`, Sercrod marks the rendered element with `sercrod-include-depth-overflow="<max_depth>"`.
      - It removes `*include` / `n-include` from the rendered element.
      - The include is skipped to prevent infinite recursion.
 
 2. If the `*include` value is empty:
-   - Nablla removes `*include` / `n-include` from the source node.
+   - Sercrod removes `*include` / `n-include` from the source node.
    - No template is inserted.
 
 3. Resolve the template name:
-   - Nablla calls `_resolve_template_name(raw_text, scope, {el: node, mode: "include"})`.
+   - Sercrod calls `_resolve_template_name(raw_text, scope, {el: node, mode: "include"})`.
    - If name resolution fails (empty string):
      - If `this.error?.warn` is enabled:
-       - Optionally marks the source node with `nablla-template-not-found="<raw_text>"` when `config.include.warn_on_element` is `true`.
+       - Optionally marks the source node with `sercrod-template-not-found="<raw_text>"` when `config.include.warn_on_element` is `true`.
        - Removes `*include` / `n-include` from the source node.
      - The include is skipped.
 
@@ -185,13 +185,13 @@ At a high level, the implementation behaves as follows for a node `node` with `*
    - Otherwise, `_lookupTemplateNear(name)` searches parent worlds.
    - If no template is found anywhere:
      - If `this.error?.warn` is enabled:
-       - Optionally marks the rendered element with `nablla-template-not-found="<name or raw_text>"` when `config.include.warn_on_element` is `true`.
+       - Optionally marks the rendered element with `sercrod-template-not-found="<name or raw_text>"` when `config.include.warn_on_element` is `true`.
        - Removes `*include` / `n-include` from the rendered element.
        - If `config.include.remove_element_if_empty` is false, the host element is still appended, potentially empty.
      - The include is skipped.
 
 5. Inject the template content:
-   - If a template is found, Nablla obtains its prototype `proto`.
+   - If a template is found, Sercrod obtains its prototype `proto`.
    - It sets `node.innerHTML = proto.innerHTML || ""`.
    - It removes `*include` / `n-include` from the rendered element.
    - It does not return early at this point: normal child rendering continues, now processing the included children.
@@ -205,7 +205,7 @@ This model keeps `*include` simple and predictable: name resolution, template lo
 
 - The included template body is rendered in the same scope as the `*include` host.
 - All variables and helpers that are visible at the host are also visible in the included content:
-  - Data bound to `<na-blla>` (for example `user`, `items`, `state`).
+  - Data bound to `<serc-rod>` (for example `user`, `items`, `state`).
   - Special helpers such as `$data`, `$root`, `$parent`.
   - Methods defined by `*methods` or similar configuration.
 
@@ -217,15 +217,15 @@ If the template itself defines additional directives (for example `*let`):
 Guidelines:
 
 - Think of `*include` as a textual template expansion that runs in the current scope.
-- Do not expect an isolated component-like scope; for that you can nest a new `<na-blla>` block inside the template.
+- Do not expect an isolated component-like scope; for that you can nest a new `<serc-rod>` block inside the template.
 
 
 #### Parent access
 
 Because `*include` does not introduce a new world or host, parent data access works in the usual way:
 
-- `$root` refers to the root data of the nearest Nablla host.
-- `$parent` refers to the data of the parent Nablla world if you are inside a nested Nablla.
+- `$root` refers to the root data of the nearest Sercrod host.
+- `$parent` refers to the data of the parent Sercrod world if you are inside a nested Sercrod.
 - Any plain data objects (for example `state`, `config`) are referenced exactly as in normal templates.
 
 The only change is that the HTML you wrote under `*template` is now located under the `*include` host at render time.
@@ -258,7 +258,7 @@ Host-level loops:
   ```
 
 - For each iteration of `*for`:
-  - Nablla evaluates `*include`, injects the `user-item` template into the `<li>`, and then renders its children.
+  - Sercrod evaluates `*include`, injects the `user-item` template into the `<li>`, and then renders its children.
   - The template body can use the loop variable `user`.
 
 Child-level condition and loops:
@@ -295,7 +295,7 @@ Child-level condition and loops:
     - `headers` (object of request headers).
   - Caches HTML per URL on the class in `_import_cache`.
   - On success, sets `node.innerHTML` to the fetched HTML, then removes `*import` / `n-import`.
-  - On failure, can mark the rendered element with `nablla-import-error` and either keep or drop the host based on `config.include.remove_element_if_empty`.
+  - On failure, can mark the rendered element with `sercrod-import-error` and either keep or drop the host based on `config.include.remove_element_if_empty`.
 
 For the injected HTML, the behavior is intentionally parallel:
 
@@ -311,7 +311,7 @@ Because `*include`, `*each`, and `*import` all want to control the host’s chil
   - `*each` treats the host’s original children as the loop body and repeats them.
   - `*include` overwrites the host’s `innerHTML` with template content.
   - Combining them on one element produces undefined behavior and is not supported.
-  - Officially, Nablla does not allow a single element to have both `*each` and `*include`.
+  - Officially, Sercrod does not allow a single element to have both `*each` and `*include`.
 
 - `*include` and `*import` must not appear on the same element:
 
@@ -361,7 +361,7 @@ From the template system’s point of view:
 Typical usage patterns:
 
 - Use `*include` when:
-  - The template is defined in the same document or in a Nablla world that is already in memory.
+  - The template is defined in the same document or in a Sercrod world that is already in memory.
   - You want predictable, purely in-memory reuse.
 
 - Use `*import` when:
@@ -369,8 +369,8 @@ Typical usage patterns:
   - That HTML may contain `*template` declarations, reusable snippets, or complete fragments.
   - After the import, you can use `*include` to consume any templates defined in the imported content.
 
-The string passed to `*import` is treated purely as an URL from Nablla’s perspective.
-If you use patterns like `"/partials/card.html:card"`, the `:card` part is just part of the URL and is not parsed specially by Nablla itself.
+The string passed to `*import` is treated purely as an URL from Sercrod’s perspective.
+If you use patterns like `"/partials/card.html:card"`, the `:card` part is just part of the URL and is not parsed specially by Sercrod itself.
 Any such semantics (for example, serving only one named fragment from a combined file) must be implemented on the server side.
 
 
@@ -385,8 +385,8 @@ Any such semantics (for example, serving only one named fragment from a combined
   - Compose pages by including a few well-defined templates.
 
 - Avoid deep include chains:
-  - Although Nablla has a depth guard (`config.include.max_depth`, default 16), very deep nesting is harder to reason about.
-  - If you see `nablla-include-depth-overflow`, review your include structure.
+  - Although Sercrod has a depth guard (`config.include.max_depth`, default 16), very deep nesting is harder to reason about.
+  - If you see `sercrod-include-depth-overflow`, review your include structure.
 
 - Use worlds to structure templates:
   - Define shared templates in outer layouts and local templates closer to the components that use them.
@@ -402,7 +402,7 @@ Any such semantics (for example, serving only one named fragment from a combined
 Dynamic template selection:
 
 ```html
-<na-blla data='{
+<serc-rod data='{
   "mode": "compact",
   "cards": [1,2,3]
 }'>
@@ -421,17 +421,17 @@ Dynamic template selection:
   <section *for="id of cards">
     <div *include="mode === 'compact' ? 'card-compact' : 'card-full'"></div>
   </section>
-</na-blla>
+</serc-rod>
 ```
 
 Using a template as a partial inside a layout:
 
 ```html
-<na-blla data='{"user":{"name":"Alice"}}'>
+<serc-rod data='{"user":{"name":"Alice"}}'>
 
   <template *template="layout">
     <header>
-      <h1>Nablla demo</h1>
+      <h1>Sercrod demo</h1>
     </header>
     <main>
       <!-- Slot for content -->
@@ -448,21 +448,21 @@ Using a template as a partial inside a layout:
     <!-- After include, the header/main/footer structure appears here -->
   </div>
 
-</na-blla>
+</serc-rod>
 ```
 
 
 #### Notes
 
 - `*include` and `n-include` are aliases; choose one style per project for consistency.
-- `*include` uses Nablla’s expression evaluator in `include` mode and suppresses JavaScript-level reference errors.
+- `*include` uses Sercrod’s expression evaluator in `include` mode and suppresses JavaScript-level reference errors.
 - Template lookup is world-aware:
-  - The current Nablla world is searched first.
+  - The current Sercrod world is searched first.
   - Parent worlds are searched next via `_lookupTemplateNear`.
 - Depth and error diagnostics:
-  - Excessive nesting of `*include` and `*import` can be flagged with `nablla-include-depth-overflow` or `nablla-import-depth-overflow` on the rendered element.
-  - Missing templates can be flagged with `nablla-template-not-found`.
-  - Failed imports can be flagged with `nablla-import-error`.
-- Structural restrictions are part of the official Nablla behavior:
+  - Excessive nesting of `*include` and `*import` can be flagged with `sercrod-include-depth-overflow` or `sercrod-import-depth-overflow` on the rendered element.
+  - Missing templates can be flagged with `sercrod-template-not-found`.
+  - Failed imports can be flagged with `sercrod-import-error`.
+- Structural restrictions are part of the official Sercrod behavior:
   - A single element must not combine `*include` with `*each` or `*import`.
   - `*include` on an element that also has `*template` is effectively ignored for rendering and should be treated as invalid usage.

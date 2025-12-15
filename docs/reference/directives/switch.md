@@ -23,19 +23,19 @@ Aliases:
 A simple status switch:
 
 ```html
-<na-blla id="app" data='{"status":"ready"}'>
+<serc-rod id="app" data='{"status":"ready"}'>
   <div *switch="status">
     <p *case="'idle'">Waiting…</p>
     <p *case="'ready'">Ready</p>
     <p *case="'running'">Running</p>
     <p *default>Unknown status</p>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
-- Nablla evaluates `status` on the `*switch` element.
+- Sercrod evaluates `status` on the `*switch` element.
 - It scans the direct child elements of the `div` in DOM order.
 - The first `*case` whose expression matches `status` becomes the entry point.
 - That `p` and all subsequent `*case` / `*default` elements are rendered until a break is encountered.
@@ -49,9 +49,9 @@ Behavior:
 
 On each render:
 
-- Nablla evaluates the `*switch` (or `n-switch`) expression on the host.
+- Sercrod evaluates the `*switch` (or `n-switch`) expression on the host.
 - The evaluated value is stored in a local variable `$switch` and passed to all branch expressions and branch bodies.
-- Nablla iterates over the host’s **direct child elements** in DOM order.
+- Sercrod iterates over the host’s **direct child elements** in DOM order.
 - It treats only children that declare:
 
   - `*case`, `n-case`
@@ -62,18 +62,18 @@ On each render:
 
 Branch selection and fallthrough:
 
-- Before any branch has been selected, Nablla looks for:
+- Before any branch has been selected, Sercrod looks for:
 
   - The first `*case` / `n-case` / `*case.break` / `n-case.break` whose expression matches the switch value.
   - Or, if no case has matched yet, the first `*default` / `n-default`.
 
-- Once a branch is selected, Nablla:
+- Once a branch is selected, Sercrod:
 
   - Clones that child node.
   - Strips the control attributes (`*case`, `*case.break`, `*default`, `*break` and their `n-` aliases) from the clone.
   - Renders the clone as a normal element with `_renderElement`, using a scope that includes `$switch`.
 
-- Nablla then continues to the **next** eligible branch child (fallthrough) and repeats the process until a break is encountered or there are no more branch children.
+- Sercrod then continues to the **next** eligible branch child (fallthrough) and repeats the process until a break is encountered or there are no more branch children.
 
 Important structural details:
 
@@ -88,7 +88,7 @@ Each `*case` / `n-case` / `*case.break` / `n-case.break` attribute holds an expr
 
 Expression evaluation:
 
-- Nablla evaluates the case expression with an extended scope that includes `$switch`:
+- Sercrod evaluates the case expression with an extended scope that includes `$switch`:
 
   - You can reference `$switch` directly inside the case expression if you need it.
   - All other data and helpers available on the switch host are also accessible.
@@ -117,9 +117,9 @@ Expression evaluation:
 
   - **Other values (primitives, objects without `.has`, etc.):**
 
-    - The value is compared to the switch value using Nablla’s internal equality check.
+    - The value is compared to the switch value using Sercrod’s internal equality check.
 
-- If evaluation throws, or none of the above patterns succeed, Nablla falls back to a simple string-list matcher:
+- If evaluation throws, or none of the above patterns succeed, Sercrod falls back to a simple string-list matcher:
 
   - The raw attribute text is split by `,` and `|` into tokens.
   - Each token is trimmed and evaluated as an expression when possible.
@@ -161,22 +161,22 @@ Common patterns:
 
 #### Evaluation timing
 
-`*switch` participates in Nablla’s structural evaluation in this order:
+`*switch` participates in Sercrod’s structural evaluation in this order:
 
 - Host-level `*let` / `n-let` are evaluated first, so they can influence the switch expression and case expressions.
 
 - Host-level `*if` / `*elseif` / `*else` chains are resolved **before** `*switch`:
 
-  - If a `*switch` element is part of a conditional chain, Nablla first selects the active branch of that chain.
+  - If a `*switch` element is part of a conditional chain, Sercrod first selects the active branch of that chain.
   - It then renders only that chosen branch node, and `*switch` is applied to that branch node as usual.
 
-- After the `*if` chain, Nablla looks for `*switch` / `n-switch` on the (possibly cloned) working node.
+- After the `*if` chain, Sercrod looks for `*switch` / `n-switch` on the (possibly cloned) working node.
 
 - If `*switch` is present:
 
-  - Nablla runs `_renderSwitchBlock`, which renders only the selected cases/defaults.
+  - Sercrod runs `_renderSwitchBlock`, which renders only the selected cases/defaults.
   - The host element itself is not rendered.
-  - Nablla does not proceed to other structural directives on that host (`*each`, `*for`, `*template`, `*include`, `*import`).
+  - Sercrod does not proceed to other structural directives on that host (`*each`, `*for`, `*template`, `*include`, `*import`).
 
 - Child directives inside each case/default are evaluated during `_renderElement` for the case clone:
 
@@ -230,9 +230,9 @@ Conceptually, the runtime performs these steps for `*switch`:
 
 6. **Break handling**
 
-   - After rendering each branch child, Nablla checks the original child element for break markers:
+   - After rendering each branch child, Sercrod checks the original child element for break markers:
 
-     - If it has any of `*break`, `n-break`, `*case.break`, `n-case.break`, Nablla stops the scan and does not consider any later branches.
+     - If it has any of `*break`, `n-break`, `*case.break`, `n-case.break`, Sercrod stops the scan and does not consider any later branches.
      - The value of the `*break` attribute is not evaluated by the `*switch` implementation; it is treated as a simple presence marker in this context.
 
 7. **Host element**
@@ -250,9 +250,9 @@ Conceptually, the runtime performs these steps for `*switch`:
   - Inside `*case` / `*default` branches you can read `$switch` directly.
   - `childScope` also inherits all existing data:
 
-    - Root data bound on `<na-blla>` (for example `data='{"status":"ready"}'`).
+    - Root data bound on `<serc-rod>` (for example `data='{"status":"ready"}'`).
     - Any variables created by `*let` on the switch host or ancestors.
-    - Methods and globals configured via Nablla’s configuration.
+    - Methods and globals configured via Sercrod’s configuration.
 
 Scope behavior:
 
@@ -262,10 +262,10 @@ Scope behavior:
 
 #### Parent access
 
-`*switch` runs within the normal Nablla scope chain:
+`*switch` runs within the normal Sercrod scope chain:
 
-- `$root` continues to refer to the root data of the Nablla world.
-- `$parent` continues to refer to the nearest ancestor Nablla host’s data.
+- `$root` continues to refer to the root data of the Sercrod world.
+- `$parent` continues to refer to the nearest ancestor Sercrod host’s data.
 - `$switch` is just an additional helper, not a replacement for existing parent or root access.
 
 Inside case/default branches:
@@ -273,7 +273,7 @@ Inside case/default branches:
 - All bindings and expressions see the extended `childScope`, which includes:
 
   - Normal data access (for example `status`, `user`, `config`).
-  - `$root`, `$parent`, other Nablla helpers.
+  - `$root`, `$parent`, other Sercrod helpers.
   - `$switch` with the current switch value.
 
 
@@ -285,7 +285,7 @@ Host-level conditionals:
 
 - When `*switch` appears on a node that is also part of a `*if` / `*elseif` / `*else` chain:
 
-  - Nablla first resolves the conditional chain and selects exactly one branch element.
+  - Sercrod first resolves the conditional chain and selects exactly one branch element.
   - That branch is cloned, stripped of its conditional attributes, and passed to `renderNode`.
   - `*switch` on that chosen branch then executes normally.
 
@@ -314,7 +314,7 @@ Branches containing loops:
 - You can safely use `*for` / `*each` inside case/default branches:
 
   ```html
-  <na-blla id="app" data='{
+  <serc-rod id="app" data='{
     "status":"list",
     "items":["A","B","C"]
   }'>
@@ -325,7 +325,7 @@ Branches containing loops:
       </ul>
       <p *default>Unknown mode.</p>
     </section>
-  </na-blla>
+  </serc-rod>
   ```
 
 - In this example, the `*switch` selects the `<ul>` branch for `"list"`, and then `*for` runs inside that branch to render `<li>` elements.
@@ -353,11 +353,11 @@ Loops containing switches:
 #### Use with templates, *include and *import
 
 `*switch` is itself a structural directive that controls which children are rendered and how they are cloned.
-On the **same host element**, Nablla processes `*switch` **before** other structural directives like `*each`, `*for`, `*template`, `*include`, and any helpers built on top of them (such as `*import`).
+On the **same host element**, Sercrod processes `*switch` **before** other structural directives like `*each`, `*for`, `*template`, `*include`, and any helpers built on top of them (such as `*import`).
 
 Structural restriction on the host element:
 
-- When a node has `*switch` or `n-switch`, Nablla:
+- When a node has `*switch` or `n-switch`, Sercrod:
 
   - Executes the switch block for that node.
   - Does not render the host element itself.
@@ -372,7 +372,7 @@ Structural restriction on the host element:
 - Practically, this means:
 
   - If you put `*switch` together with `*each`, `*for`, `*include`, `*import`, or `*template` on the same element, `*switch` takes over and the other directive will not behave as you might expect.
-  - Nablla treats the `*switch` host as a pure container for branch children.
+  - Sercrod treats the `*switch` host as a pure container for branch children.
 
 Recommended pattern:
 
@@ -441,14 +441,14 @@ What is allowed:
 Multiple fallthrough branches:
 
 ```html
-<na-blla id="app" data='{"level":"warning"}'>
+<serc-rod id="app" data='{"level":"warning"}'>
   <div *switch="level">
     <p *case="'info'">Info: low priority.</p>
     <p *case="'warning'">Warning: check this.</p>
     <p *case.break="'error'">Error: action required.</p>
     <p *default>Fallback message.</p>
   </div>
-</na-blla>
+</serc-rod>
 ```
 
 - If `level` is `'warning'`, the second `<p>` matches and fallthrough continues, rendering:

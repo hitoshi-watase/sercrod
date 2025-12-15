@@ -3,8 +3,8 @@
 #### Summary
 
 `*save` exports the host data (or its staged view) as a JSON file in the browser.
-It is typically used on a button inside a `<na-blla>` host.
-When clicked, `*save` collects the host’s current data, builds a JSON string, and starts a download such as `Nablla-20251205-093000.json`.
+It is typically used on a button inside a `<serc-rod>` host.
+When clicked, `*save` collects the host’s current data, builds a JSON string, and starts a download such as `Sercrod-20251205-093000.json`.
 
 By default, `*save` exports the entire host data.
 If you provide a list of property names, only those top-level properties are included.
@@ -15,29 +15,29 @@ If you provide a list of property names, only those top-level properties are inc
 Save the entire host data:
 
 ```html
-<na-blla id="profile" data='{"name":"Alice","age":30}'>
+<serc-rod id="profile" data='{"name":"Alice","age":30}'>
   <button *save>Download profile JSON</button>
-</na-blla>
+</serc-rod>
 ```
 
 Behavior:
 
-- The `<button>` is cloned and given a click handler by Nablla.
-- When the button is clicked, Nablla takes the host’s current data and serializes it to JSON.
-- A file named like `Nablla-YYYYMMDD-HHMMSS.json` is generated and downloaded by the browser.
+- The `<button>` is cloned and given a click handler by Sercrod.
+- When the button is clicked, Sercrod takes the host’s current data and serializes it to JSON.
+- A file named like `Sercrod-YYYYMMDD-HHMMSS.json` is generated and downloaded by the browser.
 
 
 #### Behavior
 
 - `*save` attaches a click handler to the element it is placed on.
-- The handler runs in the context of the surrounding Nablla host and serializes:
+- The handler runs in the context of the surrounding Sercrod host and serializes:
 
   - `this._stage` if it exists, otherwise
   - `this._data`.
 
 - No network request is sent by `*save` itself.
 - The resulting JSON is written into a Blob, and a temporary `<a download>` element is used to trigger the browser’s download dialog.
-- After the download is initiated, a `CustomEvent("nablla-saved")` is dispatched from the host for application-specific hooks.
+- After the download is initiated, a `CustomEvent("sercrod-saved")` is dispatched from the host for application-specific hooks.
 
 Alias:
 
@@ -69,20 +69,20 @@ Property selection:
 Example (selective save):
 
 ```html
-<na-blla id="settings" data='{
+<serc-rod id="settings" data='{
   "user": { "name": "Alice", "age": 30 },
   "theme": { "mode": "dark" },
   "debug": true
 }'>
   <!-- Only save "user" and "theme" from the host data -->
   <button *save="user theme">Download user+theme</button>
-</na-blla>
+</serc-rod>
 ```
 
 In this example:
 
 - `src` is `host._stage ?? host._data`.
-- If the `*save` attribute is `"user theme"`, Nablla builds:
+- If the `*save` attribute is `"user theme"`, Sercrod builds:
 
   - `data = { user: src.user, theme: src.theme }` (if those properties exist).
 
@@ -94,10 +94,10 @@ In this example:
 
 Render-time:
 
-- When Nablla renders the host, it looks for elements with `*save` or `n-save`.
+- When Sercrod renders the host, it looks for elements with `*save` or `n-save`.
 - For each such element:
 
-  - Nablla clones the element.
+  - Sercrod clones the element.
   - Attaches a click handler on the clone.
   - Appends the clone to the parent.
   - Returns from the element renderer without recursing into the children of that clone.
@@ -106,8 +106,8 @@ Click-time:
 
 - When the user clicks the `*save` button:
 
-  1. Nablla reads the `*save` / `n-save` attribute value and parses it into a property list, if present.
-  2. Nablla selects `src = this._stage ?? this._data` from the host.
+  1. Sercrod reads the `*save` / `n-save` attribute value and parses it into a property list, if present.
+  2. Sercrod selects `src = this._stage ?? this._data` from the host.
   3. It builds a plain object:
 
      - Entire `src` if no property list was provided.
@@ -115,7 +115,7 @@ Click-time:
 
   4. It serializes that object with `JSON.stringify(data, null, 2)`.
   5. It creates a Blob, a temporary `<a>` element, and triggers a download with a timestamped name.
-  6. It dispatches the `nablla-saved` event from the host.
+  6. It dispatches the `sercrod-saved` event from the host.
 
 Because the JSON is built at click time, `*save` always reflects the current state of `_stage` or `_data` at the moment of the click.
 
@@ -124,13 +124,13 @@ Because the JSON is built at click time, `*save` always reflects the current sta
 
 Internally, `*save` behaves as follows (conceptually):
 
-1. During render, Nablla finds an element `work` with `*save` or `n-save`.
-2. Nablla clones `work` into `el`.
-3. Nablla attaches:
+1. During render, Sercrod finds an element `work` with `*save` or `n-save`.
+2. Sercrod clones `work` into `el`.
+3. Sercrod attaches:
 
    - `el.addEventListener("click", () => { /* build JSON and download */ })`.
 
-4. Nablla appends `el` to the parent node and returns, without processing `el`’s children for further Nablla directives.
+4. Sercrod appends `el` to the parent node and returns, without processing `el`’s children for further Sercrod directives.
 
 On click, the handler:
 
@@ -149,16 +149,16 @@ On click, the handler:
 6. Creates an `ObjectURL` and a temporary `<a>` element with:
 
    - `href = url`.
-   - `download = "Nablla-YYYYMMDD-HHMMSS.json"` (in the local time of the browser).
+   - `download = "Sercrod-YYYYMMDD-HHMMSS.json"` (in the local time of the browser).
 
 7. Programmatically clicks the anchor to prompt download.
 8. Cleans up (removes the anchor from the DOM and revokes the `ObjectURL`).
-9. Dispatches `CustomEvent("nablla-saved", { detail: { ... } })` from the host.
+9. Dispatches `CustomEvent("sercrod-saved", { detail: { ... } })` from the host.
 
 
 #### Use on nested elements and scope
 
-- `*save` must live inside a Nablla host to be meaningful, since it reads from the host’s `_stage` or `_data`.
+- `*save` must live inside a Sercrod host to be meaningful, since it reads from the host’s `_stage` or `_data`.
 - `*save` does not use per-element scope; it only uses the host’s data object.
 - Placing `*save` on a deeply nested element is allowed, but it still always saves the surrounding host’s data, not a subset scoped by `*for` or `*each`.
 
@@ -174,20 +174,20 @@ After starting the download, `*save` dispatches a bubbling, composed `CustomEven
 
 - Event type:
 
-  - `"nablla-saved"`
+  - `"sercrod-saved"`
 
 - Event detail structure:
 
   - `detail.stage`: `"save"` (a simple tag for the workflow stage).
-  - `detail.host`: the Nablla host element (`<na-blla>` instance).
-  - `detail.fileName`: the file name used for the download (for example `"Nablla-20251205-093000.json"`).
+  - `detail.host`: the Sercrod host element (`<serc-rod>` instance).
+  - `detail.fileName`: the file name used for the download (for example `"Sercrod-20251205-093000.json"`).
   - `detail.props`: the property list array if provided; `null` if no list was specified.
   - `detail.json`: the JSON string that was generated.
 
 Example hook:
 
 ```js
-document.addEventListener("nablla-saved", (evt) => {
+document.addEventListener("sercrod-saved", (evt) => {
   const { host, fileName, props, json } = evt.detail;
   console.log("Saved from host:", host.id);
   console.log("File name:", fileName);
@@ -207,7 +207,7 @@ You can use this event to:
 
 - Treat `*save` elements as simple buttons:
 
-  - Because the renderer does not recursively process children of `*save` hosts after cloning, avoid placing other Nablla directives inside the same element.
+  - Because the renderer does not recursively process children of `*save` hosts after cloning, avoid placing other Sercrod directives inside the same element.
   - Use plain text or static markup inside the button where possible.
 
 - Use property lists for focused exports:
@@ -226,9 +226,9 @@ You can use this event to:
   - Use `*save` to export JSON snapshots.
   - Use `*load` to re-import and merge them later into the same or a different host.
 
-- Use `nablla-saved` for integration:
+- Use `sercrod-saved` for integration:
 
-  - Attach listeners to `"nablla-saved"` if you want to route the JSON elsewhere instead of or in addition to the download.
+  - Attach listeners to `"sercrod-saved"` if you want to route the JSON elsewhere instead of or in addition to the download.
 
 
 #### Advanced - Using *save with *stage, *apply, *restore, *load, and *post
@@ -273,6 +273,6 @@ The core rule is:
 - The value of `*save` is parsed as plain text and split by whitespace; it is not evaluated as an expression.
 - When no property list is provided, the entire `_stage ?? _data` object is serialized.
 - When a property list is provided, only the listed top-level properties are included if they exist.
-- The file name is generated as `"Nablla-YYYYMMDD-HHMMSS.json"` using the browser’s local time.
+- The file name is generated as `"Sercrod-YYYYMMDD-HHMMSS.json"` using the browser’s local time.
 - `*save` itself does not change `_stage` or `_data`; it is a read-only export operation.
-- There are no special structural restrictions specific to `*save` beyond the general behavior described above; it can be combined with directives such as `*if` on the same element, as long as you keep in mind that `*save` turns that element into a “save button” whose children are not further processed by Nablla.
+- There are no special structural restrictions specific to `*save` beyond the general behavior described above; it can be combined with directives such as `*if` on the same element, as long as you keep in mind that `*save` turns that element into a “save button” whose children are not further processed by Sercrod.
