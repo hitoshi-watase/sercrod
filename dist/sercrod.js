@@ -1118,12 +1118,17 @@ In this pattern, *man documents the exact directive that is used on the button.
 				catch(e){ this._stage = JSON.parse(JSON.stringify(this._data)); }
 			}
 			if(this.hasAttribute("*fetch") || this.hasAttribute("n-fetch")){
-				this._loading = true;
-				const spec = this.getAttribute("*fetch") ?? this.getAttribute("n-fetch") ?? "";
-				const error = structuredClone(this.error);
-				this.error.warn = false;
-				this._do_load(spec);
-				this.error = error;
+				const spec_raw = this.getAttribute("*fetch") ?? this.getAttribute("n-fetch") ?? "";
+				const spec = this._resolve_fetch_spec(spec_raw, this._data || {}, this);
+				if(spec){
+					this._loading = true;
+					const error = structuredClone(this.error);
+					this.error.warn = false;
+					this._do_load(spec);
+					this.error = error;
+				}else{
+					this.update();
+				}
 			}else{
 				this.update();
 			}
@@ -1527,6 +1532,23 @@ In this pattern, *man documents the exact directive that is used on the button.
 			return this.constructor._filters.placeholder(raw, { expr: ex, scope });
 		});
 	}
+
+	// *fetch / n-fetch の spec を解決
+	// - まず %expr% を展開（_expand_text）
+	// - 展開結果が "=<expr>" で始まる場合は、式として評価して文字列化
+	//   例: *fetch="=`/api/${id}.json`"
+	_resolve_fetch_spec(spec_raw, scope, node){
+		const expanded = this._expand_text(spec_raw ?? "", scope, node);
+		const spec = String(expanded);
+		if(spec.startsWith("=")){
+			const expr = spec.slice(1).trim();
+			const v = this.eval_expr(expr, scope, {el: node, mode:"fetch", quiet:true});
+			if(v===false || v===null || v===undefined) return "";
+			return String(v);
+		}
+		return spec;
+	}
+
 
 	// *updated フックを処理する
 	//    - *updated="(sel)"        -> セレクタ指定 (最上位 Sercrod 内で update())
@@ -3019,7 +3041,9 @@ ${str}
 		//   - それ以外: 初回描画時に一度だけ自動 fetch（onceKey で重複抑止）
 		if(work.hasAttribute("*fetch") || work.hasAttribute("n-fetch")){
 			const el   = work.cloneNode(false);
-			const spec = work.getAttribute("*fetch") ?? work.getAttribute("n-fetch") ?? "";
+			const spec_raw = work.getAttribute("*fetch") ?? work.getAttribute("n-fetch") ?? "";
+			const resolve_spec = () => this._resolve_fetch_spec(spec_raw, scope, work);
+			const spec = resolve_spec();
 
 			if(!spec){
 				if(this.error.warn) console.warn("[Sercrod warn] *fetch requires a URL spec");
@@ -3040,12 +3064,14 @@ ${str}
 
 			// 自動発火用 onceKey（ts パラメータは無視して一意性判定）
 			const makeOnceKey=()=>{
+				const spec_now = resolve_spec();
+				if(!spec_now) return "";
 				try{
-					const u = new URL(spec, location.href);
+					const u = new URL(spec_now, location.href);
 					u.searchParams.delete("ts");
 					return u.pathname + (u.search ? "?" + u.searchParams.toString() : "");
 				}catch(_){
-					return spec.replace(/([?&])ts=[^&]*/g, "").replace(/[?&]$/, "");
+					return spec_now.replace(/([?&])ts=[^&]*/g, "").replace(/[?&]$/, "");
 				}
 			};
 
@@ -3055,15 +3081,17 @@ ${str}
 			if(isClickable){
 				// クリック系は自動発火しない（明示トリガ）
 				el.addEventListener("click", ()=>{
-					this._do_load(spec);
+					const spec_now = resolve_spec();
+					if(spec_now) this._do_load(spec_now);
 				});
 			}else{
 				// 非クリック要素のみ初回自動発火
 				const onceKey = makeOnceKey();
-				if(!this.__fetchOnce.has(onceKey)){
+				if(onceKey && !this.__fetchOnce.has(onceKey)){
 					this.__fetchOnce.add(onceKey);
 					requestAnimationFrame(()=>{
-						this._do_load(spec);
+						const spec_now = resolve_spec();
+						if(spec_now) this._do_load(spec_now);
 					});
 				}
 			}
