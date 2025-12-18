@@ -1,4 +1,4 @@
-// Sercrod v0.1.2
+// Sercrod v0.1.3
 //
 // Sercrod は Web Components を基盤としたフレームワークです。
 // 最大の特徴は「属性を正とする」設計にあります。
