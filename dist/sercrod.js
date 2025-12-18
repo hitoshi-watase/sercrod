@@ -1,4 +1,4 @@
-// Sercrod v0.1.1
+// Sercrod v0.1.2
 //
 // Sercrod は Web Components を基盤としたフレームワークです。
 // 最大の特徴は「属性を正とする」設計にあります。
@@ -3012,69 +3012,6 @@ ${str}
 			return;
 		}
 
-		// 9.4) *fetch
-		// - Sercrod ホストに付与時: connectedCallback 内で処理（ここでは通常要素のみ）
-		// - 通常要素に付与時:
-		//   - button / a / input[type=button|submit|reset|image] 等: クリック時に fetch
-		//   - それ以外: 初回描画時に一度だけ自動 fetch（onceKey で重複抑止）
-		if(work.hasAttribute("*fetch") || work.hasAttribute("n-fetch")){
-			const el   = work.cloneNode(false);
-			const spec = work.getAttribute("*fetch") ?? work.getAttribute("n-fetch") ?? "";
-
-			if(!spec){
-				if(this.error.warn) console.warn("[Sercrod warn] *fetch requires a URL spec");
-				parent.appendChild(el);
-				// 子要素だけは通常描画しておく
-				node.childNodes.forEach(c => this.renderNode(c, scope, el));
-				return;
-			}
-
-			// ホスト側の *fetch は connectedCallback で処理するので、
-			// ここでは通常要素（button / div / section 等）だけを扱う。
-			const tag  = el.tagName.toUpperCase();
-			const type = (el.getAttribute("type")||"").toLowerCase();
-			const isClickable =
-				tag==="BUTTON" ||
-				(tag==="A" && !el.hasAttribute("download")) ||
-				(tag==="INPUT" && ["button","submit","reset","image"].includes(type));
-
-			// 自動発火用 onceKey（ts パラメータは無視して一意性判定）
-			const makeOnceKey=()=>{
-				try{
-					const u = new URL(spec, location.href);
-					u.searchParams.delete("ts");
-					return u.pathname + (u.search ? "?" + u.searchParams.toString() : "");
-				}catch(_){
-					return spec.replace(/([?&])ts=[^&]*/g, "").replace(/[?&]$/, "");
-				}
-			};
-
-			// *api と同様、「一度だけ自動発火」用のメモ
-			this.__fetchOnce = this.__fetchOnce || new Set();
-
-			if(isClickable){
-				// クリック系は自動発火しない（明示トリガ）
-				el.addEventListener("click", ()=>{
-					this._do_load(spec);
-				});
-			}else{
-				// 非クリック要素のみ初回自動発火
-				const onceKey = makeOnceKey();
-				if(!this.__fetchOnce.has(onceKey)){
-					this.__fetchOnce.add(onceKey);
-					requestAnimationFrame(()=>{
-						this._do_load(spec);
-					});
-				}
-			}
-
-			// 自分自身を出力
-			parent.appendChild(el);
-			// 子要素は通常描画（*if/*for/*print 等で fetch 結果を参照できる）
-			node.childNodes.forEach(c => this.renderNode(c, scope, el));
-			return;
-		}
-
 		// ============================================================
 		//  *api / n-api  …… API 呼び出しの窓口はこれひとつ
 		//  *into / n-into … 受け皿の変数名（必須 / *api 専用）
@@ -3422,11 +3359,54 @@ ${str}
 		// - 親が Sercrod であれば "sercrod" フラグを付与してインデックスに反映可能に
 		if(this._isSercrod(parent)) this.add_flag(parent, "sercrod");
 
-		// ベース要素を浅いコピーで作成（子はまだ描かない）
-		const el = node.cloneNode(false);
+                // ベース要素を浅いコピーで作成（子はまだ描かない）
+                const el = node.cloneNode(false);
 
-		// el では判定できないので、node で Sercrod 判定をしておく
-		if(this._isSercrod(el)) this.add_flag(el, "sercrod");
+                // el では判定できないので、node で Sercrod 判定をしておく
+                if(this._isSercrod(el)) this.add_flag(el, "sercrod");
+
+                // *fetch / n-fetch: クローンを返しつつ通常の属性/子描画を継続できるよう、
+                // ここでフェッチのセットアップだけ行う（他ディレクティブとの併用を許容）。
+                if(node.hasAttribute("*fetch") || node.hasAttribute("n-fetch")){
+                        const spec = node.getAttribute("*fetch") ?? node.getAttribute("n-fetch") ?? "";
+
+                        if(!spec){
+                                if(this.error.warn) console.warn("[Sercrod warn] *fetch requires a URL spec");
+                        }else{
+                                const tag  = el.tagName.toUpperCase();
+                                const type = (el.getAttribute("type")||"").toLowerCase();
+                                const isClickable =
+                                        tag==="BUTTON" ||
+                                        (tag==="A" && !el.hasAttribute("download")) ||
+                                        (tag==="INPUT" && ["button","submit","reset","image"].includes(type));
+
+                                const makeOnceKey=()=>{
+                                        try{
+                                                const u = new URL(spec, location.href);
+                                                u.searchParams.delete("ts");
+                                                return u.pathname + (u.search ? "?" + u.searchParams.toString() : "");
+                                        }catch(_){
+                                                return spec.replace(/([?&])ts=[^&]*/g, "").replace(/[?&]$/, "");
+                                        }
+                                };
+
+                                this.__fetchOnce = this.__fetchOnce || new Set();
+
+                                if(isClickable){
+                                        el.addEventListener("click", ()=>{
+                                                this._do_load(spec);
+                                        });
+                                }else{
+                                        const onceKey = makeOnceKey();
+                                        if(!this.__fetchOnce.has(onceKey)){
+                                                this.__fetchOnce.add(onceKey);
+                                                requestAnimationFrame(()=>{
+                                                        this._do_load(spec);
+                                                });
+                                        }
+                                }
+                        }
+                }
 
 		// ここでフラグ登録だけ行う（警告はまだ実装しない）
 		// - * / @ / : で始まる属性名をフラグとして採取し、_rebuild_flag_index で逆引き可能にする
