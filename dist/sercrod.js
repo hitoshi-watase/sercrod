@@ -3045,14 +3045,14 @@ ${str}
 		//    - <input type="file" *api> は FormData で自動アップロード
 		//    - 自動発火は「同一 (method,url,into,bodyHash)」につき 1 回だけ
 		// ============================================================
-		if(work.hasAttribute("*api") || work.hasAttribute("n-api")){
-			const el      = work.cloneNode(false);
-			const urlRaw  = work.getAttribute("*api") ?? work.getAttribute("n-api") ?? "";
-			const resolveUrl = () => this._expand_text(urlRaw, scope, work); // 実行時に都度展開
-			const method  = (work.getAttribute("method") || "GET").toUpperCase();
-			const into    = work.getAttribute("*into") ?? work.getAttribute("n-into") ?? "";
-			const bodyExp = work.getAttribute("body")  || work.getAttribute("payload") || "";
-			const isFile  = el.tagName==="INPUT" && (el.getAttribute("type")||"").toLowerCase()==="file";
+                if(work.hasAttribute("*api") || work.hasAttribute("n-api")){
+                        const el      = work.cloneNode(false);
+                        const urlRaw  = work.getAttribute("*api") ?? work.getAttribute("n-api") ?? "";
+                        const resolveUrl = () => this._expand_text(urlRaw, scope, work); // 実行時に都度展開
+                        const method  = (work.getAttribute("method") || "GET").toUpperCase();
+                        const into    = work.getAttribute("*into") ?? work.getAttribute("n-into") ?? "";
+                        const bodyExp = work.getAttribute("body")  || work.getAttribute("payload") || "";
+                        const isFile  = el.tagName==="INPUT" && (el.getAttribute("type")||"").toLowerCase()==="file";
 
 			// --- 初期化: 初回でも参照できるよう“未宣言”を避ける ---
 			if(this._data.$pending === undefined) this._data.$pending = false;
@@ -3067,11 +3067,9 @@ ${str}
 			if(this._data.$upload    === undefined) this._data.$upload    = null;
 			if(into && this._data[into] === undefined) this._data[into] = null;
 
-			parent.appendChild(el);
-
-			// *into は任意。常に $download/$upload は更新し、into があればそこにも置く
-			const place = (value)=>{
-				if (isFile || method !== "GET") this._data.$upload = value;
+                        // *into は任意。常に $download/$upload は更新し、into があればそこにも置く
+                        const place = (value)=>{
+                                if (isFile || method !== "GET") this._data.$upload = value;
 				else this._data.$download = value;
 				if(into){
 					this._data[into] = value;
@@ -3179,10 +3177,10 @@ ${str}
 					requestAnimationFrame(runJsonLike);
 				}
 			}
-			// 子要素は通常描画（*for/*if 等で into 変数や $pending を参照できる）
-			node.childNodes.forEach(c => this.renderNode(c, scope, el));
-			return;
-		}
+                        // *print や他のディレクティブも併用できるよう、共通のレンダラに渡す
+                        this._renderElement(work, effScope, parent, el);
+                        return;
+                }
 
 		// *upload: 「式文字列」を取り出して _bind_upload に渡す
 		//  - expr は effScope（*let 反映後のスコープ）で評価させるため、
@@ -3353,10 +3351,10 @@ ${str}
 	//    - テキスト内 %expr% 展開
 	//    - 子ノードの再帰レンダリング
 	//    - <select> の選択復元（child 描画後に postApply で同期）
-	_renderElement(node, scope, parent){
+        _renderElement(node, scope, parent, existingEl=null){
 
-		// --- 子 Sercrod は親で中身をレンダリングしない（自分で描かせる） ---
-		if (this._isSercrod(node)) {
+                // --- 子 Sercrod は親で中身をレンダリングしない（自分で描かせる） ---
+                if (this._isSercrod(node)) {
 			//const el = node.cloneNode(true); // テンプレートごと渡す（子が自前で再評価）
 			const el = document.importNode(node, true); // ここも importNode を使う
 			//if (el.__sercrod_scope === undefined && !el.hasAttribute("data")) {
@@ -3381,8 +3379,8 @@ ${str}
 		// - 親が Sercrod であれば "sercrod" フラグを付与してインデックスに反映可能に
 		if(this._isSercrod(parent)) this.add_flag(parent, "sercrod");
 
-		// ベース要素を浅いコピーで作成（子はまだ描かない）
-		const el = node.cloneNode(false);
+                // ベース要素を浅いコピーで作成（子はまだ描かない）
+                const el = existingEl || node.cloneNode(false);
 
 		// el では判定できないので、node で Sercrod 判定をしておく
 		if(this._isSercrod(el)) this.add_flag(el, "sercrod");
